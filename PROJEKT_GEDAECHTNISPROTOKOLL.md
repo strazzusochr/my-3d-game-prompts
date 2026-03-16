@@ -200,5 +200,12 @@
 - Testabdeckung erweitert: `runtimePersistence.test.ts` und `gameStore.test.ts` pruefen Volatilitaets-Felder im Store und Snapshot inklusive Sanitisierung.
 - Vollverifikation nach Replay-Delta-Volatilitaetsampel erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 253/253.
 
+- Replay-Delta-Trendhistorie am 16.03.2026 umgesetzt: Store fuehrt jetzt `replayQualityDeltaHistory` (maximal 6 Werte, newest-first) als kurze Verlaufshistorie der Delta-Events pro Checkpoint.
+- Berechnung erweitert: `pushReplayQualityDeltaHistory` dedupliziert identische Kopfwerte, begrenzt auf 6 Eintraege und wird in Live-/Rewind-Pfaden konsistent fortgeschrieben.
+- Snapshot erweitert: `runtimePersistence` persistiert `replayState.quality.deltaHistory` und sanitisiert robust (nur finite Zahlen, Clamp auf -999..999, Limit 6).
+- HUD-Operationsansicht erweitert: neue Zeile `Delta-Verlauf` zeigt die letzten Delta-Werte kompakt als Folgeanzeige fuer unmittelbare Trendlesbarkeit.
+- Testabdeckung erweitert: `runtimePersistence.test.ts` verifiziert Roundtrip und Sanitisierung der Delta-Historie, `gameStore.test.ts` prueft Delta-Historie in Store und Snapshot.
+- Vollverifikation nach Replay-Delta-Trendhistorie erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 253/253.
+
 ## Naechster logischer Schritt
-- Nach Volatilitaetsampel folgt als naechster Ausbaupunkt eine Replay-Delta-Trendhistorie (kurze persistente Zeitreihe der letzten N Delta-Werte) mit Sparkline-Visualisierung im HUD.
+- Nach Delta-Trendhistorie folgt als naechster Ausbaupunkt ein Replay-Delta-Momentumindikator (Kurz-/Mitteltrend mit Richtungsstaerke) inklusive kompakter HUD-Ampel fuer Trendbeschleunigung.

@@ -70,6 +70,7 @@ const resetStore = () => {
       replayQualityDeltaHint: 'Replay-Eventlast stabil.',
       replayQualityDeltaVolatilityBand: 'calm',
       replayQualityDeltaVolatilityHint: 'Delta-Verlauf stabil.',
+      replayQualityDeltaHistory: [],
       replayQualityStability: 'stable',
       replayQualityRecentTrend: [],
       replayRiskLevel: 'low',
@@ -612,6 +613,7 @@ describe('gameStore core flow', () => {
     expect(state.gameState.replayQualityDeltaHint.length).toBeGreaterThan(0);
     expect(['calm', 'mixed', 'volatile']).toContain(state.gameState.replayQualityDeltaVolatilityBand);
     expect(state.gameState.replayQualityDeltaVolatilityHint.length).toBeGreaterThan(0);
+    expect(Array.isArray(state.gameState.replayQualityDeltaHistory)).toBe(true);
     expect(['stable', 'watch', 'critical']).toContain(state.gameState.replayQualityStability);
     expect(state.gameState.replayQualityRecentTrend.length).toBeGreaterThan(0);
     expect(['stable', 'watch', 'critical']).toContain(state.gameState.replayQualityRecentTrend[0]);
@@ -643,6 +645,7 @@ describe('gameStore core flow', () => {
           deltaHint: string;
           deltaVolatilityBand: 'calm' | 'mixed' | 'volatile';
           deltaVolatilityHint: string;
+          deltaHistory: number[];
           stability: 'stable' | 'watch' | 'critical';
           recentStabilityTrend: Array<'stable' | 'watch' | 'critical'>;
           riskLevel: 'low' | 'medium' | 'high';
@@ -669,6 +672,7 @@ describe('gameStore core flow', () => {
     expect(snapshot.replayState.quality.deltaHint.length).toBeGreaterThan(0);
     expect(['calm', 'mixed', 'volatile']).toContain(snapshot.replayState.quality.deltaVolatilityBand);
     expect(snapshot.replayState.quality.deltaVolatilityHint.length).toBeGreaterThan(0);
+    expect(Array.isArray(snapshot.replayState.quality.deltaHistory)).toBe(true);
     expect(snapshot.replayState.quality.recentStabilityTrend.length).toBeGreaterThan(0);
     expect(['low', 'medium', 'high']).toContain(snapshot.replayState.quality.riskLevel);
     expect(snapshot.replayState.quality.riskHint.length).toBeGreaterThan(0);

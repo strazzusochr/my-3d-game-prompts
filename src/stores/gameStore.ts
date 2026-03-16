@@ -55,6 +55,7 @@ type ReplayQualityDeltaDirection = 'up' | 'down' | 'flat';
 type ReplayQualityDeltaHint = 'Replay-Eventlast steigt.' | 'Replay-Eventlast sinkt.' | 'Replay-Eventlast stabil.';
 type ReplayQualityDeltaVolatilityBand = 'calm' | 'mixed' | 'volatile';
 type ReplayQualityDeltaVolatilityHint = 'Delta-Verlauf stabil.' | 'Delta-Verlauf leicht wechselhaft.' | 'Delta-Verlauf oszilliert stark.';
+const MAX_DELTA_HISTORY_POINTS = 6;
 type ReplayRiskLevel = 'low' | 'medium' | 'high';
 type ReplayRiskHint =
     | 'Stabiler Replay-Betrieb.'
@@ -76,6 +77,7 @@ interface ReplayQualityState {
     deltaHint: ReplayQualityDeltaHint;
     deltaVolatilityBand: ReplayQualityDeltaVolatilityBand;
     deltaVolatilityHint: ReplayQualityDeltaVolatilityHint;
+    deltaHistory: number[];
     stability: ReplayQualityStability;
     recentStabilityTrend: ReplayQualityStability[];
     riskLevel: ReplayRiskLevel;
@@ -115,6 +117,7 @@ interface GameStore {
         replayQualityDeltaHint: ReplayQualityDeltaHint;
         replayQualityDeltaVolatilityBand: ReplayQualityDeltaVolatilityBand;
         replayQualityDeltaVolatilityHint: ReplayQualityDeltaVolatilityHint;
+        replayQualityDeltaHistory: number[];
         replayQualityStability: ReplayQualityStability;
         replayQualityRecentTrend: ReplayQualityStability[];
         replayRiskLevel: ReplayRiskLevel;
@@ -203,6 +206,7 @@ const persistedReplayState = persistedRuntimeSnapshot?.replayState ?? {
         deltaHint: 'Replay-Eventlast stabil.' as ReplayQualityDeltaHint,
         deltaVolatilityBand: 'calm' as ReplayQualityDeltaVolatilityBand,
         deltaVolatilityHint: 'Delta-Verlauf stabil.' as ReplayQualityDeltaVolatilityHint,
+        deltaHistory: [] as number[],
         stability: 'stable' as ReplayQualityStability,
         recentStabilityTrend: [] as ReplayQualityStability[],
         riskLevel: 'low' as ReplayRiskLevel,
@@ -240,6 +244,14 @@ const pushReplayHistory = (
     return [entry, ...history].slice(0, MAX_REPLAY_HISTORY_POINTS);
 };
 
+const pushReplayQualityDeltaHistory = (
+    history: number[],
+    nextDelta: number,
+): number[] => {
+    if (history[0] === nextDelta) return history;
+    return [nextDelta, ...history].slice(0, MAX_DELTA_HISTORY_POINTS);
+};
+
 const pushReplayQualityTrend = (
     trend: ReplayQualityStability[],
     nextStability: ReplayQualityStability,
@@ -257,6 +269,7 @@ const getReplayQualityState = (
     previousTrend: ReplayQualityStability[],
     previousLastHighAnchorTime: string | null,
     previousAvgRebuildEvents: number,
+    previousDeltaHistory: number[],
 ): ReplayQualityState => {
     const referenceMinutes = timeToMinutes(referenceClock);
     const inWindow = history.filter((entry) => {
@@ -343,6 +356,7 @@ const getReplayQualityState = (
         deltaHint,
         deltaVolatilityBand,
         deltaVolatilityHint,
+        deltaHistory: pushReplayQualityDeltaHistory(previousDeltaHistory, deltaEventsPerCheckpoint),
         stability,
         recentStabilityTrend: pushReplayQualityTrend(previousTrend, stability),
         riskLevel,
@@ -381,6 +395,7 @@ const buildRuntimeSnapshot = (state: GameStore): RuntimeSnapshot => ({
             deltaHint: state.gameState.replayQualityDeltaHint,
             deltaVolatilityBand: state.gameState.replayQualityDeltaVolatilityBand,
             deltaVolatilityHint: state.gameState.replayQualityDeltaVolatilityHint,
+            deltaHistory: state.gameState.replayQualityDeltaHistory,
             stability: state.gameState.replayQualityStability,
             recentStabilityTrend: state.gameState.replayQualityRecentTrend,
             riskLevel: state.gameState.replayRiskLevel,
@@ -1038,7 +1053,8 @@ const replayWorldStateToMinutes = (currentMinutes: number): WorldReplayState => 
             } else if (event.action === 'DESPAWN') {
                 npcs = removeNpcs(npcs, event.npcType, event.count);
             } else if (event.action === 'MOVE' && event.position) {
-                npcs = npcs.map((npc) => (npc.type === event.npcType ? { ...npc, position: event.position } : npc));
+                const movePosition = event.position;
+                npcs = npcs.map((npc) => (npc.type === event.npcType ? { ...npc, position: movePosition } : npc));
             } else if (event.action === 'MOOD_CHANGE') {
                 npcs = npcs.map((npc) => (npc.type === event.npcType ? applyNpcState(npc, event.targetMood, event.targetBehavior) : npc));
             } else if (event.action === 'BEHAVIOR_CHANGE') {
@@ -1232,6 +1248,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         replayQualityDeltaHint: persistedReplayState.quality.deltaHint,
         replayQualityDeltaVolatilityBand: persistedReplayState.quality.deltaVolatilityBand,
         replayQualityDeltaVolatilityHint: persistedReplayState.quality.deltaVolatilityHint,
+        replayQualityDeltaHistory: persistedReplayState.quality.deltaHistory,
         replayQualityStability: persistedReplayState.quality.stability,
         replayQualityRecentTrend: persistedReplayState.quality.recentStabilityTrend,
         replayRiskLevel: persistedReplayState.quality.riskLevel,
@@ -1287,6 +1304,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityDeltaHint: 'Replay-Eventlast stabil.',
                 replayQualityDeltaVolatilityBand: 'calm' as ReplayQualityDeltaVolatilityBand,
                 replayQualityDeltaVolatilityHint: 'Delta-Verlauf stabil.' as ReplayQualityDeltaVolatilityHint,
+                replayQualityDeltaHistory: [],
                 replayQualityStability: 'stable',
                 replayQualityRecentTrend: [],
                 replayRiskLevel: 'low',
@@ -1393,6 +1411,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 state.gameState.replayQualityRecentTrend,
                 state.gameState.replayRiskLastHighAnchorTime,
                 state.gameState.replayQualityAvgEvents,
+                state.gameState.replayQualityDeltaHistory,
             );
 
             return {
@@ -1418,6 +1437,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     replayQualityDeltaHint: replayQuality.deltaHint,
                     replayQualityDeltaVolatilityBand: replayQuality.deltaVolatilityBand,
                     replayQualityDeltaVolatilityHint: replayQuality.deltaVolatilityHint,
+                    replayQualityDeltaHistory: replayQuality.deltaHistory,
                     replayQualityStability: replayQuality.stability,
                     replayQualityRecentTrend: replayQuality.recentStabilityTrend,
                     replayRiskLevel: replayQuality.riskLevel,
@@ -1477,6 +1497,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             state.gameState.replayQualityRecentTrend,
             state.gameState.replayRiskLastHighAnchorTime,
             state.gameState.replayQualityAvgEvents,
+            state.gameState.replayQualityDeltaHistory,
         );
 
         workerManager.syncNpcs(dynamicState.npcs);
@@ -1503,6 +1524,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityDeltaHint: replayQuality.deltaHint,
                 replayQualityDeltaVolatilityBand: replayQuality.deltaVolatilityBand,
                 replayQualityDeltaVolatilityHint: replayQuality.deltaVolatilityHint,
+                replayQualityDeltaHistory: replayQuality.deltaHistory,
                 replayQualityStability: replayQuality.stability,
                 replayQualityRecentTrend: replayQuality.recentStabilityTrend,
                 replayRiskLevel: replayQuality.riskLevel,
@@ -1564,6 +1586,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             state.gameState.replayQualityRecentTrend,
             state.gameState.replayRiskLastHighAnchorTime,
             state.gameState.replayQualityAvgEvents,
+            state.gameState.replayQualityDeltaHistory,
         );
 
         workerManager.syncNpcs(dynamicState.npcs);
@@ -1590,6 +1613,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityDeltaHint: replayQuality.deltaHint,
                 replayQualityDeltaVolatilityBand: replayQuality.deltaVolatilityBand,
                 replayQualityDeltaVolatilityHint: replayQuality.deltaVolatilityHint,
+                replayQualityDeltaHistory: replayQuality.deltaHistory,
                 replayQualityStability: replayQuality.stability,
                 replayQualityRecentTrend: replayQuality.recentStabilityTrend,
                 replayRiskLevel: replayQuality.riskLevel,
@@ -1641,6 +1665,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityDeltaHint: 'Replay-Eventlast stabil.',
                 replayQualityDeltaVolatilityBand: 'calm' as ReplayQualityDeltaVolatilityBand,
                 replayQualityDeltaVolatilityHint: 'Delta-Verlauf stabil.' as ReplayQualityDeltaVolatilityHint,
+                replayQualityDeltaHistory: [],
                 replayQualityStability: 'stable',
                 replayQualityRecentTrend: [],
                 replayRiskLevel: 'low',

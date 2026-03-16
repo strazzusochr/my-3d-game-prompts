@@ -51,6 +51,7 @@ interface RuntimeReplayQuality {
     deltaHint: 'Replay-Eventlast steigt.' | 'Replay-Eventlast sinkt.' | 'Replay-Eventlast stabil.';
     deltaVolatilityBand: 'calm' | 'mixed' | 'volatile';
     deltaVolatilityHint: 'Delta-Verlauf stabil.' | 'Delta-Verlauf leicht wechselhaft.' | 'Delta-Verlauf oszilliert stark.';
+    deltaHistory: number[];
     stability: 'stable' | 'watch' | 'critical';
     recentStabilityTrend: Array<'stable' | 'watch' | 'critical'>;
     riskLevel: 'low' | 'medium' | 'high';
@@ -311,6 +312,12 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
             )
             .slice(0, 3)
         : [];
+    const qualityDeltaHistory = Array.isArray(qualityObj.deltaHistory)
+        ? qualityObj.deltaHistory
+            .filter((v): v is number => typeof v === 'number' && isFinite(v))
+            .map(v => clamp(Math.round(v), -999, 999))
+            .slice(0, 6)
+        : [];
 
     return {
         mode,
@@ -327,6 +334,7 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
             deltaHint: qualityDeltaHint,
             deltaVolatilityBand: qualityDeltaVolatilityBand,
             deltaVolatilityHint: qualityDeltaVolatilityHint,
+            deltaHistory: qualityDeltaHistory,
             stability: qualityStability,
             recentStabilityTrend: qualityTrend,
             riskLevel: qualityRiskLevel,

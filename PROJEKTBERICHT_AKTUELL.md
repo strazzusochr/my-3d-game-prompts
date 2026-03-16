@@ -82,6 +82,14 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Testnachweis erweitert: `runtimePersistence.test.ts` und `gameStore.test.ts` validieren Volatilitaetsfelder in Snapshot und Store inkl. Sanitisierung.
 - Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 253 von 253 gruen, Build gruen.
 
+### 2.0.41 Replay-Delta-Trendhistorie vom 16.03.2026
+- Die Replay-Auswertung wurde um eine kurze Delta-Zeitreihe erweitert: `deltaHistory` speichert die letzten sechs Delta-Werte (`newest-first`) fuer direkte Trendtransparenz.
+- Der Store fuehrt die Historie ueber `pushReplayQualityDeltaHistory` konsistent in Live- und Rewind-Pfaden fort; identische Kopfwerte werden dedupliziert und die Historie auf sechs Werte begrenzt.
+- `runtimePersistence` persistiert `replayState.quality.deltaHistory` und sanitisiert robust (nur finite Zahlen, Clamp auf `-999..999`, Maximum sechs Eintraege).
+- Das HUD-Operations-Panel zeigt eine neue Zeile `Delta-Verlauf` und stellt die Historie kompakt als Wertfolge dar.
+- Testnachweis erweitert: `runtimePersistence.test.ts` verifiziert Roundtrip plus Sanitisierung der Historie, `gameStore.test.ts` verifiziert Delta-Historie in Store und Snapshot.
+- Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 253 von 253 gruen, Build gruen.
+
 ### 2.0.1 Viewer- und Lastnachweis vom 16.03.2026
 - Zwei weitere Viewer-Seiten wurden geoeffnet und der Health-Endpunkt achtmal im Abstand von rund 1,5 Sekunden abgefragt.
 - Der Stream benoetigte eine kurze Aufwaermphase: zuerst `viewerFps=0`, danach stabile Werte zwischen 22 und 24 FPS.
