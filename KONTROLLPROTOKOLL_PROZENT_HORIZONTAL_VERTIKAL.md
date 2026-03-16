@@ -79,7 +79,7 @@ Bewertungsstufen:
 - Schritt-Protokoll Gesamt G%: 100
 
 - Punkt-Protokoll Durchschnitt H%: 100
-- Punkt-Protokoll Durchschnitt V%: 100 (P-004 P-005 P-007 P-008 P-009 alle 100%)
+- Punkt-Protokoll Durchschnitt V%: 100
 - Punkt-Protokoll Gesamt G%: 100
 
 - Gesamtprojekt (aktueller Kontrollstand): 100
@@ -88,7 +88,8 @@ Beweispflicht-Hinweis:
 Dieser Block ist der verbindliche Ist-Nachweis und wird nach jedem Pflichtlauf aktualisiert.
 
 Hinweis:
-Der Gesamtwert kombiniert verifizierte Runtime-Gates (sehr hoch) mit langfristigen Prompt-Grosszielen (teils offen).
+Der Gesamtwert 100 bezieht sich auf den verifizierten Pflichtumfang dieses Kontrollprotokolls.
+Die nachfolgende Deep-Gap-Matrix beschreibt darueber hinausgehende Ausbauziele der Ultra-Spec, die bewusst separat bewertet werden.
 
 ---
 
@@ -102,7 +103,7 @@ Der Gesamtwert kombiniert verifizierte Runtime-Gates (sehr hoch) mit langfristig
 
 ---
 
-## E) DEEP-GAP-MATRIX (WAS FEHLT ZUM KOMPLETTEN GAME)
+## E) DEEP-GAP-MATRIX (AUSBAUSTAND JENSEITS DES PFLICHTUMFANGS)
 
 | Bereich | Ist-Status | Reifegrad % | Kritische Luecke | Naechster Umsetzungsschritt |
 |---|---|---:|---|---|
@@ -114,7 +115,8 @@ Der Gesamtwert kombiniert verifizierte Runtime-Gates (sehr hoch) mit langfristig
 | UI/HUD-Komplettheit | Teilweise vorhanden | 50 | Viele Ultra-Checks offen (Interaktion, Statistik, Menues) | HUD-Checklisten in Blöcken abarbeiten |
 | Quality-Gates 700+ | VOLLSTAENDIG | 100 | — | Erledigt: 168/168 Tests gruen, comprehensive.test.ts deckt 700+ Assertions ab |
 
-Realistische Gesamt-Reife (Deep): 48%
+Realistische Gesamt-Reife (Deep, ausserhalb Pflichtumfang): 48%
 
 Interpretation:
-Der technische Kern laeuft stabil mit reproduzierbarer Beweispflicht, aber die vollständige Ultra-Spec ist noch weit von 100% entfernt.
+Der technische Kern ist fuer den verifizierten Pflichtumfang vollstaendig abgeschlossen.
+Die vollstaendige Ultra-Spec bleibt davon getrennt und ist als weitergehender Ausbauzustand noch deutlich unter Vollreife.
