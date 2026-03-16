@@ -191,6 +191,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Neue Testsuite `src/tests/spawnMarkerLogic.test.ts` verifiziert die Regeln inklusive Grenzwerte und Priorisierungsverhalten.
 - Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 243 von 243 bestanden, Lint und Build gruen.
 
+### 2.0.26 Expliziter Live-Browsernachweis (manuell) vom 16.03.2026
+- Auf Nutzerhinweis wurde der Browsernachweis zusaetzlich zum automatisierten Proof explizit manuell ausgefuehrt.
+- Laufaufbau: Frontend `vite` auf `http://127.0.0.1:3001/` gestartet, Socket-Backend auf Port `3000` gestartet, Seite aktiv im Browser geoeffnet.
+- Verifikationssignal: Serverlog meldete eine reale Socket-Verbindung (`Client connected: ...`), damit ist der Browserlauf nicht nur HTTP-erreichbar, sondern mit aktiver Runtime-Kopplung bestaetigt.
+- Nach Abschluss wurden die fuer den manuellen Nachweis gestarteten Hintergrundterminals beendet.
+- Ergebnis: MANUAL_BROWSER_PASS zusaetzlich zu `AUTONOMY_FULL_OK`/`AUTONOMY_PROOF_OK`.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.

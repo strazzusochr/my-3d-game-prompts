@@ -123,6 +123,8 @@
 - Spawn-Marker-Logik am 16.03.2026 modularisiert: Zeitfenster-, Grouping-, Priorisierungs- und Dringlichkeitsentscheidungen in `src/systems/spawnMarkerLogic.ts` extrahiert.
 - Neue Testsuite aktiv: `src/tests/spawnMarkerLogic.test.ts` verifiziert T-10..T-5-Fenster, Urgency-Stufen, Aggregation je Zeit/Position und Top-8-Priorisierung.
 - Vollverifikation nach Logik-Extraktion erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 243/243.
+- Expliziter Live-Browsernachweis am 16.03.2026 nachgezogen: lokaler Stack manuell gestartet (`vite` auf `127.0.0.1:3001` + Socket-Server `:3000`), Browserseite geoeffnet und Socket-Verbindung im Serverlog (`Client connected`) bestaetigt.
+- Zusatznachweis dokumentiert: Browser- und Socket-Echtlauf wurde getrennt von `autonomy:full` verifiziert, anschliessend alle Hintergrundterminals kontrolliert beendet.
 
 ## Naechster logischer Schritt
 - Spawn-HUD-Liveabgleich finalisieren: Badge-Kontrast bei Tageslicht und Sammelhinweis-Platzierung am letzten Marker visuell trimmen.

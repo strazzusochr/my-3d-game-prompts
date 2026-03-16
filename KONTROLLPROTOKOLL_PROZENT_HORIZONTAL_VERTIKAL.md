@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 10:59:08 +01:00
-- Repo-Head: 4f07fb0 (vor Spawn-Marker-Logik-Extraktion und Testabdeckung)
-- Nachweislauf: npm run autonomy:full PASS (inkl. lint PASS + tests 243/243 PASS + build PASS + live proof PASS)
-- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_243_243 + BUILD_PASS + LIVE_SOCKET_PASS + MASTER_80000_PASS
-- Gates: Lint PASS, Tests 243/243 PASS, Build PASS, Browser-/Socket-Livecheck PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: geaendert fuer SpawnMarker-Logikmodul + neue Testsuite fuer Zeitfenster/Priorisierung/Dringlichkeit
+- Zeitstempel: 2026-03-16 11:03:39 +01:00
+- Repo-Head: 01ea711 (nach Spawn-Marker-Logik-Extraktion und Testabdeckung)
+- Nachweislauf: npm run autonomy:full PASS (inkl. lint PASS + tests 243/243 PASS + build PASS + live proof PASS) + expliziter manueller Browsertest PASS
+- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_243_243 + BUILD_PASS + LIVE_SOCKET_PASS + MANUAL_BROWSER_PASS + MASTER_80000_PASS
+- Gates: Lint PASS, Tests 243/243 PASS, Build PASS, Browser-/Socket-Livecheck PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, manueller Browserlauf via http://127.0.0.1:3001/ PASS mit Socket-Log `Client connected`, Masterquelle 80.000/80.000 PASS
+- Arbeitsbaum: Nachweislauf ohne Codeaenderung; zusaetzlicher Browser-/Socket-Echtlauf separat verifiziert
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -43,7 +43,7 @@ Bewertungsstufen:
 
 | Schritt-ID | Schritt | H% | V% | G% | Status | Nachweis |
 |---|---|---:|---:|---:|---|---|
-| S-001 | Browser-Erreichbarkeit Stream | 100 | 100 | 100 | PASS | URL erreichbar |
+| S-001 | Browser-Erreichbarkeit Stream | 100 | 100 | 100 | PASS | URL erreichbar + manueller Browseraufruf 127.0.0.1:3001 bestaetigt |
 | S-002 | Workspace-Fehlercheck | 100 | 100 | 100 | PASS | No errors found |
 | S-003 | Lint-Gate | 100 | 100 | 100 | PASS | eslint ohne Fehler |
 | S-004 | Test-Gate | 100 | 100 | 100 | PASS | 243/243 Tests bestanden (10 Dateien, comprehensive.test.ts 161 Tests) |
