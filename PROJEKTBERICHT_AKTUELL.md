@@ -59,6 +59,12 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Initialer Health-Wert im Wiederholungslauf: `profile=low`, `transportSource=canvas-webrtc`, `publicPort=7860`, `internalPort=3099`, `clients=5`.
 - Ergebnis: Der Null-Fehler-Modus ist nach Aenderungen weiterhin stabil und reproduzierbar.
 
+### 2.0.7 Runner-Haertung und Fehlerbehebung vom 16.03.2026
+- Beim weiteren Ausbau wurde ein Windows-Prozessstartfehler im Runner festgestellt (`AUTONOMY_FULL_FAIL: spawn EINVAL`).
+- Der Runner wurde daraufhin technisch gehaertet: Shell-basierter Kommandoaufruf mit expliziten Schrittmarkern (`lint`, `test`, `build`, `proof`).
+- Der Nachlauf war erfolgreich und lieferte beide Abschlussmarker: `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`.
+- Ergebnis: Der GO-GO-GO-Standardlauf ist nun auch gegen den vorherigen Spawn-Fehler abgesichert.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.

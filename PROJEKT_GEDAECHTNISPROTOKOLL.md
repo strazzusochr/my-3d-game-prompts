@@ -29,6 +29,8 @@
 - GO-GO-GO-Automation umgesetzt: `npm run autonomy:full` fuehrt nun in einem Lauf Lint, Tests, Build und serverseitigen Profil-/Health-Beweis aus.
 - Autonomy-Proof am 16.03.2026 bestaetigt: Profilkette `low -> medium -> high -> aaa -> low` erfolgreich, Abschlussmarker `AUTONOMY_PROOF_OK` erreicht.
 - Wiederholungslauf nach Doku-Update erfolgreich: `npm run autonomy:full` erneut komplett gruen inklusive Proof-Marker `AUTONOMY_PROOF_OK`.
+- Runner-Haertung am 16.03.2026 abgeschlossen: Windows-Spawn-Problem (`EINVAL`) in `autonomy:full` behoben, neuer Shell-basierter Prozessstart validiert.
+- Neuer Nachweislauf erfolgreich: `AUTONOMY_FULL_OK` sowie `AUTONOMY_PROOF_OK` in einem Durchgang erreicht.
 
 ## Naechster logischer Schritt
 - Etappe 1 des Masterplans technisch ausbauen und nach jedem Block den Command `npm run autonomy:full` als Pflichtnachweis ausfuehren.
