@@ -83,7 +83,11 @@
 - Runtime-Wirkung verstaerkt: zweite Wellen koppeln weitere Support-/Security-Spawns mit zusätzlicher Deeskalation und DayStats-Entlastung in spaeteren Zeitfenstern.
 - Operations-HUD erneut erweitert: neue Missionswellen werden als eigene aktive Badges dargestellt.
 - Vollverifikation nach Folgewellen-Block erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 230/230.
+- Alternative Ergebnisbaeume am 16.03.2026 integriert: Bei verpassten Missionsschritten triggern nun negative Fallback-Wellen (`dyn-mission-epoch-misinformation`, `dyn-mission-hazard-surge`, `dyn-mission-fragmented-command`) als Gegenpfad zu den positiven Branches.
+- Runtime-Wirkung erweitert: Fallback-Wellen erhoehen Drucklagen (Verletzte/Sachschaden) und bilden damit unterschiedliche Endlagen je nach Missionsdisziplin.
+- Operations-HUD erweitert: positive und negative Missionszweige sind als aktive Badges unterscheidbar sichtbar.
+- Vollverifikation nach Alternativpfad-Block erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 233/233.
 
 ## Naechster logischer Schritt
-- Alternative Ergebnisbaeume ausbauen: Missionsentscheidungen sollen mehrere unterschiedliche Folgewellen-Pfade aktivieren statt nur einen linearen Strang.
 - Trend-Korrelationen ausweiten: Verlaufslinien mit Missionsentscheidungspfaden verknuepfen und als konkrete Trigger fuer weitere Folge-Events nutzen.
+- Gewichtete Pfadregeln einfuehren: Triggerstaerke je nach Zeitfenster, Panikquote und Rollenbalance dynamisch skalieren.

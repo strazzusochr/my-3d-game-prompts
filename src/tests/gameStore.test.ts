@@ -405,6 +405,14 @@ describe('gameStore core flow', () => {
     expect(state.npcs.filter((npc) => npc.type === NPCType.POLICE).length).toBeGreaterThanOrEqual(7);
   });
 
+  it('triggers epoch misinformation fallback when briefing is missing', () => {
+    useGameStore.getState().evaluateEvents('15:00');
+    const state = useGameStore.getState();
+
+    expect(state.firedEventKeys).toContain('dyn-mission-epoch-misinformation');
+    expect(state.npcs.filter((npc) => npc.type === NPCType.DEMONSTRATOR).length).toBeGreaterThanOrEqual(3);
+  });
+
   it('triggers mission hazard branch after hazard map preparation', () => {
     useGameStore.setState((state) => ({
       ...state,
@@ -442,6 +450,14 @@ describe('gameStore core flow', () => {
     expect(state.firedEventKeys).toContain('dyn-mission-hazard-shield');
     expect(state.firedEventKeys).toContain('dyn-mission-hazard-firebreak');
     expect(state.npcs.filter((npc) => npc.type === NPCType.FIREFIGHTER).length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('triggers hazard surge fallback when hazard map is missing', () => {
+    useGameStore.getState().evaluateEvents('20:00');
+    const state = useGameStore.getState();
+
+    expect(state.firedEventKeys).toContain('dyn-mission-hazard-surge');
+    expect(state.npcs.filter((npc) => npc.type === NPCType.RIOTER).length).toBeGreaterThanOrEqual(4);
   });
 
   it('triggers fullchain mission deescalation after three priorities are set', () => {
@@ -487,6 +503,14 @@ describe('gameStore core flow', () => {
     expect(state.firedEventKeys).toContain('dyn-mission-fullchain-deescalation');
     expect(state.firedEventKeys).toContain('dyn-mission-fullchain-recovery');
     expect(state.npcs.filter((npc) => npc.type === NPCType.MEDIC).length).toBeGreaterThanOrEqual(4);
+  });
+
+  it('triggers fragmented command fallback when priorities stay too low', () => {
+    useGameStore.getState().evaluateEvents('22:30');
+    const state = useGameStore.getState();
+
+    expect(state.firedEventKeys).toContain('dyn-mission-fragmented-command');
+    expect(state.npcs.filter((npc) => npc.type === NPCType.EXTREMIST).length).toBeGreaterThanOrEqual(2);
   });
 
   it('rebuilds dynamic role responses correctly when rewinding', () => {
