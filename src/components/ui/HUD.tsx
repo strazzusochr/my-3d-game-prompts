@@ -111,6 +111,9 @@ export const HUD = () => {
         { key: 'dyn-late-triage', label: 'Triage-Korridor dynamisch aktiv', color: '#99ffcc' },
         { key: 'dyn-high-medical-relief', label: 'Medical Relief (HIGH) aktiv', color: '#66ffcc' },
         { key: 'dyn-critical-lockdown', label: 'SEK Lockdown (CRITICAL) aktiv', color: '#ff8888' },
+        { key: 'dyn-mission-epoch-media', label: 'Mission Branch: Medienabschirmung', color: '#88ccff' },
+        { key: 'dyn-mission-hazard-shield', label: 'Mission Branch: Gefahrenzonen-Schild', color: '#aaddff' },
+        { key: 'dyn-mission-fullchain-deescalation', label: 'Mission Branch: Vollkette Deeskalation', color: '#99ffbb' },
     ].filter((response) => firedEventKeys.includes(response.key));
     const operationsInsight = getOperationsInsight({
         trendHistory: roleTrendHistory,

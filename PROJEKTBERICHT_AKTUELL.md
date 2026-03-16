@@ -100,6 +100,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Der anschliessende Nachlauf war erfolgreich und endete erneut mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`.
 - Ergebnis: Der GO-GO-GO-Flow ist auch gegen fehlende Dist-Artefakte beim Streamstart abgesichert.
 
+### 2.0.13 Missionsbranch-Runtimeblock vom 16.03.2026
+- Die Missionskette wirkt jetzt nicht nur ueber Hook-Readiness und Korrelation indirekt, sondern triggert drei direkte Laufzeit-Branches im Store.
+- Neu aktivierte Runtime-Events: `dyn-mission-epoch-media` (Medienabschirmung), `dyn-mission-hazard-shield` (Gefahrenzonen-Schild) und `dyn-mission-fullchain-deescalation` (spaete Deeskalationsumschaltung).
+- Der Deeskalationsbranch setzt konfliktnahe Demonstranten-/Rioter-Verhalten gezielt auf `RETREAT` und reduziert dadurch Verletzungs- sowie Schadenstrend in der Spaetphase.
+- Das Operations-Overlay zeigt diese Missionsbranches nun als eigene Live-Badges neben den korrelationsgetriebenen Triggern.
+- Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 227 von 227 bestanden, Lint und Build ebenfalls gruen.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.

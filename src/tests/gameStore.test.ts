@@ -366,6 +366,69 @@ describe('gameStore core flow', () => {
     expect(state.npcs.filter((npc) => npc.type === NPCType.SEK).length).toBeGreaterThanOrEqual(29);
   });
 
+  it('triggers mission media branch after epoch verification', () => {
+    useGameStore.setState((state) => ({
+      ...state,
+      interactionState: {
+        ...state.interactionState,
+        missionProgress: {
+          ...state.interactionState.missionProgress,
+          epochBriefingVerified: true,
+        },
+      },
+    }));
+
+    useGameStore.getState().evaluateEvents('12:00');
+    const state = useGameStore.getState();
+
+    expect(state.firedEventKeys).toContain('dyn-mission-epoch-media');
+    expect(state.npcs.filter((npc) => npc.type === NPCType.JOURNALIST).length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('triggers mission hazard branch after hazard map preparation', () => {
+    useGameStore.setState((state) => ({
+      ...state,
+      interactionState: {
+        ...state.interactionState,
+        missionProgress: {
+          ...state.interactionState.missionProgress,
+          hazardMapPrepared: true,
+        },
+      },
+    }));
+
+    useGameStore.getState().evaluateEvents('18:00');
+    const state = useGameStore.getState();
+
+    expect(state.firedEventKeys).toContain('dyn-mission-hazard-shield');
+    expect(state.npcs.filter((npc) => npc.type === NPCType.POLICE).length).toBeGreaterThanOrEqual(9);
+  });
+
+  it('triggers fullchain mission deescalation after three priorities are set', () => {
+    useGameStore.getState().evaluateEvents('21:00');
+    const baseline = useGameStore.getState().dayStats;
+
+    resetStore();
+
+    useGameStore.setState((state) => ({
+      ...state,
+      interactionState: {
+        ...state.interactionState,
+        missionProgress: {
+          ...state.interactionState.missionProgress,
+          prioritizedZoneIds: ['north-bridge', 'south-hub', 'east-avenue'],
+        },
+      },
+    }));
+
+    useGameStore.getState().evaluateEvents('21:00');
+    const state = useGameStore.getState();
+
+    expect(state.firedEventKeys).toContain('dyn-mission-fullchain-deescalation');
+    expect(state.dayStats.damage).toBeLessThanOrEqual(baseline.damage - 1700);
+    expect(state.dayStats.injured).toBeLessThanOrEqual(baseline.injured - 2);
+  });
+
   it('rebuilds dynamic role responses correctly when rewinding', () => {
     useGameStore.getState().evaluateEvents('21:00');
     useGameStore.getState().rewindHour();

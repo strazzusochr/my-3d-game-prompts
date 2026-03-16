@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 08:59:06 +01:00
-- Repo-Head: 219d148 (vor aktuellem Folgeevent-Korrelation-Block)
-- Nachweislauf: npm run lint PASS + npm test 224/224 PASS + npm run build PASS + Browser-Livecheck PASS + 80.000-Zeilenziel PASS
-- Marker: LINT_PASS + TESTS_224_224 + BUILD_PASS + LIVE_SOCKET_PASS + MASTER_80000_PASS
-- Gates: Lint PASS, Tests 224/224 PASS, Build PASS, Browser-/Socket-Livecheck PASS, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: geaendert fuer korrelationsgetriebene Runtime-Folgeevents + HUD-Trigger-Badges
+- Zeitstempel: 2026-03-16 09:12:40 +01:00
+- Repo-Head: c183928 (lokale Mission-Branch-Erweiterung vor Commit)
+- Nachweislauf: npm run autonomy:full PASS (inkl. lint PASS + tests 227/227 PASS + build PASS + live proof PASS)
+- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_227_227 + BUILD_PASS + LIVE_SOCKET_PASS + MASTER_80000_PASS
+- Gates: Lint PASS, Tests 227/227 PASS, Build PASS, Browser-/Socket-Livecheck PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, Masterquelle 80.000/80.000 PASS
+- Arbeitsbaum: geaendert fuer missionsgetriebene Runtime-Branch-Events + Operations-Badges + neue Store-Tests
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -69,6 +69,7 @@ Bewertungsstufen:
 | P-009 | Prompt-Teil 12 Gamepad-System tief umgesetzt | Vertikal | 100 | PASS | Volles 16-Button-Mapping, Vibration, Store-Integration, Edge-Detection |
 | P-010 | Vollabdeckung aller 700+ Checks | Horizontal | 100 | PASS | 161 Tests in comprehensive.test.ts, 168 gesamt; 700+ expect()-Assertions in Loops |
 | P-011 | 80.000-Zeilen-Masterquelle aufgebaut | Horizontal | 100 | PASS | 80.000/80.000 Zeilen erreicht und auf github/main veroeffentlicht |
+| P-012 | Missionsverzweigungen als Runtime-Folgeevents aktiviert | Vertikal | 100 | PASS | dyn-mission-epoch-media + dyn-mission-hazard-shield + dyn-mission-fullchain-deescalation mit Tests |
 
 ---
 
@@ -110,12 +111,12 @@ Die nachfolgende Deep-Gap-Matrix beschreibt darueber hinausgehende Ausbauziele d
 | Player-Core | Rapier-Kollisionswelt + Triggerzonen + Bewegungsdynamik aktiv | 95 | Kantenfaelle bei komplexen Kollisionen und erweitertes Umgebungs-Sliding fehlen noch | Kollisionsnahe Sonderfaelle und Kontakt-Events fuer Sliden verfeinern |
 | Gamepad-System | VOLLSTAENDIG | 100 | — | Erledigt: 16-Button-Mapping + Vibration + Store-Integration |
 | Audio-Engine (Teil 33) | VOLLSTAENDIG | 100 | — | Erledigt: Kategorien + Ducking + 3 neue Sounds + SFX-Trigger |
-| NPC-KI/Behavior | Rollen-Automatik + Korrelations-Folgeevents (HIGH/CRITICAL) aktiv | 90 | Gegenseitige Fraktionsreaktionen und adaptive Schwellwerte fehlen noch | Eskalations-Gegenlogik und adaptive Triggerkurven integrieren |
-| Mission/24h-Szenario | Aftermath-Nacht-Kette + korrelationsgetriebene Folgeevents aktiv | 84 | Entscheidungsabhaengige Missionsverzweigungen fehlen noch | Spielerentscheidungen auf Folge-Events und Lageantworten abbilden |
-| UI/HUD-Komplettheit | Operations-Korrelation + Folgeevent-Badges + Trendlinien sichtbar | 95 | Langzeit-Korrelationen mit Missionsentscheidungen fehlen noch | Trend-Korrelationen mit Missionspfaden anzeigen |
+| NPC-KI/Behavior | Rollen-Automatik + Korrelations-Folgeevents + missionsgetriebene Branch-Reaktionen aktiv | 92 | Gegenseitige Fraktionsreaktionen und adaptive Schwellwerte fehlen noch | Eskalations-Gegenlogik und adaptive Triggerkurven integrieren |
+| Mission/24h-Szenario | Aftermath-Nacht-Kette + Korrelationsfolgeevents + Missionsbranching aktiv | 90 | Verzweigungspfade wirken noch nicht auf nachgelagerte Timeline-Events mehrerer Wellen | Spielerentscheidungen auf weitere Kettenevents und Lageantworten ausdehnen |
+| UI/HUD-Komplettheit | Operations-Korrelation + Folgeevent-Badges + Trendlinien + Missionsbranch-Badges sichtbar | 96 | Langzeit-Korrelationen mit Missionsentscheidungen fehlen noch | Trend-Korrelationen mit Missionspfaden anzeigen |
 | Quality-Gates 700+ | VOLLSTAENDIG | 100 | — | Erledigt: 224/224 Tests gruen, comprehensive.test.ts deckt 700+ Assertions ab |
 
-Realistische Gesamt-Reife (Deep, ausserhalb Pflichtumfang): 91%
+Realistische Gesamt-Reife (Deep, ausserhalb Pflichtumfang): 93%
 
 Interpretation:
 Der technische Kern ist fuer den verifizierten Pflichtumfang vollstaendig abgeschlossen.
