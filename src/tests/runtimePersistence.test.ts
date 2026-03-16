@@ -57,6 +57,8 @@ const baseSnapshot: RuntimeSnapshot = {
             avgRebuildEvents: 14,
             stability: 'watch',
             recentStabilityTrend: ['watch', 'stable'],
+            riskLevel: 'medium',
+            riskHint: 'Rewind-Takt reduzieren und grobere Spruenge nutzen.',
         },
     },
 };
@@ -82,6 +84,8 @@ describe('runtimePersistence', () => {
         expect(loaded?.replayState.quality.rebuildCount).toBe(1);
         expect(loaded?.replayState.quality.stability).toBe('watch');
         expect(loaded?.replayState.quality.recentStabilityTrend).toEqual(['watch', 'stable']);
+        expect(loaded?.replayState.quality.riskLevel).toBe('medium');
+        expect(loaded?.replayState.quality.riskHint).toBe('Rewind-Takt reduzieren und grobere Spruenge nutzen.');
     });
 
     it('liefert null bei ungueltigem JSON', () => {
@@ -120,6 +124,8 @@ describe('runtimePersistence', () => {
                         avgRebuildEvents: -7,
                         stability: 'broken',
                         recentStabilityTrend: ['critical', 'unknown', 'watch', 'stable'],
+                        riskLevel: 'broken',
+                        riskHint: 'unknown',
                     },
                 },
             }),
@@ -148,6 +154,8 @@ describe('runtimePersistence', () => {
         expect(loaded?.replayState.quality.avgRebuildEvents).toBe(0);
         expect(loaded?.replayState.quality.stability).toBe('stable');
         expect(loaded?.replayState.quality.recentStabilityTrend).toEqual(['critical', 'watch', 'stable']);
+        expect(loaded?.replayState.quality.riskLevel).toBe('low');
+        expect(loaded?.replayState.quality.riskHint).toBe('Stabiler Replay-Betrieb.');
     });
 
     it('entfernt Snapshot mit clearRuntimeSnapshot', () => {

@@ -67,6 +67,8 @@ const resetStore = () => {
       replayQualityAvgEvents: 0,
       replayQualityStability: 'stable',
       replayQualityRecentTrend: [],
+      replayRiskLevel: 'low',
+      replayRiskHint: 'Stabiler Replay-Betrieb.',
       playerReputation: 0,
       moralScore: 50,
       showStatistics: false,
@@ -599,6 +601,8 @@ describe('gameStore core flow', () => {
     expect(['stable', 'watch', 'critical']).toContain(state.gameState.replayQualityStability);
     expect(state.gameState.replayQualityRecentTrend.length).toBeGreaterThan(0);
     expect(['stable', 'watch', 'critical']).toContain(state.gameState.replayQualityRecentTrend[0]);
+    expect(['low', 'medium', 'high']).toContain(state.gameState.replayRiskLevel);
+    expect(state.gameState.replayRiskHint.length).toBeGreaterThan(0);
 
     const rawSnapshot = window.localStorage.getItem(RUNTIME_SNAPSHOT_KEY);
     expect(rawSnapshot).not.toBeNull();
@@ -621,6 +625,8 @@ describe('gameStore core flow', () => {
           avgRebuildEvents: number;
           stability: 'stable' | 'watch' | 'critical';
           recentStabilityTrend: Array<'stable' | 'watch' | 'critical'>;
+          riskLevel: 'low' | 'medium' | 'high';
+          riskHint: string;
         };
       };
     };
@@ -635,6 +641,8 @@ describe('gameStore core flow', () => {
     expect(snapshot.replayState.quality.rebuildCount).toBeGreaterThan(0);
     expect(snapshot.replayState.quality.avgRebuildEvents).toBeGreaterThanOrEqual(0);
     expect(snapshot.replayState.quality.recentStabilityTrend.length).toBeGreaterThan(0);
+    expect(['low', 'medium', 'high']).toContain(snapshot.replayState.quality.riskLevel);
+    expect(snapshot.replayState.quality.riskHint.length).toBeGreaterThan(0);
   });
 
   it('records role trend snapshots while time progresses', () => {

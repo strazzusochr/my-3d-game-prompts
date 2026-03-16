@@ -48,6 +48,8 @@ interface RuntimeReplayQuality {
     avgRebuildEvents: number;
     stability: 'stable' | 'watch' | 'critical';
     recentStabilityTrend: Array<'stable' | 'watch' | 'critical'>;
+    riskLevel: 'low' | 'medium' | 'high';
+    riskHint: 'Stabiler Replay-Betrieb.' | 'Rewind-Takt reduzieren und grobere Spruenge nutzen.' | 'Replay-Risiko hoch: Rewind-Frequenz sofort senken.';
 }
 
 export interface RuntimeSnapshot {
@@ -192,6 +194,15 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
         qualityObj.stability === 'critical' || qualityObj.stability === 'watch'
             ? qualityObj.stability
             : 'stable';
+    const qualityRiskLevel =
+        qualityObj.riskLevel === 'high' || qualityObj.riskLevel === 'medium'
+            ? qualityObj.riskLevel
+            : 'low';
+    const qualityRiskHint =
+        qualityObj.riskHint === 'Replay-Risiko hoch: Rewind-Frequenz sofort senken.' ||
+        qualityObj.riskHint === 'Rewind-Takt reduzieren und grobere Spruenge nutzen.'
+            ? qualityObj.riskHint
+            : 'Stabiler Replay-Betrieb.';
     const qualityTrend = Array.isArray(qualityObj.recentStabilityTrend)
         ? qualityObj.recentStabilityTrend
             .filter(
@@ -213,6 +224,8 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
             avgRebuildEvents: Math.max(0, Math.round(qualityAvgEventsRaw)),
             stability: qualityStability,
             recentStabilityTrend: qualityTrend,
+            riskLevel: qualityRiskLevel,
+            riskHint: qualityRiskHint,
         },
     };
 };

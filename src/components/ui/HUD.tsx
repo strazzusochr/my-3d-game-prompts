@@ -71,6 +71,8 @@ export const HUD = () => {
     const replayQualityAvgEvents = useGameStore(state => state.gameState.replayQualityAvgEvents);
     const replayQualityStability = useGameStore(state => state.gameState.replayQualityStability);
     const replayQualityRecentTrend = useGameStore(state => state.gameState.replayQualityRecentTrend);
+    const replayRiskLevel = useGameStore(state => state.gameState.replayRiskLevel);
+    const replayRiskHint = useGameStore(state => state.gameState.replayRiskHint);
     const playerReputation = useGameStore(state => state.gameState.playerReputation);
     const moralScore = useGameStore(state => state.gameState.moralScore);
     const npcCount = useGameStore(state => state.npcs.length);
@@ -1010,6 +1012,9 @@ export const HUD = () => {
                                         <span style={{ padding: '3px 8px', borderRadius: '999px', fontSize: '10px', fontWeight: 700, letterSpacing: '0.5px', color: replayQualityStability === 'critical' ? '#ff7777' : replayQualityStability === 'watch' ? '#ffcc66' : '#99ffcc', border: `1px solid ${replayQualityStability === 'critical' ? '#ff777766' : replayQualityStability === 'watch' ? '#ffcc6666' : '#99ffcc55'}`, background: 'rgba(0,0,0,0.24)' }}>
                                             Replay-Qualitaet: {replayQualityStability.toUpperCase()}
                                         </span>
+                                        <span style={{ padding: '3px 8px', borderRadius: '999px', fontSize: '10px', fontWeight: 700, letterSpacing: '0.5px', color: replayRiskLevel === 'high' ? '#ff6666' : replayRiskLevel === 'medium' ? '#ffcc66' : '#99ffcc', border: `1px solid ${replayRiskLevel === 'high' ? '#ff666666' : replayRiskLevel === 'medium' ? '#ffcc6666' : '#99ffcc55'}`, background: 'rgba(0,0,0,0.24)' }}>
+                                            Replay-Risiko: {replayRiskLevel.toUpperCase()}
+                                        </span>
                                     </div>
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '8px', fontSize: '13px' }}>
                                         <span style={{ color: '#9edfff' }}>Eskalationsstufe</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{Math.floor(tensionLevel / 5)} / 20</span>
@@ -1022,6 +1027,7 @@ export const HUD = () => {
                                         <span style={{ color: '#9edfff' }}>Rebuild-Anker</span><span style={{ color: '#c6d9ff', fontWeight: 700 }}>{replayAnchorTime}</span>
                                         <span style={{ color: '#9edfff' }}>Rebuilds im Fenster</span><span style={{ color: '#ffcc66', fontWeight: 700 }}>{replayQualityRebuildCount} / {replayQualityWindowMinutes}m</span>
                                         <span style={{ color: '#9edfff' }}>Avg Events/Rebuild</span><span style={{ color: '#c6d9ff', fontWeight: 700 }}>{replayQualityAvgEvents}</span>
+                                        <span style={{ color: '#9edfff' }}>Risiko-Hinweis</span><span style={{ color: replayRiskLevel === 'high' ? '#ff7777' : replayRiskLevel === 'medium' ? '#ffcc66' : '#99ffcc', fontWeight: 700 }}>{replayRiskHint}</span>
                                     </div>
                                     <div style={{ marginTop: '10px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '8px' }}>
                                         <div style={{ color: '#9edfff', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: '6px' }}>

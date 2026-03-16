@@ -51,6 +51,11 @@ interface ReplayRebuildHistoryEntry {
 }
 
 type ReplayQualityStability = 'stable' | 'watch' | 'critical';
+type ReplayRiskLevel = 'low' | 'medium' | 'high';
+type ReplayRiskHint =
+    | 'Stabiler Replay-Betrieb.'
+    | 'Rewind-Takt reduzieren und grobere Spruenge nutzen.'
+    | 'Replay-Risiko hoch: Rewind-Frequenz sofort senken.';
 
 interface ReplayQualityState {
     windowMinutes: number;
@@ -58,6 +63,8 @@ interface ReplayQualityState {
     avgRebuildEvents: number;
     stability: ReplayQualityStability;
     recentStabilityTrend: ReplayQualityStability[];
+    riskLevel: ReplayRiskLevel;
+    riskHint: ReplayRiskHint;
 }
 
 interface GameStore {
@@ -86,6 +93,8 @@ interface GameStore {
         replayQualityAvgEvents: number;
         replayQualityStability: ReplayQualityStability;
         replayQualityRecentTrend: ReplayQualityStability[];
+        replayRiskLevel: ReplayRiskLevel;
+        replayRiskHint: ReplayRiskHint;
         // === CHUNK 11: Dynamisches System ===
         playerReputation: number;  // -100 (brutal) bis +100 (fair)
         moralScore: number;        // 0 (böse) bis 100 (gut)
@@ -163,6 +172,8 @@ const persistedReplayState = persistedRuntimeSnapshot?.replayState ?? {
         avgRebuildEvents: 0,
         stability: 'stable' as ReplayQualityStability,
         recentStabilityTrend: [] as ReplayQualityStability[],
+        riskLevel: 'low' as ReplayRiskLevel,
+        riskHint: 'Stabiler Replay-Betrieb.' as ReplayRiskHint,
     },
 };
 
@@ -215,6 +226,18 @@ const getReplayQualityState = (
             : rebuildCount >= 2 || avgRebuildEvents >= 10
                 ? 'watch'
                 : 'stable';
+    const riskLevel: ReplayRiskLevel =
+        rebuildCount >= 5 || avgRebuildEvents >= 24
+            ? 'high'
+            : rebuildCount >= 3 || avgRebuildEvents >= 12
+                ? 'medium'
+                : 'low';
+    const riskHint: ReplayRiskHint =
+        riskLevel === 'high'
+            ? 'Replay-Risiko hoch: Rewind-Frequenz sofort senken.'
+            : riskLevel === 'medium'
+                ? 'Rewind-Takt reduzieren und grobere Spruenge nutzen.'
+                : 'Stabiler Replay-Betrieb.';
 
     return {
         windowMinutes: REPLAY_QUALITY_WINDOW_MINUTES,
@@ -222,6 +245,8 @@ const getReplayQualityState = (
         avgRebuildEvents,
         stability,
         recentStabilityTrend: pushReplayQualityTrend(previousTrend, stability),
+        riskLevel,
+        riskHint,
     };
 };
 
@@ -249,6 +274,8 @@ const buildRuntimeSnapshot = (state: GameStore): RuntimeSnapshot => ({
             avgRebuildEvents: state.gameState.replayQualityAvgEvents,
             stability: state.gameState.replayQualityStability,
             recentStabilityTrend: state.gameState.replayQualityRecentTrend,
+            riskLevel: state.gameState.replayRiskLevel,
+            riskHint: state.gameState.replayRiskHint,
         },
     },
 });
@@ -1089,6 +1116,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         replayQualityAvgEvents: persistedReplayState.quality.avgRebuildEvents,
         replayQualityStability: persistedReplayState.quality.stability,
         replayQualityRecentTrend: persistedReplayState.quality.recentStabilityTrend,
+        replayRiskLevel: persistedReplayState.quality.riskLevel,
+        replayRiskHint: persistedReplayState.quality.riskHint,
         playerReputation: persistedRuntimeSnapshot?.playerReputation ?? RUNTIME_DEFAULTS.playerReputation,
         moralScore: persistedRuntimeSnapshot?.moralScore ?? RUNTIME_DEFAULTS.moralScore,
         showStatistics: false,
@@ -1133,6 +1162,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityAvgEvents: 0,
                 replayQualityStability: 'stable',
                 replayQualityRecentTrend: [],
+                replayRiskLevel: 'low',
+                replayRiskHint: 'Stabiler Replay-Betrieb.',
                 playerReputation: 0, moralScore: 50, showStatistics: false,
                 masterVolume: 0.5, muted: false
             }
@@ -1251,6 +1282,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     replayQualityAvgEvents: replayQuality.avgRebuildEvents,
                     replayQualityStability: replayQuality.stability,
                     replayQualityRecentTrend: replayQuality.recentStabilityTrend,
+                    replayRiskLevel: replayQuality.riskLevel,
+                    replayRiskHint: replayQuality.riskHint,
                     showStatistics: crossedMidnight ? true : state.gameState.showStatistics,
                 }
             };
@@ -1323,6 +1356,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityAvgEvents: replayQuality.avgRebuildEvents,
                 replayQualityStability: replayQuality.stability,
                 replayQualityRecentTrend: replayQuality.recentStabilityTrend,
+                replayRiskLevel: replayQuality.riskLevel,
+                replayRiskHint: replayQuality.riskHint,
             }
         });
         persistCurrentRuntimeSnapshot(get());
@@ -1397,6 +1432,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityAvgEvents: replayQuality.avgRebuildEvents,
                 replayQualityStability: replayQuality.stability,
                 replayQualityRecentTrend: replayQuality.recentStabilityTrend,
+                replayRiskLevel: replayQuality.riskLevel,
+                replayRiskHint: replayQuality.riskHint,
             }
         });
         persistCurrentRuntimeSnapshot(get());
@@ -1437,6 +1474,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityAvgEvents: 0,
                 replayQualityStability: 'stable',
                 replayQualityRecentTrend: [],
+                replayRiskLevel: 'low',
+                replayRiskHint: 'Stabiler Replay-Betrieb.',
                 playerReputation: get().gameState.playerReputation,
                 moralScore: get().gameState.moralScore,
                 showStatistics: false,

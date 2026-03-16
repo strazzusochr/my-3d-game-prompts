@@ -43,6 +43,14 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Testnachweis erweitert: Trend-Sanitisierung in `runtimePersistence.test.ts`, Store- und Snapshot-Nachweis nach Rewind in `gameStore.test.ts`.
 - Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 251 von 251 gruen, Build gruen.
 
+### 2.0.36 Replay-Risikoampel mit Handlungshinweis vom 16.03.2026
+- Die Replay-Auswertung wurde um eine kompakte Risikoampel erweitert: `low`, `medium`, `high` werden aus Rebuild-Frequenz und durchschnittlicher Eventlast abgeleitet.
+- Zusaetzlich liefert der Store einen direkten Handlungs-Hinweis (`replayRiskHint`), um auf Lastspitzen ohne Interpretation reagieren zu koennen.
+- `runtimePersistence` speichert diese Felder unter `replayState.quality.riskLevel` und `replayState.quality.riskHint` und sanitisiert ungueltige Werte auf sichere Defaults.
+- Das Operations-Panel zeigt den Risiko-Status als zusaetzlichen Live-Badge sowie den Hinweistext in der Kennzahlentabelle.
+- Testnachweis erweitert: Risiko-Persistenz/Sanitisierung in `runtimePersistence.test.ts` und Store-/Snapshot-Nachweis nach Rewind in `gameStore.test.ts`.
+- Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 251 von 251 gruen, Build gruen.
+
 ### 2.0.1 Viewer- und Lastnachweis vom 16.03.2026
 - Zwei weitere Viewer-Seiten wurden geoeffnet und der Health-Endpunkt achtmal im Abstand von rund 1,5 Sekunden abgefragt.
 - Der Stream benoetigte eine kurze Aufwaermphase: zuerst `viewerFps=0`, danach stabile Werte zwischen 22 und 24 FPS.

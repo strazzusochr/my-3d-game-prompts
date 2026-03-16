@@ -171,6 +171,11 @@
 - HUD-Operationsansicht erweitert: Bereich `Replay-Stabilitaetstrend` zeigt die letzten Trendpunkte als zeitnahe Badges (`JETZT`, `-1`, `-2`).
 - Testabdeckung erweitert: `runtimePersistence.test.ts` validiert Trend-Sanitisierung; `gameStore.test.ts` prueft Trendwerte im Store und Snapshot nach Rewind.
 - Vollverifikation nach Replay-Stabilitaetstrend erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 251/251.
+- Replay-Risikoampel am 16.03.2026 umgesetzt: Store berechnet jetzt `replayRiskLevel` (`low`/`medium`/`high`) plus konkreten `replayRiskHint` aus Rebuild-Frequenz und Eventlast.
+- Snapshot erweitert: `runtimePersistence` persistiert und sanitisiert Risikoampel/Hinweis unter `replayState.quality.riskLevel` und `replayState.quality.riskHint`.
+- HUD-Operationsansicht erweitert: zusaetzlicher Badge `Replay-Risiko` sowie live sichtbarer `Risiko-Hinweis` fuer direktes Operator-Handeln.
+- Testabdeckung erweitert: `runtimePersistence.test.ts` verifiziert Risiko-Sanitisierung, `gameStore.test.ts` prueft Risiko-Felder im Store und Snapshot nach Rewind.
+- Vollverifikation nach Replay-Risikoampel erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 251/251.
 
 ## Naechster logischer Schritt
-- Replay-Stabilitaetstrend ist geschlossen; naechster Ausbaupunkt ist eine kompakte Replay-Risikoampel mit Last-Schwellenhinweis im Operations-Panel inkl. Snapshot-Nachweis.
+- Replay-Risikoampel ist geschlossen; naechster Ausbaupunkt ist ein kurzer Replay-Recovery-Indikator (Zeit seit letztem `high`-Risiko) im Operations-Panel inkl. Snapshot-Nachweis.

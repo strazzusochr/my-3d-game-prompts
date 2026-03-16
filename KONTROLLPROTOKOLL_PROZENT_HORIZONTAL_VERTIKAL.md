@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 16:08:00 +01:00
-- Repo-Head: lokal (nach Replay-Stabilitaetstrend, vor neuem Commit)
-- Nachweislauf: npm run autonomy:full PASS nach Replay-Stabilitaetstrend (inkl. lint PASS + tests 251/251 PASS + build PASS + live proof PASS)
-- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_251_251 + BUILD_PASS + REPLAY_STABILITY_TREND_PASS + MASTER_80000_PASS
-- Gates: Lint PASS, Tests 251/251 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, Replay-Stabilitaetstrend inkl. Snapshot-Sanitisierung verifiziert, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: Replay-Stabilitaetstrend in Store/HUD/Persistence/Test erweitert und per Vollproof verifiziert
+- Zeitstempel: 2026-03-16 16:15:00 +01:00
+- Repo-Head: lokal (nach Replay-Risikoampel, vor neuem Commit)
+- Nachweislauf: npm run autonomy:full PASS nach Replay-Risikoampel (inkl. lint PASS + tests 251/251 PASS + build PASS + live proof PASS)
+- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_251_251 + BUILD_PASS + REPLAY_RISK_PASS + MASTER_80000_PASS
+- Gates: Lint PASS, Tests 251/251 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, Replay-Risikoampel inkl. Snapshot-Sanitisierung verifiziert, Masterquelle 80.000/80.000 PASS
+- Arbeitsbaum: Replay-Risikoampel und Handlungshinweis in Store/HUD/Persistence/Test erweitert und per Vollproof verifiziert
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -93,6 +93,7 @@ Bewertungsstufen:
 | P-033 | Replay-Rebuild-Historie persistent und im HUD sichtbar umgesetzt | Vertikal | 100 | PASS | replayRebuildHistory im Store + replayState.rebuildHistory im Snapshot + HUD-Panel `Letzte Rebuilds` + Tests; Full-Proof gruen |
 | P-034 | Replay-Qualitaetsindikator mit Persistenz umgesetzt | Vertikal | 100 | PASS | replayState.quality + 90m-Fensterlogik im Store + HUD-Badge/Kennzahlen + Sanitisierungs-/Storetests; Full-Proof gruen |
 | P-035 | Replay-Stabilitaetstrend (letzte 3 Quality-Zustaende) umgesetzt | Vertikal | 100 | PASS | replayQualityRecentTrend im Store + recentStabilityTrend im Snapshot + HUD-Trendbadges + Sanitisierungs-/Storetests; Full-Proof gruen |
+| P-036 | Replay-Risikoampel mit Handlungshinweis umgesetzt | Vertikal | 100 | PASS | riskLevel/riskHint im Store + Snapshot-Sanitisierung + HUD-Risikobadge/Hinweis + Tests; Full-Proof gruen |
 
 ---
 
