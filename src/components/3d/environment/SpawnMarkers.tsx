@@ -1,22 +1,17 @@
-/**
- * 📍 SPAWN MARKERS MIT LABELN
- * Zeigt an jedem Spawn-Punkt: Uhrzeit, Anzahl und NPC-Typ als 3D-Text.
- * FLACKER-FIX: Y weit über Park-Boden (0.05), polygonOffset aktiv.
- */
-
 import { useMemo } from 'react';
-import { Text } from '@react-three/drei';
-import { EVENT_TIMELINE, NPC_COLORS } from '../../../systems/eventScheduler';
+import { Billboard, Text } from '@react-three/drei';
+import { useGameStore } from '../../../stores/gameStore';
+import { EVENT_TIMELINE, NPC_COLORS, timeToMinutes } from '../../../systems/eventScheduler';
 
 interface SpawnPoint {
     position: [number, number, number];
     color: string;
     radius: number;
     id: string;
-    label: string;      // z.B. "8× DEMONSTRATOR"
-    shortType: string;   // z.B. "DEMO"
     time: string;
-    mission: string;
+    title: string;
+    details: string[];
+    minutesUntilSpawn: number;
 }
 
 const SHORT_NAMES: Record<string, string> = {
@@ -35,43 +30,57 @@ const SHORT_NAMES: Record<string, string> = {
 };
 
 export const SpawnMarkers = () => {
+    const inGameTime = useGameStore((state) => state.gameState.inGameTime);
+    const formatCountdown = (minutesUntilSpawn: number) => {
+        const mm = Math.max(0, minutesUntilSpawn).toString().padStart(2, '0');
+        return `SPAWN IN 00:${mm}`;
+    };
+
     const markers = useMemo(() => {
-        const seen = new Map<string, SpawnPoint>();
+        const currentMinutes = timeToMinutes(inGameTime);
+        const grouped = new Map<string, SpawnPoint>();
 
         EVENT_TIMELINE.forEach((event, i) => {
-            if (event.action !== 'SPAWN' || !event.position) return;
+            if (event.action !== 'SPAWN' || !event.position || event.count <= 0) {
+                return;
+            }
 
-            const key = `${Math.round(event.position[0])},${Math.round(event.position[2])},${event.npcType}`;
+            const eventMinutes = timeToMinutes(event.time);
+            const minutesUntilSpawn = (eventMinutes - currentMinutes + 24 * 60) % (24 * 60);
+
+            // Sichtbarkeitsfenster: ab T-10 bis T-5, danach ausblenden.
+            if (minutesUntilSpawn > 10 || minutesUntilSpawn < 5) {
+                return;
+            }
+
+            const key = `${event.time}:${Math.round(event.position[0])}:${Math.round(event.position[2])}`;
             const shortName = SHORT_NAMES[event.npcType] || event.npcType;
-            const newLabel = `${event.count}× ${shortName}`;
-            const missionLabel = event.description || event.phaseLabel || "Einsatz";
+            const detailLine = `${event.count}x ${shortName}`;
 
-            if (seen.has(key)) {
-                // Merge: append additional spawn info
-                const existing = seen.get(key)!;
-                existing.label += `\n${newLabel}`;
+            if (grouped.has(key)) {
+                const existing = grouped.get(key)!;
+                existing.details.push(detailLine);
             } else {
-                seen.set(key, {
+                grouped.set(key, {
                     position: event.position,
                     color: NPC_COLORS[event.npcType] || '#888',
                     radius: Math.min(event.radius || 5, 15),
                     id: `marker-${i}`,
-                    label: newLabel,
-                    shortType: shortName,
                     time: event.time,
-                    mission: missionLabel
+                    title: detailLine,
+                    details: [detailLine],
+                    minutesUntilSpawn,
                 });
             }
         });
 
-        return Array.from(seen.values());
-    }, []);
+        return Array.from(grouped.values()).sort((a, b) => a.minutesUntilSpawn - b.minutesUntilSpawn);
+    }, [inGameTime]);
 
     return (
         <group>
             {markers.map((m, idx) => (
                 <group key={m.id} position={[m.position[0], 0, m.position[2]]}>
-                    {/* Ring on ground - elevated above park surface */}
                     <mesh
                         rotation={[-Math.PI / 2, 0, 0]}
                         position={[0, 0.25 + idx * 0.01, 0]}
@@ -80,7 +89,7 @@ export const SpawnMarkers = () => {
                         <meshBasicMaterial
                             color={m.color}
                             transparent
-                            opacity={0.35}
+                            opacity={0.42}
                             depthWrite={false}
                             polygonOffset={true}
                             polygonOffsetFactor={-1}
@@ -88,49 +97,70 @@ export const SpawnMarkers = () => {
                         />
                     </mesh>
 
-                    {/* 🕒 SCHWEBENDE DIGITALE UHRZEIT & MISSION */}
-                    <group position={[0, 4.5, 0]}>
-                        {/* Uhrzeit */}
-                        <Text
-                            position={[0, 1.2, 0]}
-                            fontSize={1.4}
-                            color="#ffff00" // "Time-Yellow"
-                            anchorX="center"
-                            anchorY="middle"
-                            outlineWidth={0.1}
-                            outlineColor="#000000"
-                        >
-                            {m.time}
-                        </Text>
+                    <Billboard position={[0, 4.4, 0]} follow={true} lockX={false} lockY={false} lockZ={false}>
+                        <group>
+                            <mesh position={[0, 0, -0.03]}>
+                                <planeGeometry args={[6.2, 8.2]} />
+                                <meshBasicMaterial color="#05070e" transparent opacity={0.88} />
+                            </mesh>
+                            <mesh>
+                                <planeGeometry args={[6.5, 8.5]} />
+                                <meshBasicMaterial color={m.color} transparent opacity={0.2} />
+                            </mesh>
 
-                        {/* NPC Typ & Anzahl */}
-                        <Text
-                            position={[0, 0, 0]}
-                            fontSize={1.0}
-                            color={m.color}
-                            anchorX="center"
-                            anchorY="middle"
-                            outlineWidth={0.08}
-                            outlineColor="#000000"
-                        >
-                            {m.label}
-                        </Text>
+                            <Text
+                                position={[0, 2.95, 0.03]}
+                                fontSize={0.95}
+                                color="#ffe46b"
+                                anchorX="center"
+                                anchorY="middle"
+                                outlineWidth={0.06}
+                                outlineColor="#000"
+                            >
+                                {m.time}
+                            </Text>
 
-                        {/* Mission / Akt */}
-                        <Text
-                            position={[0, -1.2, 0]}
-                            fontSize={0.7}
-                            color="#fff"
-                            anchorX="center"
-                            anchorY="middle"
-                            outlineWidth={0.05}
-                            outlineColor="#000000"
-                            maxWidth={12}
-                            textAlign="center"
-                        >
-                            {m.mission}
-                        </Text>
-                    </group>
+                            <Text
+                                position={[0, 1.7, 0.03]}
+                                fontSize={0.78}
+                                color={m.color}
+                                anchorX="center"
+                                anchorY="middle"
+                                outlineWidth={0.05}
+                                outlineColor="#000"
+                                maxWidth={5.9}
+                                textAlign="center"
+                            >
+                                {m.title}
+                            </Text>
+
+                            <Text
+                                position={[0, 0.3, 0.03]}
+                                fontSize={0.44}
+                                color="#d9f6ff"
+                                anchorX="center"
+                                anchorY="middle"
+                                outlineWidth={0.03}
+                                outlineColor="#000"
+                                maxWidth={5.7}
+                                textAlign="center"
+                            >
+                                {m.details.slice(0, 4).join('\n')}
+                            </Text>
+
+                            <Text
+                                position={[0, -2.35, 0.03]}
+                                fontSize={0.62}
+                                color="#ffffff"
+                                anchorX="center"
+                                anchorY="middle"
+                                outlineWidth={0.04}
+                                outlineColor="#000"
+                            >
+                                {formatCountdown(m.minutesUntilSpawn)}
+                            </Text>
+                        </group>
+                    </Billboard>
                 </group>
             ))}
         </group>
