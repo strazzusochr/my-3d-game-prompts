@@ -227,24 +227,35 @@ export const HUD = () => {
         }));
     };
 
-    const makeHandleDrag = (panel: HudPanelKey) => (event: React.MouseEvent) => {
+    const isDragHandleTarget = (target: EventTarget | null) => {
+        if (!(target instanceof HTMLElement)) return false;
+        return Boolean(target.closest('[data-hud-drag-handle="true"]'));
+    };
+
+    const startPanelDrag = (panel: HudPanelKey, event: React.MouseEvent<HTMLDivElement>) => {
         if (!layoutEditMode || event.button !== 0) return;
+        if (!isDragHandleTarget(event.target)) return;
         event.preventDefault();
         event.stopPropagation();
         const startX = event.clientX;
         const startY = event.clientY;
         const originX = panelUi[panel].offsetX;
         const originY = panelUi[panel].offsetY;
-        const onMove = (e: MouseEvent) => {
+
+        const onMove = (moveEvent: MouseEvent) => {
+            const dx = moveEvent.clientX - startX;
+            const dy = moveEvent.clientY - startY;
             setPanelUi((prev) => ({
                 ...prev,
-                [panel]: { ...prev[panel], offsetX: originX + (e.clientX - startX), offsetY: originY + (e.clientY - startY) },
+                [panel]: { ...prev[panel], offsetX: originX + dx, offsetY: originY + dy },
             }));
         };
+
         const onUp = () => {
             window.removeEventListener('mousemove', onMove);
             window.removeEventListener('mouseup', onUp);
         };
+
         window.addEventListener('mousemove', onMove);
         window.addEventListener('mouseup', onUp);
     };
@@ -276,7 +287,6 @@ export const HUD = () => {
         <div data-hud-control="true" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <button
                 data-hud-drag-handle="true"
-                onMouseDown={makeHandleDrag(panel)}
                 style={{ ...squareControlStyle(layoutEditMode), minWidth: compact ? '28px' : '30px', padding: compact ? '2px 4px' : '2px 5px', fontSize: compact ? '10px' : '11px', cursor: layoutEditMode ? 'grab' : 'default' }}
                 title="Panel verschieben"
             >
@@ -336,6 +346,7 @@ export const HUD = () => {
             </div>
             {/* Left Panel */}
             <div
+                onMouseDown={(event) => startPanelDrag('left', event)}
                 style={{ pointerEvents: 'auto', position: 'absolute', top: '24px', left: '24px', width: '292px', padding: '16px', background: 'rgba(10,10,10,0.82)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', boxShadow: '0 8px 24px rgba(0,0,0,0.45)', cursor: layoutEditMode ? 'grab' : 'default', ...panelScaleStyle('left', 'top left') }}
             >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
@@ -358,6 +369,7 @@ export const HUD = () => {
 
             {/* Top Center Badge + Phase Label */}
             <div
+                onMouseDown={(event) => startPanelDrag('top', event)}
                 style={{ position: 'absolute', top: '24px', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', cursor: layoutEditMode ? 'grab' : 'default', ...panelScaleStyle('top', 'top center') }}
             >
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '6px', pointerEvents: 'auto' }}>{renderPanelControls('top')}</div>
@@ -399,7 +411,7 @@ export const HUD = () => {
                 cursor: layoutEditMode ? 'grab' : 'default',
                 textShadow: '0 1px 3px rgba(0,0,0,0.85), 0 0 8px rgba(0,0,0,0.55)',
                 ...panelScaleStyle('right', 'top right')
-            }}>
+            }} onMouseDown={(event) => startPanelDrag('right', event)}>
                 {/* Header with FPS */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                     <h3 style={{ margin: 0, color: '#00ccff', fontSize: '16px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800' }}>Streifen-Protokoll</h3>
@@ -437,7 +449,7 @@ export const HUD = () => {
                     border: '1px solid rgba(0,204,255,0.25)',
                     cursor: layoutEditMode ? 'grab' : 'default',
                     ...panelScaleStyle('nasa', 'top right')
-                }}>
+                }} onMouseDown={(event) => startPanelDrag('nasa', event)}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                         <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase' }}>
                             NASA PDC25 Epoch 2 Lagebild
@@ -481,7 +493,7 @@ export const HUD = () => {
                     border: `1px solid ${phaseWindowColor}55`,
                     cursor: layoutEditMode ? 'grab' : 'default',
                     ...panelScaleStyle('telemetry', 'top right')
-                }}>
+                }} onMouseDown={(event) => startPanelDrag('telemetry', event)}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                         <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase' }}>
                             Phase-Telemetrie
@@ -521,7 +533,7 @@ export const HUD = () => {
                 </div>
 
                 {/* Missions */}
-                <div style={{ marginBottom: '20px', cursor: layoutEditMode ? 'grab' : 'default', ...panelScaleStyle('mission', 'top right') }}>
+                <div style={{ marginBottom: '20px', cursor: layoutEditMode ? 'grab' : 'default', ...panelScaleStyle('mission', 'top right') }} onMouseDown={(event) => startPanelDrag('mission', event)}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                         <h4 style={{ margin: 0, color: '#00ccff', fontSize: '16px', textTransform: 'uppercase', letterSpacing: '1.2px', fontWeight: '800' }}>
                             Missionslage
@@ -543,7 +555,7 @@ export const HUD = () => {
                 <div style={{ height: '1px', background: 'rgba(255,255,255,0.2)', marginBottom: '16px', boxShadow: '0 1px 2px rgba(0,0,0,0.5)' }} />
 
                 {/* Timeline (Was passiert gerade) */}
-                <div style={{ cursor: layoutEditMode ? 'grab' : 'default', ...panelScaleStyle('timeline', 'top right') }}>
+                <div style={{ cursor: layoutEditMode ? 'grab' : 'default', ...panelScaleStyle('timeline', 'top right') }} onMouseDown={(event) => startPanelDrag('timeline', event)}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                         <h4 style={{ margin: 0, color: '#00ccff', fontSize: '18px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: '800' }}>
                             Einsatz-Timeline
@@ -652,7 +664,7 @@ export const HUD = () => {
                     pointerEvents: layoutEditMode ? 'auto' : 'none',
                     cursor: layoutEditMode ? 'grab' : 'default',
                     ...panelScaleStyle('interaction', 'bottom center')
-                }}>
+                }} onMouseDown={(event) => startPanelDrag('interaction', event)}>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px', marginBottom: '6px', pointerEvents: 'auto' }}>{renderPanelControls('interaction')}</div>
                     {!panelUi.interaction.minimized && (
                     <>
@@ -702,7 +714,7 @@ export const HUD = () => {
                 width: compactBottomLayout ? 'min(1160px, calc(100vw - 36px))' : 'min(1700px, calc(100vw - 48px))',
                 transformOrigin: 'center bottom',
                 cursor: layoutEditMode ? 'grab' : 'default',
-            }}>
+            }} onMouseDown={(event) => startPanelDrag('bottom', event)}>
                 <div style={{ display: 'flex', gap: '6px', pointerEvents: 'auto', background: 'rgba(10,10,10,0.62)', border: '2px solid rgba(255,255,255,0.09)', borderRadius: '10px', padding: '5px 7px', ...bottomOrderStyle(1) }}>
                     {renderPanelControls('bottom')}
                 </div>
