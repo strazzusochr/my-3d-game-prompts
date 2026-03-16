@@ -111,6 +111,89 @@ function removeNpcs(npcs: NPCData[], type: NPCType, count: number): NPCData[] {
     return npcs.filter(n => !toRemoveIds.has(n.id));
 }
 
+const moodToEmotionalState = (mood: NPCMood): EmotionalState => {
+    switch (mood) {
+        case NPCMood.PEACEFUL:
+            return EmotionalState.PEACEFUL;
+        case NPCMood.ANGRY:
+        case NPCMood.RIOTING:
+            return EmotionalState.ANGRY;
+        case NPCMood.PANICKED:
+            return EmotionalState.SCARED;
+        case NPCMood.ENTHUSIASTIC:
+            return EmotionalState.HAPPY;
+        case NPCMood.TENSE:
+        default:
+            return EmotionalState.NEUTRAL;
+    }
+};
+
+const applyMissionNpcEffects = (npcs: NPCData[], zoneId: InteractionZoneId): NPCData[] => {
+    const updateNpc = (npc: NPCData, behavior: NPCBehavior, mood: NPCMood): NPCData => ({
+        ...npc,
+        behavior,
+        mood,
+        emotionalState: moodToEmotionalState(mood),
+    });
+
+    const isResponder = (npc: NPCData) =>
+        npc.type === NPCType.MEDIC || npc.type === NPCType.FIREFIGHTER;
+
+    const isSecurity = (npc: NPCData) =>
+        npc.type === NPCType.POLICE || npc.type === NPCType.RIOT_POLICE || npc.type === NPCType.SEK;
+
+    const isPopulation = (npc: NPCData) =>
+        npc.type === NPCType.CIVILIAN || npc.type === NPCType.TOURIST || npc.type === NPCType.JOURNALIST;
+
+    if (zoneId === 'epoch-terminal') {
+        return npcs.map((npc) => {
+            if (npc.type === NPCType.JOURNALIST || npc.type === NPCType.ORGANIZER) {
+                return updateNpc(npc, NPCBehavior.GATHER, NPCMood.TENSE);
+            }
+            if (npc.type === NPCType.DEMONSTRATOR && npc.behavior === NPCBehavior.IDLE) {
+                return updateNpc(npc, NPCBehavior.GATHER, NPCMood.TENSE);
+            }
+            return npc;
+        });
+    }
+
+    if (zoneId === 'hazard-console') {
+        return npcs.map((npc) => {
+            if (isResponder(npc)) {
+                return updateNpc(npc, NPCBehavior.CLEANUP, NPCMood.TENSE);
+            }
+            if (isSecurity(npc) && npc.behavior === NPCBehavior.PATROL) {
+                return updateNpc(npc, NPCBehavior.SHIELD_WALL, NPCMood.TENSE);
+            }
+            return npc;
+        });
+    }
+
+    const zoneFilter = (npc: NPCData) => {
+        const x = npc.position[0];
+        const z = npc.position[2];
+        if (zoneId === 'evacuation-board-north') return z >= 0;
+        if (zoneId === 'evacuation-board-west') return x < 0 && z < 0;
+        return x >= 0 && z < 0;
+    };
+
+    return npcs.map((npc) => {
+        if (!zoneFilter(npc)) {
+            return npc;
+        }
+
+        if (isPopulation(npc)) {
+            return updateNpc(npc, NPCBehavior.FLEE, NPCMood.PANICKED);
+        }
+
+        if (isResponder(npc)) {
+            return updateNpc(npc, NPCBehavior.CLEANUP, NPCMood.TENSE);
+        }
+
+        return npc;
+    });
+};
+
 export const useGameStore = create<GameStore>((set, get) => ({
     npcs: [],
     firedEventKeys: [],
@@ -442,8 +525,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const nextReputation = Math.max(-100, Math.min(100, state.gameState.playerReputation + outcome.reputationDelta));
         const nextMoral = Math.max(0, Math.min(100, state.gameState.moralScore + outcome.moralDelta));
         const nextTension = Math.max(0, Math.min(100, state.gameState.tensionLevel + outcome.tensionDelta));
+        const nextNpcs = outcome.wasApplied ? applyMissionNpcEffects(state.npcs, zoneId) : state.npcs;
+
+        if (outcome.wasApplied && nextNpcs !== state.npcs) {
+            workerManager.syncNpcs(nextNpcs);
+        }
 
         return {
+            npcs: nextNpcs,
             interactionState: {
                 ...state.interactionState,
                 lastMessage: outcome.message,
