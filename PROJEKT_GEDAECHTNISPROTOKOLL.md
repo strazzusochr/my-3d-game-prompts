@@ -99,7 +99,12 @@
 - Runtime-Schwellen differenziert: Synchronisierungs- und Fracture-Trigger nutzen nun fensterspezifische Schwellen plus fensterabhaengige Skalierungsfaktoren.
 - Skalierung je Tagesphase aktiv: positive und fallback-Zweige werden je nach `phaseBand` unterschiedlich verstaerkt oder gedrosselt.
 - Vollverifikation nach Fenstergewichtung erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 238/238.
+- Mehrpunkt-Momentum am 16.03.2026 integriert: `operationsInsights` berechnet Momentum jetzt ueber alle Verlaufsschritte statt nur First/Last-Deltas.
+- Turbulenzsignal ergaenzt: nicht-kompensierende Absolut-Summen der Schrittgewichte verhindern, dass oszillierende Verlaeufe faelschlich als `flat` erkannt werden.
+- Volatilitaetsklassifikation nachgeschaerft: `trendSignal=volatile` wird bei hoher Turbulenz und gleichzeitig niedrigem Netto-Momentum gesetzt.
+- Testabgleich umgesetzt: Volatilitaets-Testfall wurde auf das neue Verhalten (volatile trotz niedrigem Netto-Momentum) umgestellt.
+- Vollverifikation nach Momentum/Turbulenz erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 239/239.
 
 ## Naechster logischer Schritt
-- Trend-Historie in Trigger einbinden: Mehrpunkt-Deltas (nicht nur First/Last) fuer robustere Branch-Entscheidungen nutzen.
-- Pfadgewicht mit Rollenverhaeltnis koppeln: dynamische Sicherheits-/Aggressor-Quoten als eigenstaendigen Triggerfaktor ausbauen.
+- Trend-/Missionsentscheidungen um Persistenzfenster erweitern: mehrere aufeinanderfolgende volatile Checkpoints als Haltedauer-Bedingung statt Einzelimpuls.
+- Pfadgewicht mit Rollenverhaeltnis koppeln: dynamische Sicherheits-/Aggressor-Quoten als eigenstaendigen Triggerfaktor weiter ausbauen.

@@ -25,6 +25,7 @@ export interface OperationsInsight {
     missionPathWeightPercent: number;
     phaseBand: 'NIGHT' | 'MORNING' | 'MIDDAY' | 'EVENING' | 'LATE';
     trendSignal: 'stabilizing' | 'deteriorating' | 'volatile' | 'flat';
+    trendMomentumScore: number;
 }
 
 const trendWord = (delta: number) => {
@@ -42,6 +43,23 @@ export const getOperationsInsight = (input: OperationsInsightInput): OperationsI
     const deltaSecurity = first && last ? last.security - first.security : 0;
     const deltaSupport = first && last ? last.support - first.support : 0;
     const deltaPanic = first && last ? last.panicRatioPercent - first.panicRatioPercent : 0;
+        let momentumRaw = 0;
+        let turbulenceRaw = 0;
+        for (let i = 1; i < view.length; i += 1) {
+            const prev = view[i - 1];
+            const next = view[i];
+            const stepAgg = next.aggressors - prev.aggressors;
+            const stepPanic = next.panicRatioPercent - prev.panicRatioPercent;
+            const stepSec = next.security - prev.security;
+            const stepSup = next.support - prev.support;
+            const weightedStep = stepAgg * 1.5 + stepPanic * 1.2 - stepSec * 0.8 - stepSup * 0.6;
+            // Positive momentum means worsening trajectory; negative means stabilizing trajectory.
+            momentumRaw += weightedStep;
+            turbulenceRaw += Math.abs(weightedStep);
+        }
+        const trendMomentumScore = Math.max(-100, Math.min(100, Math.round(momentumRaw)));
+        const trendTurbulenceScore = Math.max(0, Math.min(100, Math.round(turbulenceRaw)));
+
     const latestAggressors = last?.aggressors ?? 0;
     const latestSecurity = last?.security ?? 0;
 
@@ -74,17 +92,18 @@ export const getOperationsInsight = (input: OperationsInsightInput): OperationsI
         Math.round((hookUtilization - 50) * 0.2) +
         Math.round((input.activeDynamicResponses - 2) * 4) -
         Math.round((input.panicRatioPercent - 30) * 0.3) -
-        Math.max(0, (latestAggressors - latestSecurity) * 3) +
+        Math.max(0, (latestAggressors - latestSecurity) * 3) -
+        Math.round(trendMomentumScore * 0.25) +
         phaseWeightAdjust;
 
     const missionPathWeightPercent = Math.max(60, Math.min(140, missionPathWeightRaw));
 
     let trendSignal: OperationsInsight['trendSignal'] = 'flat';
-    if (deltaAggressors <= -2 && deltaPanic <= -3 && deltaSupport >= 0) {
+    if (deltaAggressors <= -2 && deltaPanic <= -3 && deltaSupport >= 0 && trendMomentumScore <= -4) {
         trendSignal = 'stabilizing';
-    } else if (deltaAggressors >= 2 || deltaPanic >= 4 || deltaSecurity <= -2) {
+    } else if (deltaAggressors >= 2 || deltaPanic >= 4 || deltaSecurity <= -2 || trendMomentumScore >= 6) {
         trendSignal = 'deteriorating';
-    } else if (Math.abs(deltaAggressors) + Math.abs(deltaPanic) + Math.abs(deltaSupport) >= 8) {
+    } else if (trendTurbulenceScore >= 25 && Math.abs(trendMomentumScore) <= 8) {
         trendSignal = 'volatile';
     }
 
@@ -95,6 +114,7 @@ export const getOperationsInsight = (input: OperationsInsightInput): OperationsI
         `Fenster ${phaseBand}, ` +
         `Hook-Auslastung ${hookUtilization}%, ` +
         `Pfadgewicht ${missionPathWeightPercent}%, ` +
+        `Momentum ${trendMomentumScore}, ` +
         `Trend ${trendSignal}.`;
 
     let priority: OperationsInsight['priority'] = 'low';
@@ -129,5 +149,6 @@ export const getOperationsInsight = (input: OperationsInsightInput): OperationsI
         missionPathWeightPercent,
         phaseBand,
         trendSignal,
+        trendMomentumScore,
     };
 };

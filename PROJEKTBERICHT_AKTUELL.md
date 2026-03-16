@@ -142,6 +142,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Damit sind Triggerstaerke und Trigger-Schwelle jetzt gleichzeitig trend-, missions- und fenstergekoppelt.
 - Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 238 von 238 bestanden, Lint und Build gruen.
 
+### 2.0.19 Mehrpunkt-Momentum und Turbulenzklassifikation vom 16.03.2026
+- Die Trendauswertung nutzt nun ein echtes Mehrpunkt-Momentum ueber alle aufeinanderfolgenden Trendschritte statt eines reinen First/Last-Vergleichs.
+- Zusaetzlich wurde eine Turbulenzmetrik eingefuehrt (Absolut-Summen der gewichteten Schrittbewegungen), damit gegensaetzliche Bewegungen sich nicht gegenseitig zu `flat` wegheben.
+- Die Klassifikation `trendSignal=volatile` basiert damit auf hoher Turbulenz bei gleichzeitig niedrigem Netto-Momentum und erkennt oszillierende Lagen robuster.
+- Der zugehoerige Testfall wurde auf das neue Zielbild angepasst: volatile Lage trotz kleinem Netto-Momentum.
+- Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 239 von 239 bestanden, Lint und Build gruen.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.

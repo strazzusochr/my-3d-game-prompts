@@ -33,6 +33,7 @@ describe('operations insights', () => {
     expect(insight.missionPathWeightPercent).toBeLessThan(100);
     expect(insight.trendSignal).toBe('deteriorating');
     expect(insight.phaseBand).toBe('MORNING');
+    expect(insight.trendMomentumScore).toBeGreaterThan(0);
   });
 
   it('returns medium priority when mission progress and support are weak', () => {
@@ -54,6 +55,7 @@ describe('operations insights', () => {
     expect(insight.correlationLine).toContain('Hook-Auslastung');
     expect(insight.correlationLine).toContain('Pfadgewicht');
     expect(insight.correlationLine).toContain('Fenster');
+    expect(insight.correlationLine).toContain('Momentum');
     expect(insight.missionPathWeightPercent).toBeLessThanOrEqual(100);
     expect(insight.trendSignal).not.toBe('stabilizing');
   });
@@ -77,6 +79,7 @@ describe('operations insights', () => {
     expect(insight.missionPathWeightPercent).toBeGreaterThanOrEqual(95);
     expect(insight.trendSignal).toBe('flat');
     expect(insight.phaseBand).toBe('MORNING');
+    expect(Math.abs(insight.trendMomentumScore)).toBeLessThanOrEqual(2);
   });
 
   it('raises mission path weight for high completion and hook utilization', () => {
@@ -97,6 +100,7 @@ describe('operations insights', () => {
     expect(insight.missionPathWeightPercent).toBeGreaterThan(110);
     expect(insight.correlationLine).toContain('Trend');
     expect(insight.phaseBand).toBe('MORNING');
+    expect(insight.trendMomentumScore).toBeLessThan(0);
   });
 
   it('reports stabilizing trend when aggressors and panic drop', () => {
@@ -146,5 +150,26 @@ describe('operations insights', () => {
     expect(midday.phaseBand).toBe('MIDDAY');
     expect(late.phaseBand).toBe('LATE');
     expect(late.missionPathWeightPercent).toBeLessThan(midday.missionPathWeightPercent);
+  });
+
+  it('detects volatility from multi-point oscillation even when first/last are similar', () => {
+    const insight = getOperationsInsight({
+      trendHistory: baseTrend([
+        { time: '18:00', security: 10, aggressors: 10, support: 4, panicRatioPercent: 20 },
+        { time: '18:05', security: 8, aggressors: 14, support: 3, panicRatioPercent: 29 },
+        { time: '18:10', security: 11, aggressors: 9, support: 5, panicRatioPercent: 19 },
+        { time: '18:15', security: 9, aggressors: 13, support: 3, panicRatioPercent: 28 },
+        { time: '18:20', security: 10, aggressors: 10, support: 4, panicRatioPercent: 20 },
+      ]),
+      dayStats: { killed: 0, arrested: 1, injured: 5, damage: 8200 },
+      missionCompletionPercent: 66,
+      panicRatioPercent: 20,
+      activeHooks: 2,
+      maxHooks: 4,
+      activeDynamicResponses: 2,
+    });
+
+    expect(insight.trendSignal).toBe('volatile');
+    expect(Math.abs(insight.trendMomentumScore)).toBeLessThanOrEqual(8);
   });
 });
