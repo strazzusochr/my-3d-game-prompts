@@ -5,7 +5,7 @@ import { getInteractionAvailability, getInteractionZoneById, getMissionChecklist
 import { getHudTelemetry } from '../../systems/hudTelemetry';
 import { getOperationsInsight } from '../../systems/operationsInsights';
 import { canStartHudDrag, computeHudDragOffset } from './hudDrag';
-import { HUD_PANEL_LAYOUT_STORAGE_KEY, clearPersistedHudLayout, loadPersistedPanelUi, serializePanelUi } from './hudLayoutPersistence';
+import { HUD_PANEL_LAYOUT_STORAGE_KEY, loadPersistedPanelUi, serializePanelUi } from './hudLayoutPersistence';
 
 const StatusBar = ({ label, value, color }: { label: string, value: number, color: string }) => (
     <div style={{ marginBottom: '12px' }}>
@@ -221,14 +221,6 @@ export const HUD = () => {
     const decreaseHudScale = () => setHudScale((value) => Math.max(0.5, Number((value - 0.05).toFixed(2))));
     const increaseHudScale = () => setHudScale((value) => Math.min(1.2, Number((value + 0.05).toFixed(2))));
     const resetHudScale = () => setHudScale(0.68);
-    const resetHudLayout = () => {
-        setPanelUi(makeDefaultPanelState());
-        setHudScale(0.68);
-        setLayoutEditMode(false);
-        if (typeof window !== 'undefined') {
-            clearPersistedHudLayout(window.localStorage);
-        }
-    };
 
     const togglePanelMinimize = (panel: HudPanelKey) => {
         setPanelUi((prev) => ({
@@ -343,19 +335,7 @@ export const HUD = () => {
                     transformOrigin: 'top left'
                 }}
             >
-            <div style={{ position: 'absolute', top: '16px', right: '16px', pointerEvents: 'auto', zIndex: 50, display: 'flex', gap: '8px' }}>
-                <button
-                    onClick={resetHudLayout}
-                    style={{
-                        ...squareControlStyle(),
-                        minWidth: '62px',
-                        minHeight: '36px',
-                        fontSize: '12px',
-                    }}
-                    title="HUD-Layout komplett zuruecksetzen"
-                >
-                    Reset
-                </button>
+            <div style={{ position: 'absolute', top: '16px', right: '16px', pointerEvents: 'auto', zIndex: 50 }}>
                 <button
                     onClick={() => setLayoutEditMode((prev) => !prev)}
                     style={{
