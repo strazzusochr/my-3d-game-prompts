@@ -231,6 +231,12 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Zielbild erreicht: Quadrat-Controls sind auch bei dunkler Umgebungswelt sofort auffindbar.
 - Validierung: `npm run autonomy:full` erneut erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; alle Gates gruen.
 
+### 2.0.32 Einzel-Drag-Fix fuer alle gezeigten HUD-Panels vom 16.03.2026
+- Die Unterpaneele im rechten HUD-Bereich (NASA, Phase-Telemetrie, Missionslage, Einsatz-Timeline) wurden mit eigenem `onMouseDown`-Drag-Handling versehen.
+- Das Drag-System stoppt nun Event-Bubbling beim Start eines Unterpanel-Drags, damit nicht der Parent-Container stattdessen bewegt wird.
+- Ergebnis: jedes gezeigte HUD aus den Screens kann im Edit-Modus einzeln verschoben, minimiert und ueber `-3` bis `+3` skaliert werden.
+- Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Tests weiterhin 243/243 gruen.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
