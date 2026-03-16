@@ -61,6 +61,8 @@ const baseSnapshot: RuntimeSnapshot = {
             riskHint: 'Rewind-Takt reduzieren und grobere Spruenge nutzen.',
             riskLastHighAnchorTime: '18:20',
             riskRecoveryMinutes: 10,
+            recoveryBand: 'hot',
+            recoveryHint: 'Sofort entlasten: unter 30 Minuten seit HIGH.',
         },
     },
 };
@@ -90,6 +92,8 @@ describe('runtimePersistence', () => {
         expect(loaded?.replayState.quality.riskHint).toBe('Rewind-Takt reduzieren und grobere Spruenge nutzen.');
         expect(loaded?.replayState.quality.riskLastHighAnchorTime).toBe('18:20');
         expect(loaded?.replayState.quality.riskRecoveryMinutes).toBe(10);
+        expect(loaded?.replayState.quality.recoveryBand).toBe('hot');
+        expect(loaded?.replayState.quality.recoveryHint).toBe('Sofort entlasten: unter 30 Minuten seit HIGH.');
     });
 
     it('liefert null bei ungueltigem JSON', () => {
@@ -132,6 +136,8 @@ describe('runtimePersistence', () => {
                         riskHint: 'unknown',
                         riskLastHighAnchorTime: '99:99',
                         riskRecoveryMinutes: -7,
+                        recoveryBand: 'invalid',
+                        recoveryHint: 'invalid',
                     },
                 },
             }),
@@ -164,6 +170,8 @@ describe('runtimePersistence', () => {
         expect(loaded?.replayState.quality.riskHint).toBe('Stabiler Replay-Betrieb.');
         expect(loaded?.replayState.quality.riskLastHighAnchorTime).toBe('06:00');
         expect(loaded?.replayState.quality.riskRecoveryMinutes).toBe(0);
+        expect(loaded?.replayState.quality.recoveryBand).toBe('hot');
+        expect(loaded?.replayState.quality.recoveryHint).toBe('Sofort entlasten: unter 30 Minuten seit HIGH.');
     });
 
     it('entfernt Snapshot mit clearRuntimeSnapshot', () => {

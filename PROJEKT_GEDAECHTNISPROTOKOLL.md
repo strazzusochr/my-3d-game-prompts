@@ -181,6 +181,11 @@
 - HUD-Operationsansicht erweitert: neue Live-Kennzahlen `Recovery seit HIGH` und `Letzter HIGH-Anker` direkt im operativen Replay-Block sichtbar.
 - Testabdeckung erweitert: `runtimePersistence.test.ts` und `gameStore.test.ts` pruefen Recovery-Felder in Store und Snapshot inklusive Verlauf ueber Zeit.
 - Vollverifikation nach Replay-Recovery-Indikator erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 252/252.
+- Replay-Cooldown-Schwellenampel am 16.03.2026 umgesetzt: Store fuehrt jetzt `replayRecoveryBand` (`hot`/`cooling`/`recovered`/`unknown`) und `replayRecoveryHint` als direkte Operator-Semantik.
+- Snapshot erweitert: `runtimePersistence` persistiert und sanitisiert Recovery-Band/Hinweis robust und leitet bei fehlenden Werten aus `riskRecoveryMinutes` konsistent ab.
+- HUD-Operationsansicht erweitert: zusaetzlicher Badge `Recovery-Band` plus eigener `Recovery-Hinweis` direkt neben Risiko-/Recovery-Kennzahlen.
+- Testabdeckung erweitert: `runtimePersistence.test.ts` und `gameStore.test.ts` pruefen Band/Hinweis im Snapshot und im zeitlichen Store-Verlauf (inkl. `recovered` >90m).
+- Vollverifikation nach Replay-Cooldown-Schwellenampel erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 253/253.
 
 ## Naechster logischer Schritt
-- Replay-Recovery ist geschlossen; naechster Ausbaupunkt ist ein Replay-Cooldown-Hinweis mit Schwellwertampel (z. B. <30m, 30-90m, >90m) im Operations-Panel inkl. Snapshot-Nachweis.
+- Replay-Cooldown ist geschlossen; naechster Ausbaupunkt ist ein Replay-Qualitaets-Deltaindikator (Aenderung zum letzten Checkpoint) mit Persistenz und HUD-Trendpfeil.

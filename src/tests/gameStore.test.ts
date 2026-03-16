@@ -71,6 +71,8 @@ const resetStore = () => {
       replayRiskHint: 'Stabiler Replay-Betrieb.',
       replayRiskLastHighAnchorTime: null,
       replayRiskRecoveryMinutes: null,
+      replayRecoveryBand: 'unknown',
+      replayRecoveryHint: 'Noch kein HIGH-Risiko erfasst.',
       playerReputation: 0,
       moralScore: 50,
       showStatistics: false,
@@ -632,6 +634,8 @@ describe('gameStore core flow', () => {
           riskHint: string;
           riskLastHighAnchorTime: string | null;
           riskRecoveryMinutes: number | null;
+          recoveryBand: 'hot' | 'cooling' | 'recovered' | 'unknown';
+          recoveryHint: string;
         };
       };
     };
@@ -649,6 +653,8 @@ describe('gameStore core flow', () => {
     expect(['low', 'medium', 'high']).toContain(snapshot.replayState.quality.riskLevel);
     expect(snapshot.replayState.quality.riskHint.length).toBeGreaterThan(0);
     expect(snapshot.replayState.quality.riskRecoveryMinutes === null || snapshot.replayState.quality.riskRecoveryMinutes >= 0).toBe(true);
+    expect(['hot', 'cooling', 'recovered', 'unknown']).toContain(snapshot.replayState.quality.recoveryBand);
+    expect(snapshot.replayState.quality.recoveryHint.length).toBeGreaterThan(0);
   });
 
   it('tracks replay recovery minutes since last high risk anchor', () => {
@@ -662,6 +668,8 @@ describe('gameStore core flow', () => {
         replayRiskHint: 'Stabiler Replay-Betrieb.',
         replayRiskLastHighAnchorTime: '20:00',
         replayRiskRecoveryMinutes: 0,
+        replayRecoveryBand: 'hot',
+        replayRecoveryHint: 'Sofort entlasten: unter 30 Minuten seit HIGH.',
       },
     }));
 
@@ -671,6 +679,32 @@ describe('gameStore core flow', () => {
     expect(state.gameState.replayRiskLevel).toBe('low');
     expect(state.gameState.replayRiskLastHighAnchorTime).toBe('20:00');
     expect(state.gameState.replayRiskRecoveryMinutes).toBe(90);
+    expect(state.gameState.replayRecoveryBand).toBe('cooling');
+    expect(state.gameState.replayRecoveryHint).toBe('Stabilisierung laeuft: 30 bis 90 Minuten seit HIGH.');
+  });
+
+  it('maps replay recovery band to recovered above 90 minutes', () => {
+    useGameStore.setState((state) => ({
+      ...state,
+      gameState: {
+        ...state.gameState,
+        inGameTime: '21:00',
+        replayRebuildHistory: [],
+        replayRiskLevel: 'low',
+        replayRiskHint: 'Stabiler Replay-Betrieb.',
+        replayRiskLastHighAnchorTime: '19:00',
+        replayRiskRecoveryMinutes: 0,
+        replayRecoveryBand: 'hot',
+        replayRecoveryHint: 'Sofort entlasten: unter 30 Minuten seit HIGH.',
+      },
+    }));
+
+    useGameStore.getState().evaluateEvents('21:00');
+    const state = useGameStore.getState();
+
+    expect(state.gameState.replayRiskRecoveryMinutes).toBe(120);
+    expect(state.gameState.replayRecoveryBand).toBe('recovered');
+    expect(state.gameState.replayRecoveryHint).toBe('Erholt: mehr als 90 Minuten seit letztem HIGH.');
   });
 
   it('records role trend snapshots while time progresses', () => {

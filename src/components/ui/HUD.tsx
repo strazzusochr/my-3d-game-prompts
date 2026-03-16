@@ -75,6 +75,8 @@ export const HUD = () => {
     const replayRiskHint = useGameStore(state => state.gameState.replayRiskHint);
     const replayRiskLastHighAnchorTime = useGameStore(state => state.gameState.replayRiskLastHighAnchorTime);
     const replayRiskRecoveryMinutes = useGameStore(state => state.gameState.replayRiskRecoveryMinutes);
+    const replayRecoveryBand = useGameStore(state => state.gameState.replayRecoveryBand);
+    const replayRecoveryHint = useGameStore(state => state.gameState.replayRecoveryHint);
     const playerReputation = useGameStore(state => state.gameState.playerReputation);
     const moralScore = useGameStore(state => state.gameState.moralScore);
     const npcCount = useGameStore(state => state.npcs.length);
@@ -1017,6 +1019,9 @@ export const HUD = () => {
                                         <span style={{ padding: '3px 8px', borderRadius: '999px', fontSize: '10px', fontWeight: 700, letterSpacing: '0.5px', color: replayRiskLevel === 'high' ? '#ff6666' : replayRiskLevel === 'medium' ? '#ffcc66' : '#99ffcc', border: `1px solid ${replayRiskLevel === 'high' ? '#ff666666' : replayRiskLevel === 'medium' ? '#ffcc6666' : '#99ffcc55'}`, background: 'rgba(0,0,0,0.24)' }}>
                                             Replay-Risiko: {replayRiskLevel.toUpperCase()}
                                         </span>
+                                        <span style={{ padding: '3px 8px', borderRadius: '999px', fontSize: '10px', fontWeight: 700, letterSpacing: '0.5px', color: replayRecoveryBand === 'hot' ? '#ff7777' : replayRecoveryBand === 'cooling' ? '#ffcc66' : replayRecoveryBand === 'recovered' ? '#99ffcc' : '#9bb0bf', border: `1px solid ${replayRecoveryBand === 'hot' ? '#ff777766' : replayRecoveryBand === 'cooling' ? '#ffcc6666' : replayRecoveryBand === 'recovered' ? '#99ffcc55' : '#9bb0bf55'}`, background: 'rgba(0,0,0,0.24)' }}>
+                                            Recovery-Band: {replayRecoveryBand.toUpperCase()}
+                                        </span>
                                     </div>
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '8px', fontSize: '13px' }}>
                                         <span style={{ color: '#9edfff' }}>Eskalationsstufe</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{Math.floor(tensionLevel / 5)} / 20</span>
@@ -1032,6 +1037,7 @@ export const HUD = () => {
                                         <span style={{ color: '#9edfff' }}>Risiko-Hinweis</span><span style={{ color: replayRiskLevel === 'high' ? '#ff7777' : replayRiskLevel === 'medium' ? '#ffcc66' : '#99ffcc', fontWeight: 700 }}>{replayRiskHint}</span>
                                         <span style={{ color: '#9edfff' }}>Recovery seit HIGH</span><span style={{ color: replayRiskRecoveryMinutes === null ? '#67808d' : '#99ffcc', fontWeight: 700 }}>{replayRiskRecoveryMinutes === null ? 'n/a' : `${replayRiskRecoveryMinutes}m`}</span>
                                         <span style={{ color: '#9edfff' }}>Letzter HIGH-Anker</span><span style={{ color: replayRiskLastHighAnchorTime ? '#c6d9ff' : '#67808d', fontWeight: 700 }}>{replayRiskLastHighAnchorTime ?? 'n/a'}</span>
+                                        <span style={{ color: '#9edfff' }}>Recovery-Hinweis</span><span style={{ color: replayRecoveryBand === 'hot' ? '#ff7777' : replayRecoveryBand === 'cooling' ? '#ffcc66' : replayRecoveryBand === 'recovered' ? '#99ffcc' : '#9bb0bf', fontWeight: 700 }}>{replayRecoveryHint}</span>
                                     </div>
                                     <div style={{ marginTop: '10px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '8px' }}>
                                         <div style={{ color: '#9edfff', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: '6px' }}>

@@ -56,6 +56,12 @@ type ReplayRiskHint =
     | 'Stabiler Replay-Betrieb.'
     | 'Rewind-Takt reduzieren und grobere Spruenge nutzen.'
     | 'Replay-Risiko hoch: Rewind-Frequenz sofort senken.';
+type ReplayRecoveryBand = 'hot' | 'cooling' | 'recovered' | 'unknown';
+type ReplayRecoveryHint =
+    | 'Sofort entlasten: unter 30 Minuten seit HIGH.'
+    | 'Stabilisierung laeuft: 30 bis 90 Minuten seit HIGH.'
+    | 'Erholt: mehr als 90 Minuten seit letztem HIGH.'
+    | 'Noch kein HIGH-Risiko erfasst.';
 
 interface ReplayQualityState {
     windowMinutes: number;
@@ -67,6 +73,8 @@ interface ReplayQualityState {
     riskHint: ReplayRiskHint;
     riskLastHighAnchorTime: string | null;
     riskRecoveryMinutes: number | null;
+    recoveryBand: ReplayRecoveryBand;
+    recoveryHint: ReplayRecoveryHint;
 }
 
 interface GameStore {
@@ -99,6 +107,8 @@ interface GameStore {
         replayRiskHint: ReplayRiskHint;
         replayRiskLastHighAnchorTime: string | null;
         replayRiskRecoveryMinutes: number | null;
+        replayRecoveryBand: ReplayRecoveryBand;
+        replayRecoveryHint: ReplayRecoveryHint;
         // === CHUNK 11: Dynamisches System ===
         playerReputation: number;  // -100 (brutal) bis +100 (fair)
         moralScore: number;        // 0 (böse) bis 100 (gut)
@@ -180,6 +190,8 @@ const persistedReplayState = persistedRuntimeSnapshot?.replayState ?? {
         riskHint: 'Stabiler Replay-Betrieb.' as ReplayRiskHint,
         riskLastHighAnchorTime: null as string | null,
         riskRecoveryMinutes: null as number | null,
+        recoveryBand: 'unknown' as ReplayRecoveryBand,
+        recoveryHint: 'Noch kein HIGH-Risiko erfasst.' as ReplayRecoveryHint,
     },
 };
 
@@ -261,6 +273,20 @@ const getReplayQualityState = (
         : riskLastHighAnchorTime
             ? getMinutesSinceAnchor(referenceClock, riskLastHighAnchorTime)
             : null;
+    const recoveryBand: ReplayRecoveryBand = riskRecoveryMinutes === null
+        ? 'unknown'
+        : riskRecoveryMinutes < 30
+            ? 'hot'
+            : riskRecoveryMinutes <= 90
+                ? 'cooling'
+                : 'recovered';
+    const recoveryHint: ReplayRecoveryHint = recoveryBand === 'hot'
+        ? 'Sofort entlasten: unter 30 Minuten seit HIGH.'
+        : recoveryBand === 'cooling'
+            ? 'Stabilisierung laeuft: 30 bis 90 Minuten seit HIGH.'
+            : recoveryBand === 'recovered'
+                ? 'Erholt: mehr als 90 Minuten seit letztem HIGH.'
+                : 'Noch kein HIGH-Risiko erfasst.';
 
     return {
         windowMinutes: REPLAY_QUALITY_WINDOW_MINUTES,
@@ -272,6 +298,8 @@ const getReplayQualityState = (
         riskHint,
         riskLastHighAnchorTime,
         riskRecoveryMinutes,
+        recoveryBand,
+        recoveryHint,
     };
 };
 
@@ -303,6 +331,8 @@ const buildRuntimeSnapshot = (state: GameStore): RuntimeSnapshot => ({
             riskHint: state.gameState.replayRiskHint,
             riskLastHighAnchorTime: state.gameState.replayRiskLastHighAnchorTime,
             riskRecoveryMinutes: state.gameState.replayRiskRecoveryMinutes,
+            recoveryBand: state.gameState.replayRecoveryBand,
+            recoveryHint: state.gameState.replayRecoveryHint,
         },
     },
 });
@@ -1147,6 +1177,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         replayRiskHint: persistedReplayState.quality.riskHint,
         replayRiskLastHighAnchorTime: persistedReplayState.quality.riskLastHighAnchorTime,
         replayRiskRecoveryMinutes: persistedReplayState.quality.riskRecoveryMinutes,
+        replayRecoveryBand: persistedReplayState.quality.recoveryBand,
+        replayRecoveryHint: persistedReplayState.quality.recoveryHint,
         playerReputation: persistedRuntimeSnapshot?.playerReputation ?? RUNTIME_DEFAULTS.playerReputation,
         moralScore: persistedRuntimeSnapshot?.moralScore ?? RUNTIME_DEFAULTS.moralScore,
         showStatistics: false,
@@ -1195,6 +1227,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayRiskHint: 'Stabiler Replay-Betrieb.',
                 replayRiskLastHighAnchorTime: null,
                 replayRiskRecoveryMinutes: null,
+                replayRecoveryBand: 'unknown',
+                replayRecoveryHint: 'Noch kein HIGH-Risiko erfasst.',
                 playerReputation: 0, moralScore: 50, showStatistics: false,
                 masterVolume: 0.5, muted: false
             }
@@ -1318,6 +1352,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     replayRiskHint: replayQuality.riskHint,
                     replayRiskLastHighAnchorTime: replayQuality.riskLastHighAnchorTime,
                     replayRiskRecoveryMinutes: replayQuality.riskRecoveryMinutes,
+                    replayRecoveryBand: replayQuality.recoveryBand,
+                    replayRecoveryHint: replayQuality.recoveryHint,
                     showStatistics: crossedMidnight ? true : state.gameState.showStatistics,
                 }
             };
@@ -1395,6 +1431,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayRiskHint: replayQuality.riskHint,
                 replayRiskLastHighAnchorTime: replayQuality.riskLastHighAnchorTime,
                 replayRiskRecoveryMinutes: replayQuality.riskRecoveryMinutes,
+                replayRecoveryBand: replayQuality.recoveryBand,
+                replayRecoveryHint: replayQuality.recoveryHint,
             }
         });
         persistCurrentRuntimeSnapshot(get());
@@ -1474,6 +1512,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayRiskHint: replayQuality.riskHint,
                 replayRiskLastHighAnchorTime: replayQuality.riskLastHighAnchorTime,
                 replayRiskRecoveryMinutes: replayQuality.riskRecoveryMinutes,
+                replayRecoveryBand: replayQuality.recoveryBand,
+                replayRecoveryHint: replayQuality.recoveryHint,
             }
         });
         persistCurrentRuntimeSnapshot(get());
@@ -1518,6 +1558,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayRiskHint: 'Stabiler Replay-Betrieb.',
                 replayRiskLastHighAnchorTime: null,
                 replayRiskRecoveryMinutes: null,
+                replayRecoveryBand: 'unknown',
+                replayRecoveryHint: 'Noch kein HIGH-Risiko erfasst.',
                 playerReputation: get().gameState.playerReputation,
                 moralScore: get().gameState.moralScore,
                 showStatistics: false,

@@ -52,6 +52,12 @@ interface RuntimeReplayQuality {
     riskHint: 'Stabiler Replay-Betrieb.' | 'Rewind-Takt reduzieren und grobere Spruenge nutzen.' | 'Replay-Risiko hoch: Rewind-Frequenz sofort senken.';
     riskLastHighAnchorTime: string | null;
     riskRecoveryMinutes: number | null;
+    recoveryBand: 'hot' | 'cooling' | 'recovered' | 'unknown';
+    recoveryHint:
+        | 'Sofort entlasten: unter 30 Minuten seit HIGH.'
+        | 'Stabilisierung laeuft: 30 bis 90 Minuten seit HIGH.'
+        | 'Erholt: mehr als 90 Minuten seit letztem HIGH.'
+        | 'Noch kein HIGH-Risiko erfasst.';
 }
 
 export interface RuntimeSnapshot {
@@ -232,6 +238,29 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
     } else if (qualityRiskLastHighAnchorTime && qualityRiskRecoveryMinutes === null) {
         qualityRiskRecoveryMinutes = getMinutesSinceAnchor(anchorTime, qualityRiskLastHighAnchorTime);
     }
+    const derivedRecoveryBand: 'hot' | 'cooling' | 'recovered' | 'unknown' = qualityRiskRecoveryMinutes === null
+        ? 'unknown'
+        : qualityRiskRecoveryMinutes < 30
+            ? 'hot'
+            : qualityRiskRecoveryMinutes <= 90
+                ? 'cooling'
+                : 'recovered';
+    const qualityRecoveryBand =
+        qualityObj.recoveryBand === 'hot' || qualityObj.recoveryBand === 'cooling' || qualityObj.recoveryBand === 'recovered'
+            ? qualityObj.recoveryBand
+            : derivedRecoveryBand;
+    const qualityRecoveryHint =
+        qualityObj.recoveryHint === 'Sofort entlasten: unter 30 Minuten seit HIGH.' ||
+        qualityObj.recoveryHint === 'Stabilisierung laeuft: 30 bis 90 Minuten seit HIGH.' ||
+        qualityObj.recoveryHint === 'Erholt: mehr als 90 Minuten seit letztem HIGH.'
+            ? qualityObj.recoveryHint
+            : qualityRecoveryBand === 'hot'
+                ? 'Sofort entlasten: unter 30 Minuten seit HIGH.'
+                : qualityRecoveryBand === 'cooling'
+                    ? 'Stabilisierung laeuft: 30 bis 90 Minuten seit HIGH.'
+                    : qualityRecoveryBand === 'recovered'
+                        ? 'Erholt: mehr als 90 Minuten seit letztem HIGH.'
+                        : 'Noch kein HIGH-Risiko erfasst.';
 
     const qualityTrend = Array.isArray(qualityObj.recentStabilityTrend)
         ? qualityObj.recentStabilityTrend
@@ -258,6 +287,8 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
             riskHint: qualityRiskHint,
             riskLastHighAnchorTime: qualityRiskLastHighAnchorTime,
             riskRecoveryMinutes: qualityRiskRecoveryMinutes,
+            recoveryBand: qualityRecoveryBand,
+            recoveryHint: qualityRecoveryHint,
         },
     };
 };

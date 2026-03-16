@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 16:33:00 +01:00
-- Repo-Head: lokal (nach Replay-Recovery-Indikator, vor neuem Commit)
-- Nachweislauf: npm run autonomy:full PASS nach Replay-Recovery-Indikator (inkl. lint PASS + tests 252/252 PASS + build PASS + live proof PASS)
-- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_252_252 + BUILD_PASS + REPLAY_RECOVERY_PASS + MASTER_80000_PASS
-- Gates: Lint PASS, Tests 252/252 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, Replay-Recovery-Indikator inkl. Snapshot-Sanitisierung verifiziert, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: Replay-Recovery-Indikator (Zeit seit letztem HIGH) in Store/HUD/Persistence/Test erweitert und per Vollproof verifiziert
+- Zeitstempel: 2026-03-16 16:39:00 +01:00
+- Repo-Head: lokal (nach Replay-Cooldown-Schwellenampel, vor neuem Commit)
+- Nachweislauf: npm run autonomy:full PASS nach Replay-Cooldown-Schwellenampel (inkl. lint PASS + tests 253/253 PASS + build PASS + live proof PASS)
+- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_253_253 + BUILD_PASS + REPLAY_COOLDOWN_BAND_PASS + MASTER_80000_PASS
+- Gates: Lint PASS, Tests 253/253 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, Replay-Cooldown-Schwellenampel inkl. Snapshot-Sanitisierung verifiziert, Masterquelle 80.000/80.000 PASS
+- Arbeitsbaum: Replay-Cooldown-Schwellenampel (<30m, 30-90m, >90m) in Store/HUD/Persistence/Test erweitert und per Vollproof verifiziert
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -46,7 +46,7 @@ Bewertungsstufen:
 | S-001 | Browser-Erreichbarkeit Stream | 100 | 100 | 100 | PASS | URL erreichbar + manueller Browseraufruf 127.0.0.1:3001 bestaetigt |
 | S-002 | Workspace-Fehlercheck | 100 | 100 | 100 | PASS | No errors found |
 | S-003 | Lint-Gate | 100 | 100 | 100 | PASS | eslint ohne Fehler |
-| S-004 | Test-Gate | 100 | 100 | 100 | PASS | 252/252 Tests bestanden (12 Dateien, Replay-Recovery-Test erweitert) |
+| S-004 | Test-Gate | 100 | 100 | 100 | PASS | 253/253 Tests bestanden (12 Dateien, Replay-Cooldown-Band-Tests erweitert) |
 | S-005 | Build-Gate | 100 | 100 | 100 | PASS | vite build erfolgreich |
 | S-006 | Live-Proof Profilfolge | 100 | 100 | 100 | PASS | low->medium->high->aaa->low |
 | S-007 | Health-/Transport-Nachweis | 100 | 100 | 100 | PASS | canvas-webrtc aktiv |
@@ -95,6 +95,7 @@ Bewertungsstufen:
 | P-035 | Replay-Stabilitaetstrend (letzte 3 Quality-Zustaende) umgesetzt | Vertikal | 100 | PASS | replayQualityRecentTrend im Store + recentStabilityTrend im Snapshot + HUD-Trendbadges + Sanitisierungs-/Storetests; Full-Proof gruen |
 | P-036 | Replay-Risikoampel mit Handlungshinweis umgesetzt | Vertikal | 100 | PASS | riskLevel/riskHint im Store + Snapshot-Sanitisierung + HUD-Risikobadge/Hinweis + Tests; Full-Proof gruen |
 | P-037 | Replay-Recovery-Indikator (seit letztem HIGH) umgesetzt | Vertikal | 100 | PASS | riskLastHighAnchorTime/riskRecoveryMinutes im Store + Snapshot-Sanitisierung + HUD-Anzeige + Tests; Full-Proof gruen |
+| P-038 | Replay-Cooldown-Schwellenampel umgesetzt | Vertikal | 100 | PASS | recoveryBand/recoveryHint im Store + Snapshot-Sanitisierung + HUD-Badge/Hinweis + Tests; Full-Proof gruen |
 
 ---
 

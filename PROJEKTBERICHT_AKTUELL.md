@@ -59,6 +59,14 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Testnachweis erweitert: Persistenz-/Sanitisierungsnachweise in `runtimePersistence.test.ts` sowie Store-/Snapshot-Verlaufstest in `gameStore.test.ts`.
 - Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 252 von 252 gruen, Build gruen.
 
+### 2.0.38 Replay-Cooldown-Schwellenampel vom 16.03.2026
+- Die Recovery-Metrik wurde um eine operative Schwellenampel erweitert: `replayRecoveryBand` mit den Stufen `hot` (<30m), `cooling` (30-90m), `recovered` (>90m) sowie `unknown` ohne HIGH-Historie.
+- Zusaetzlich liefert der Store `replayRecoveryHint` als sofort nutzbare Handlungsaussage je Band, damit die Zeitwerte nicht manuell interpretiert werden muessen.
+- `runtimePersistence` speichert `recoveryBand` und `recoveryHint` unter `replayState.quality` und sanitisiert/rekonstruiert die Felder konsistent aus den vorhandenen Recovery-Minuten.
+- Das Operations-Panel zeigt jetzt einen eigenen `Recovery-Band`-Badge sowie den separaten `Recovery-Hinweis` im Replay-Kennzahlenblock.
+- Testnachweis erweitert: Band-/Hinweis-Sanitisierung in `runtimePersistence.test.ts` und zeitbasierte Band-Umschaltung (`cooling`, `recovered`) in `gameStore.test.ts`.
+- Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 253 von 253 gruen, Build gruen.
+
 ### 2.0.1 Viewer- und Lastnachweis vom 16.03.2026
 - Zwei weitere Viewer-Seiten wurden geoeffnet und der Health-Endpunkt achtmal im Abstand von rund 1,5 Sekunden abgefragt.
 - Der Stream benoetigte eine kurze Aufwaermphase: zuerst `viewerFps=0`, danach stabile Werte zwischen 22 und 24 FPS.
