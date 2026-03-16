@@ -247,5 +247,10 @@
 - Testabdeckung erweitert: `runtimePersistence.test.ts` verifiziert Anomalie-Roundtrip und Sanitisierung, `gameStore.test.ts` prueft Anomalie-Felder in Store und Snapshot.
 - Vollverifikation nach Replay-Delta-Anomalieindikator erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 253/253.
 
+- Workflow-Parser-Hotfix am 16.03.2026 final stabilisiert: Header in `.github/workflows/security-ci.yml` auf kompatibles YAML-Format mit Dokumentstart und quoted Trigger-Key normalisiert.
+- Favicon-404-Hotfix am 16.03.2026 abgeschlossen: [index.html](index.html#L5) verweist jetzt auf `/favicon.ico`, und [public/favicon.ico](public/favicon.ico) wurde als statisches Asset angelegt.
+- Vollverifikation nach beiden Hotfixes erfolgreich: `npm run lint` gruen, `npm exec vitest run` 256/256 gruen, `npm run build` gruen.
+- Remote-Sync verifiziert: `github/main` und `origin/main` zeigen auf denselben Commit `0c2727a957d28728922c2c3fa32458b7020b9d2e`.
+
 ## Naechster logischer Schritt
 - Nach dem integrierten Reset ist der naechste sinnvolle HUD-Ausbau eine feinere Drag-/Persistenzebene fuer Teilsektionen (z. B. NASA/Telemetrie/Mission/Timeline) innerhalb des rechten Hauptpanels.
