@@ -56,6 +56,9 @@
 - HUD-Telemetrie-/Statistik-Block am 16.03.2026 ausgebaut: phasenbasierte Live-Metriken (Fenster, Hook-Readiness, Panikquote, Behavior-Counter) direkt im HUD integriert; zusaetzlich Statistik-Overlay mit Store-Tageswerten und Verhaltensbalken angebunden.
 - Store-Erweiterung umgesetzt: explizite Aktion zum Oeffnen der Statistikansicht sowie automatische Einblendung bei Tageswechsel ueber Mitternacht.
 - HUD-Telemetrie-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 207/207 gruen (neuer Testblock `hudTelemetry.test.ts` + Store-Tests erweitert), `npm run build` gruen.
+- DayStats-Runtime-Block am 16.03.2026 ausgebaut: Tagesstatistik wird nun aus Timeline-Events und Missionsinteraktionen fortlaufend gefuellt (Verletzte, Festnahmen, Sachschaden) statt statisch zu bleiben.
+- Statistik-Overlay um Menue-Drilldowns erweitert (`Overview`, `Operations`, `Mission`) mit operativen Kennzahlen und missionsbezogenen Handlungsempfehlungen.
+- DayStats-/Drilldown-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 209/209 gruen, `npm run build` gruen, Browser-/Socket-Livecheck bestaetigt.
 
 ## Naechster logischer Schritt
-- DayStats in Runtime fachlich fuellen (Ereigniszaehler pro Missions-/KI-Outcome) und das Statistik-Overlay um menuebasierte Drilldowns erweitern.
+- Rollenbasierte Langzeittrends und feinere Korrelation zwischen KI-Eskalationsgruppen und DayStats-Verlauf in das Statistiksystem integrieren.
