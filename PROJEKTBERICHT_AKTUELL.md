@@ -90,6 +90,15 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Testnachweis erweitert: `runtimePersistence.test.ts` verifiziert Roundtrip plus Sanitisierung der Historie, `gameStore.test.ts` verifiziert Delta-Historie in Store und Snapshot.
 - Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 253 von 253 gruen, Build gruen.
 
+### 2.0.42 Replay-Delta-Momentumindikator vom 16.03.2026
+- Die Replay-Auswertung wurde um einen Momentumindikator erweitert: `deltaMomentumScore`, `deltaMomentumDirection`, `deltaMomentumBand` und `deltaMomentumHint` bilden die Trendbeschleunigung zwischen Kurz- und Mittelfenster ab.
+- Berechnung basiert auf der Delta-Historie: Kurzfenster (letzte 3 Werte) gegen Mittelfenster (Werte 4-6, mit Fallback auf Gesamtdurchschnitt), Differenz als Score auf `-999..999` begrenzt.
+- Die Ampelsemantik nutzt `easing`/`steady`/`accelerating`; Richtung wird als `up`/`down`/`flat` aus dem Score abgeleitet.
+- `runtimePersistence` persistiert Momentum-Felder unter `replayState.quality` und sanitisiert robust (Score Clamp, Richtungs-/Band-/Hinweisableitung bei ungueltigen Inputs).
+- Das HUD-Operations-Panel zeigt neue Zeilen `Delta-Momentum`, `Momentum-Band` und `Momentum-Hinweis` fuer direkte Operator-Transparenz.
+- Testnachweis erweitert: `runtimePersistence.test.ts` und `gameStore.test.ts` validieren Momentum-Felder in Store und Snapshot inklusive Sanitisierung.
+- Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 253 von 253 gruen, Build gruen.
+
 ### 2.0.1 Viewer- und Lastnachweis vom 16.03.2026
 - Zwei weitere Viewer-Seiten wurden geoeffnet und der Health-Endpunkt achtmal im Abstand von rund 1,5 Sekunden abgefragt.
 - Der Stream benoetigte eine kurze Aufwaermphase: zuerst `viewerFps=0`, danach stabile Werte zwischen 22 und 24 FPS.

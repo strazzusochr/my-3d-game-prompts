@@ -61,6 +61,10 @@ const baseSnapshot: RuntimeSnapshot = {
             deltaVolatilityBand: 'calm',
             deltaVolatilityHint: 'Delta-Verlauf stabil.',
             deltaHistory: [3, 1, 0],
+            deltaMomentumScore: 4,
+            deltaMomentumDirection: 'up',
+            deltaMomentumBand: 'steady',
+            deltaMomentumHint: 'Trendbeschleunigung moderat.',
             stability: 'watch',
             recentStabilityTrend: ['watch', 'stable'],
             riskLevel: 'medium',
@@ -98,6 +102,10 @@ describe('runtimePersistence', () => {
         expect(loaded?.replayState.quality.deltaVolatilityBand).toBe('calm');
         expect(loaded?.replayState.quality.deltaVolatilityHint).toBe('Delta-Verlauf stabil.');
         expect(loaded?.replayState.quality.deltaHistory).toEqual([3, 1, 0]);
+        expect(loaded?.replayState.quality.deltaMomentumScore).toBe(4);
+        expect(loaded?.replayState.quality.deltaMomentumDirection).toBe('up');
+        expect(loaded?.replayState.quality.deltaMomentumBand).toBe('steady');
+        expect(loaded?.replayState.quality.deltaMomentumHint).toBe('Trendbeschleunigung moderat.');
         expect(loaded?.replayState.quality.stability).toBe('watch');
         expect(loaded?.replayState.quality.recentStabilityTrend).toEqual(['watch', 'stable']);
         expect(loaded?.replayState.quality.riskLevel).toBe('medium');
@@ -148,6 +156,10 @@ describe('runtimePersistence', () => {
                         deltaVolatilityBand: 'invalid',
                         deltaVolatilityHint: 'invalid',
                         deltaHistory: [1200, 'invalid', -500],
+                        deltaMomentumScore: 1200,
+                        deltaMomentumDirection: 'invalid',
+                        deltaMomentumBand: 'invalid',
+                        deltaMomentumHint: 'invalid',
                         stability: 'broken',
                         recentStabilityTrend: ['critical', 'unknown', 'watch', 'stable'],
                         riskLevel: 'broken',
@@ -188,6 +200,10 @@ describe('runtimePersistence', () => {
         expect(loaded?.replayState.quality.deltaVolatilityBand).toBe('calm');
         expect(loaded?.replayState.quality.deltaVolatilityHint).toBe('Delta-Verlauf stabil.');
         expect(loaded?.replayState.quality.deltaHistory).toEqual([999, -500]);
+        expect(loaded?.replayState.quality.deltaMomentumScore).toBe(999);
+        expect(loaded?.replayState.quality.deltaMomentumDirection).toBe('up');
+        expect(loaded?.replayState.quality.deltaMomentumBand).toBe('accelerating');
+        expect(loaded?.replayState.quality.deltaMomentumHint).toBe('Trendbeschleunigung hoch.');
         expect(loaded?.replayState.quality.stability).toBe('stable');
         expect(loaded?.replayState.quality.recentStabilityTrend).toEqual(['critical', 'watch', 'stable']);
         expect(loaded?.replayState.quality.riskLevel).toBe('low');

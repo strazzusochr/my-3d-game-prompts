@@ -55,6 +55,8 @@ type ReplayQualityDeltaDirection = 'up' | 'down' | 'flat';
 type ReplayQualityDeltaHint = 'Replay-Eventlast steigt.' | 'Replay-Eventlast sinkt.' | 'Replay-Eventlast stabil.';
 type ReplayQualityDeltaVolatilityBand = 'calm' | 'mixed' | 'volatile';
 type ReplayQualityDeltaVolatilityHint = 'Delta-Verlauf stabil.' | 'Delta-Verlauf leicht wechselhaft.' | 'Delta-Verlauf oszilliert stark.';
+type ReplayQualityDeltaMomentumBand = 'easing' | 'steady' | 'accelerating';
+type ReplayQualityDeltaMomentumHint = 'Trendbeschleunigung gering.' | 'Trendbeschleunigung moderat.' | 'Trendbeschleunigung hoch.';
 const MAX_DELTA_HISTORY_POINTS = 6;
 type ReplayRiskLevel = 'low' | 'medium' | 'high';
 type ReplayRiskHint =
@@ -78,6 +80,10 @@ interface ReplayQualityState {
     deltaVolatilityBand: ReplayQualityDeltaVolatilityBand;
     deltaVolatilityHint: ReplayQualityDeltaVolatilityHint;
     deltaHistory: number[];
+    deltaMomentumScore: number;
+    deltaMomentumDirection: ReplayQualityDeltaDirection;
+    deltaMomentumBand: ReplayQualityDeltaMomentumBand;
+    deltaMomentumHint: ReplayQualityDeltaMomentumHint;
     stability: ReplayQualityStability;
     recentStabilityTrend: ReplayQualityStability[];
     riskLevel: ReplayRiskLevel;
@@ -118,6 +124,10 @@ interface GameStore {
         replayQualityDeltaVolatilityBand: ReplayQualityDeltaVolatilityBand;
         replayQualityDeltaVolatilityHint: ReplayQualityDeltaVolatilityHint;
         replayQualityDeltaHistory: number[];
+        replayQualityDeltaMomentumScore: number;
+        replayQualityDeltaMomentumDirection: ReplayQualityDeltaDirection;
+        replayQualityDeltaMomentumBand: ReplayQualityDeltaMomentumBand;
+        replayQualityDeltaMomentumHint: ReplayQualityDeltaMomentumHint;
         replayQualityStability: ReplayQualityStability;
         replayQualityRecentTrend: ReplayQualityStability[];
         replayRiskLevel: ReplayRiskLevel;
@@ -207,6 +217,10 @@ const persistedReplayState = persistedRuntimeSnapshot?.replayState ?? {
         deltaVolatilityBand: 'calm' as ReplayQualityDeltaVolatilityBand,
         deltaVolatilityHint: 'Delta-Verlauf stabil.' as ReplayQualityDeltaVolatilityHint,
         deltaHistory: [] as number[],
+        deltaMomentumScore: 0,
+        deltaMomentumDirection: 'flat' as ReplayQualityDeltaDirection,
+        deltaMomentumBand: 'easing' as ReplayQualityDeltaMomentumBand,
+        deltaMomentumHint: 'Trendbeschleunigung gering.' as ReplayQualityDeltaMomentumHint,
         stability: 'stable' as ReplayQualityStability,
         recentStabilityTrend: [] as ReplayQualityStability[],
         riskLevel: 'low' as ReplayRiskLevel,
@@ -227,6 +241,8 @@ const getMinutesSinceAnchor = (referenceClock: string, anchorClock: string) => {
     }
     return delta;
 };
+
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 
 const pushReplayHistory = (
     history: ReplayRebuildHistoryEntry[],
@@ -308,6 +324,31 @@ const getReplayQualityState = (
         : deltaVolatilityBand === 'mixed'
             ? 'Delta-Verlauf leicht wechselhaft.'
             : 'Delta-Verlauf stabil.';
+    const deltaHistory = pushReplayQualityDeltaHistory(previousDeltaHistory, deltaEventsPerCheckpoint);
+    const shortMomentumWindow = deltaHistory.slice(0, 3);
+    const mediumMomentumWindow = deltaHistory.slice(3, 6);
+    const shortMomentumAvg = shortMomentumWindow.length > 0
+        ? Math.round(shortMomentumWindow.reduce((sum, value) => sum + value, 0) / shortMomentumWindow.length)
+        : 0;
+    const mediumMomentumAvg = mediumMomentumWindow.length > 0
+        ? Math.round(mediumMomentumWindow.reduce((sum, value) => sum + value, 0) / mediumMomentumWindow.length)
+        : deltaHistory.length > 0
+            ? Math.round(deltaHistory.reduce((sum, value) => sum + value, 0) / deltaHistory.length)
+            : 0;
+    const deltaMomentumScore = clamp(shortMomentumAvg - mediumMomentumAvg, -999, 999);
+    const deltaMomentumDirection: ReplayQualityDeltaDirection =
+        deltaMomentumScore > 0 ? 'up' : deltaMomentumScore < 0 ? 'down' : 'flat';
+    const deltaMomentumAbs = Math.abs(deltaMomentumScore);
+    const deltaMomentumBand: ReplayQualityDeltaMomentumBand = deltaMomentumAbs >= 6
+        ? 'accelerating'
+        : deltaMomentumAbs >= 3
+            ? 'steady'
+            : 'easing';
+    const deltaMomentumHint: ReplayQualityDeltaMomentumHint = deltaMomentumBand === 'accelerating'
+        ? 'Trendbeschleunigung hoch.'
+        : deltaMomentumBand === 'steady'
+            ? 'Trendbeschleunigung moderat.'
+            : 'Trendbeschleunigung gering.';
     const stability: ReplayQualityStability =
         rebuildCount >= 4 || avgRebuildEvents >= 20
             ? 'critical'
@@ -356,7 +397,11 @@ const getReplayQualityState = (
         deltaHint,
         deltaVolatilityBand,
         deltaVolatilityHint,
-        deltaHistory: pushReplayQualityDeltaHistory(previousDeltaHistory, deltaEventsPerCheckpoint),
+        deltaHistory,
+        deltaMomentumScore,
+        deltaMomentumDirection,
+        deltaMomentumBand,
+        deltaMomentumHint,
         stability,
         recentStabilityTrend: pushReplayQualityTrend(previousTrend, stability),
         riskLevel,
@@ -396,6 +441,10 @@ const buildRuntimeSnapshot = (state: GameStore): RuntimeSnapshot => ({
             deltaVolatilityBand: state.gameState.replayQualityDeltaVolatilityBand,
             deltaVolatilityHint: state.gameState.replayQualityDeltaVolatilityHint,
             deltaHistory: state.gameState.replayQualityDeltaHistory,
+            deltaMomentumScore: state.gameState.replayQualityDeltaMomentumScore,
+            deltaMomentumDirection: state.gameState.replayQualityDeltaMomentumDirection,
+            deltaMomentumBand: state.gameState.replayQualityDeltaMomentumBand,
+            deltaMomentumHint: state.gameState.replayQualityDeltaMomentumHint,
             stability: state.gameState.replayQualityStability,
             recentStabilityTrend: state.gameState.replayQualityRecentTrend,
             riskLevel: state.gameState.replayRiskLevel,
@@ -1249,6 +1298,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         replayQualityDeltaVolatilityBand: persistedReplayState.quality.deltaVolatilityBand,
         replayQualityDeltaVolatilityHint: persistedReplayState.quality.deltaVolatilityHint,
         replayQualityDeltaHistory: persistedReplayState.quality.deltaHistory,
+        replayQualityDeltaMomentumScore: persistedReplayState.quality.deltaMomentumScore,
+        replayQualityDeltaMomentumDirection: persistedReplayState.quality.deltaMomentumDirection,
+        replayQualityDeltaMomentumBand: persistedReplayState.quality.deltaMomentumBand,
+        replayQualityDeltaMomentumHint: persistedReplayState.quality.deltaMomentumHint,
         replayQualityStability: persistedReplayState.quality.stability,
         replayQualityRecentTrend: persistedReplayState.quality.recentStabilityTrend,
         replayRiskLevel: persistedReplayState.quality.riskLevel,
@@ -1305,6 +1358,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityDeltaVolatilityBand: 'calm' as ReplayQualityDeltaVolatilityBand,
                 replayQualityDeltaVolatilityHint: 'Delta-Verlauf stabil.' as ReplayQualityDeltaVolatilityHint,
                 replayQualityDeltaHistory: [],
+                replayQualityDeltaMomentumScore: 0,
+                replayQualityDeltaMomentumDirection: 'flat',
+                replayQualityDeltaMomentumBand: 'easing',
+                replayQualityDeltaMomentumHint: 'Trendbeschleunigung gering.',
                 replayQualityStability: 'stable',
                 replayQualityRecentTrend: [],
                 replayRiskLevel: 'low',
@@ -1438,6 +1495,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     replayQualityDeltaVolatilityBand: replayQuality.deltaVolatilityBand,
                     replayQualityDeltaVolatilityHint: replayQuality.deltaVolatilityHint,
                     replayQualityDeltaHistory: replayQuality.deltaHistory,
+                    replayQualityDeltaMomentumScore: replayQuality.deltaMomentumScore,
+                    replayQualityDeltaMomentumDirection: replayQuality.deltaMomentumDirection,
+                    replayQualityDeltaMomentumBand: replayQuality.deltaMomentumBand,
+                    replayQualityDeltaMomentumHint: replayQuality.deltaMomentumHint,
                     replayQualityStability: replayQuality.stability,
                     replayQualityRecentTrend: replayQuality.recentStabilityTrend,
                     replayRiskLevel: replayQuality.riskLevel,
@@ -1525,6 +1586,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityDeltaVolatilityBand: replayQuality.deltaVolatilityBand,
                 replayQualityDeltaVolatilityHint: replayQuality.deltaVolatilityHint,
                 replayQualityDeltaHistory: replayQuality.deltaHistory,
+                replayQualityDeltaMomentumScore: replayQuality.deltaMomentumScore,
+                replayQualityDeltaMomentumDirection: replayQuality.deltaMomentumDirection,
+                replayQualityDeltaMomentumBand: replayQuality.deltaMomentumBand,
+                replayQualityDeltaMomentumHint: replayQuality.deltaMomentumHint,
                 replayQualityStability: replayQuality.stability,
                 replayQualityRecentTrend: replayQuality.recentStabilityTrend,
                 replayRiskLevel: replayQuality.riskLevel,
@@ -1614,6 +1679,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityDeltaVolatilityBand: replayQuality.deltaVolatilityBand,
                 replayQualityDeltaVolatilityHint: replayQuality.deltaVolatilityHint,
                 replayQualityDeltaHistory: replayQuality.deltaHistory,
+                replayQualityDeltaMomentumScore: replayQuality.deltaMomentumScore,
+                replayQualityDeltaMomentumDirection: replayQuality.deltaMomentumDirection,
+                replayQualityDeltaMomentumBand: replayQuality.deltaMomentumBand,
+                replayQualityDeltaMomentumHint: replayQuality.deltaMomentumHint,
                 replayQualityStability: replayQuality.stability,
                 replayQualityRecentTrend: replayQuality.recentStabilityTrend,
                 replayRiskLevel: replayQuality.riskLevel,
@@ -1666,6 +1735,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityDeltaVolatilityBand: 'calm' as ReplayQualityDeltaVolatilityBand,
                 replayQualityDeltaVolatilityHint: 'Delta-Verlauf stabil.' as ReplayQualityDeltaVolatilityHint,
                 replayQualityDeltaHistory: [],
+                replayQualityDeltaMomentumScore: 0,
+                replayQualityDeltaMomentumDirection: 'flat',
+                replayQualityDeltaMomentumBand: 'easing',
+                replayQualityDeltaMomentumHint: 'Trendbeschleunigung gering.',
                 replayQualityStability: 'stable',
                 replayQualityRecentTrend: [],
                 replayRiskLevel: 'low',

@@ -75,6 +75,10 @@ export const HUD = () => {
     const replayQualityDeltaVolatilityBand = useGameStore(state => state.gameState.replayQualityDeltaVolatilityBand);
     const replayQualityDeltaVolatilityHint = useGameStore(state => state.gameState.replayQualityDeltaVolatilityHint);
     const replayQualityDeltaHistory = useGameStore(state => state.gameState.replayQualityDeltaHistory);
+    const replayQualityDeltaMomentumScore = useGameStore(state => state.gameState.replayQualityDeltaMomentumScore);
+    const replayQualityDeltaMomentumDirection = useGameStore(state => state.gameState.replayQualityDeltaMomentumDirection);
+    const replayQualityDeltaMomentumBand = useGameStore(state => state.gameState.replayQualityDeltaMomentumBand);
+    const replayQualityDeltaMomentumHint = useGameStore(state => state.gameState.replayQualityDeltaMomentumHint);
     const replayQualityStability = useGameStore(state => state.gameState.replayQualityStability);
     const replayQualityRecentTrend = useGameStore(state => state.gameState.replayQualityRecentTrend);
     const replayRiskLevel = useGameStore(state => state.gameState.replayRiskLevel);
@@ -1046,6 +1050,9 @@ export const HUD = () => {
                                         <span style={{ color: '#9edfff' }}>Volatilität</span><span style={{ color: replayQualityDeltaVolatilityBand === 'volatile' ? '#ff7777' : replayQualityDeltaVolatilityBand === 'mixed' ? '#ffcc66' : '#99ffcc', fontWeight: 700 }}>{replayQualityDeltaVolatilityBand.toUpperCase()}</span>
                                         <span style={{ color: '#9edfff' }}>Volatilitäts-Hinweis</span><span style={{ color: replayQualityDeltaVolatilityBand === 'volatile' ? '#ff7777' : replayQualityDeltaVolatilityBand === 'mixed' ? '#ffcc66' : '#99ffcc', fontWeight: 700 }}>{replayQualityDeltaVolatilityHint}</span>
                                         <span style={{ color: '#9edfff' }}>Delta-Verlauf</span><span style={{ color: '#c6d9ff', fontWeight: 700 }}>{replayQualityDeltaHistory.length === 0 ? 'n/a' : replayQualityDeltaHistory.map(v => v > 0 ? `+${v}` : `${v}`).join(' › ')}</span>
+                                        <span style={{ color: '#9edfff' }}>Delta-Momentum</span><span style={{ color: replayQualityDeltaMomentumDirection === 'up' ? '#ff7777' : replayQualityDeltaMomentumDirection === 'down' ? '#99ffcc' : '#c6d9ff', fontWeight: 700 }}>{replayQualityDeltaMomentumScore > 0 ? `+${replayQualityDeltaMomentumScore}` : replayQualityDeltaMomentumScore} ({replayQualityDeltaMomentumDirection === 'up' ? 'UP ↑' : replayQualityDeltaMomentumDirection === 'down' ? 'DOWN ↓' : 'FLAT →'})</span>
+                                        <span style={{ color: '#9edfff' }}>Momentum-Band</span><span style={{ color: replayQualityDeltaMomentumBand === 'accelerating' ? '#ff7777' : replayQualityDeltaMomentumBand === 'steady' ? '#ffcc66' : '#99ffcc', fontWeight: 700 }}>{replayQualityDeltaMomentumBand.toUpperCase()}</span>
+                                        <span style={{ color: '#9edfff' }}>Momentum-Hinweis</span><span style={{ color: replayQualityDeltaMomentumBand === 'accelerating' ? '#ff7777' : replayQualityDeltaMomentumBand === 'steady' ? '#ffcc66' : '#99ffcc', fontWeight: 700 }}>{replayQualityDeltaMomentumHint}</span>
                                         <span style={{ color: '#9edfff' }}>Risiko-Hinweis</span><span style={{ color: replayRiskLevel === 'high' ? '#ff7777' : replayRiskLevel === 'medium' ? '#ffcc66' : '#99ffcc', fontWeight: 700 }}>{replayRiskHint}</span>
                                         <span style={{ color: '#9edfff' }}>Recovery seit HIGH</span><span style={{ color: replayRiskRecoveryMinutes === null ? '#67808d' : '#99ffcc', fontWeight: 700 }}>{replayRiskRecoveryMinutes === null ? 'n/a' : `${replayRiskRecoveryMinutes}m`}</span>
                                         <span style={{ color: '#9edfff' }}>Letzter HIGH-Anker</span><span style={{ color: replayRiskLastHighAnchorTime ? '#c6d9ff' : '#67808d', fontWeight: 700 }}>{replayRiskLastHighAnchorTime ?? 'n/a'}</span>

@@ -52,6 +52,10 @@ interface RuntimeReplayQuality {
     deltaVolatilityBand: 'calm' | 'mixed' | 'volatile';
     deltaVolatilityHint: 'Delta-Verlauf stabil.' | 'Delta-Verlauf leicht wechselhaft.' | 'Delta-Verlauf oszilliert stark.';
     deltaHistory: number[];
+    deltaMomentumScore: number;
+    deltaMomentumDirection: 'up' | 'down' | 'flat';
+    deltaMomentumBand: 'easing' | 'steady' | 'accelerating';
+    deltaMomentumHint: 'Trendbeschleunigung gering.' | 'Trendbeschleunigung moderat.' | 'Trendbeschleunigung hoch.';
     stability: 'stable' | 'watch' | 'critical';
     recentStabilityTrend: Array<'stable' | 'watch' | 'critical'>;
     riskLevel: 'low' | 'medium' | 'high';
@@ -318,6 +322,40 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
             .map(v => clamp(Math.round(v), -999, 999))
             .slice(0, 6)
         : [];
+    const qualityDeltaMomentumScoreRaw =
+        typeof qualityObj.deltaMomentumScore === 'number' && Number.isFinite(qualityObj.deltaMomentumScore)
+            ? qualityObj.deltaMomentumScore
+            : qualityDeltaHistory.length >= 2
+                ? qualityDeltaHistory[0] - qualityDeltaHistory[1]
+                : qualityDeltaHistory[0] ?? 0;
+    const qualityDeltaMomentumScore = clamp(Math.round(qualityDeltaMomentumScoreRaw), -999, 999);
+    const qualityDeltaMomentumDirection =
+        qualityObj.deltaMomentumDirection === 'up' || qualityObj.deltaMomentumDirection === 'down' || qualityObj.deltaMomentumDirection === 'flat'
+            ? qualityObj.deltaMomentumDirection
+            : qualityDeltaMomentumScore > 0
+                ? 'up'
+                : qualityDeltaMomentumScore < 0
+                    ? 'down'
+                    : 'flat';
+    const qualityDeltaMomentumAbs = Math.abs(qualityDeltaMomentumScore);
+    const qualityDeltaMomentumBand: 'easing' | 'steady' | 'accelerating' =
+        qualityObj.deltaMomentumBand === 'easing' || qualityObj.deltaMomentumBand === 'steady' || qualityObj.deltaMomentumBand === 'accelerating'
+            ? qualityObj.deltaMomentumBand
+            : qualityDeltaMomentumAbs >= 6
+                ? 'accelerating'
+                : qualityDeltaMomentumAbs >= 3
+                    ? 'steady'
+                    : 'easing';
+    const qualityDeltaMomentumHint: 'Trendbeschleunigung gering.' | 'Trendbeschleunigung moderat.' | 'Trendbeschleunigung hoch.' =
+        qualityObj.deltaMomentumHint === 'Trendbeschleunigung gering.' ||
+        qualityObj.deltaMomentumHint === 'Trendbeschleunigung moderat.' ||
+        qualityObj.deltaMomentumHint === 'Trendbeschleunigung hoch.'
+            ? qualityObj.deltaMomentumHint
+            : qualityDeltaMomentumBand === 'accelerating'
+                ? 'Trendbeschleunigung hoch.'
+                : qualityDeltaMomentumBand === 'steady'
+                    ? 'Trendbeschleunigung moderat.'
+                    : 'Trendbeschleunigung gering.';
 
     return {
         mode,
@@ -335,6 +373,10 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
             deltaVolatilityBand: qualityDeltaVolatilityBand,
             deltaVolatilityHint: qualityDeltaVolatilityHint,
             deltaHistory: qualityDeltaHistory,
+            deltaMomentumScore: qualityDeltaMomentumScore,
+            deltaMomentumDirection: qualityDeltaMomentumDirection,
+            deltaMomentumBand: qualityDeltaMomentumBand,
+            deltaMomentumHint: qualityDeltaMomentumHint,
             stability: qualityStability,
             recentStabilityTrend: qualityTrend,
             riskLevel: qualityRiskLevel,

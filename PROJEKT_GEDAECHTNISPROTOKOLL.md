@@ -207,5 +207,12 @@
 - Testabdeckung erweitert: `runtimePersistence.test.ts` verifiziert Roundtrip und Sanitisierung der Delta-Historie, `gameStore.test.ts` prueft Delta-Historie in Store und Snapshot.
 - Vollverifikation nach Replay-Delta-Trendhistorie erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 253/253.
 
+- Replay-Delta-Momentumindikator am 16.03.2026 umgesetzt: Store fuehrt jetzt `replayQualityDeltaMomentumScore`, `replayQualityDeltaMomentumDirection`, `replayQualityDeltaMomentumBand` und `replayQualityDeltaMomentumHint` als Kurz-/Mitteltrend-Auswertung der Delta-Historie.
+- Berechnung erweitert: Momentum wird als Differenz aus Kurzfenster- und Mittelfenster-Mittelwert (`deltaHistory`) abgeleitet, auf -999..999 begrenzt und in Richtung/Band (`easing`/`steady`/`accelerating`) uebersetzt.
+- Snapshot erweitert: `runtimePersistence` persistiert und sanitisiert Momentum-Felder robust (Score Clamp, Richtungs-/Band-/Hinweisableitung bei ungueltigen Eingaben).
+- HUD-Operationsansicht erweitert: neue Zeilen `Delta-Momentum`, `Momentum-Band` und `Momentum-Hinweis` inklusive kompakter Ampellogik fuer Trendbeschleunigung.
+- Testabdeckung erweitert: `runtimePersistence.test.ts` verifiziert Momentum-Roundtrip und Sanitisierung, `gameStore.test.ts` prueft Momentum-Felder in Store und Snapshot.
+- Vollverifikation nach Replay-Delta-Momentumindikator erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 253/253.
+
 ## Naechster logischer Schritt
-- Nach Delta-Trendhistorie folgt als naechster Ausbaupunkt ein Replay-Delta-Momentumindikator (Kurz-/Mitteltrend mit Richtungsstaerke) inklusive kompakter HUD-Ampel fuer Trendbeschleunigung.
+- Nach Delta-Momentumindikator folgt als naechster Ausbaupunkt ein Replay-Delta-Driftindikator (Baseline-Abweichung ueber laengeres Fenster) inklusive frueher Warnstufe im HUD.

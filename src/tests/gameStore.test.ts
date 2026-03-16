@@ -71,6 +71,10 @@ const resetStore = () => {
       replayQualityDeltaVolatilityBand: 'calm',
       replayQualityDeltaVolatilityHint: 'Delta-Verlauf stabil.',
       replayQualityDeltaHistory: [],
+      replayQualityDeltaMomentumScore: 0,
+      replayQualityDeltaMomentumDirection: 'flat',
+      replayQualityDeltaMomentumBand: 'easing',
+      replayQualityDeltaMomentumHint: 'Trendbeschleunigung gering.',
       replayQualityStability: 'stable',
       replayQualityRecentTrend: [],
       replayRiskLevel: 'low',
@@ -614,6 +618,10 @@ describe('gameStore core flow', () => {
     expect(['calm', 'mixed', 'volatile']).toContain(state.gameState.replayQualityDeltaVolatilityBand);
     expect(state.gameState.replayQualityDeltaVolatilityHint.length).toBeGreaterThan(0);
     expect(Array.isArray(state.gameState.replayQualityDeltaHistory)).toBe(true);
+    expect(Math.abs(state.gameState.replayQualityDeltaMomentumScore)).toBeLessThanOrEqual(999);
+    expect(['up', 'down', 'flat']).toContain(state.gameState.replayQualityDeltaMomentumDirection);
+    expect(['easing', 'steady', 'accelerating']).toContain(state.gameState.replayQualityDeltaMomentumBand);
+    expect(state.gameState.replayQualityDeltaMomentumHint.length).toBeGreaterThan(0);
     expect(['stable', 'watch', 'critical']).toContain(state.gameState.replayQualityStability);
     expect(state.gameState.replayQualityRecentTrend.length).toBeGreaterThan(0);
     expect(['stable', 'watch', 'critical']).toContain(state.gameState.replayQualityRecentTrend[0]);
@@ -646,6 +654,10 @@ describe('gameStore core flow', () => {
           deltaVolatilityBand: 'calm' | 'mixed' | 'volatile';
           deltaVolatilityHint: string;
           deltaHistory: number[];
+          deltaMomentumScore: number;
+          deltaMomentumDirection: 'up' | 'down' | 'flat';
+          deltaMomentumBand: 'easing' | 'steady' | 'accelerating';
+          deltaMomentumHint: string;
           stability: 'stable' | 'watch' | 'critical';
           recentStabilityTrend: Array<'stable' | 'watch' | 'critical'>;
           riskLevel: 'low' | 'medium' | 'high';
@@ -673,6 +685,10 @@ describe('gameStore core flow', () => {
     expect(['calm', 'mixed', 'volatile']).toContain(snapshot.replayState.quality.deltaVolatilityBand);
     expect(snapshot.replayState.quality.deltaVolatilityHint.length).toBeGreaterThan(0);
     expect(Array.isArray(snapshot.replayState.quality.deltaHistory)).toBe(true);
+    expect(Math.abs(snapshot.replayState.quality.deltaMomentumScore)).toBeLessThanOrEqual(999);
+    expect(['up', 'down', 'flat']).toContain(snapshot.replayState.quality.deltaMomentumDirection);
+    expect(['easing', 'steady', 'accelerating']).toContain(snapshot.replayState.quality.deltaMomentumBand);
+    expect(snapshot.replayState.quality.deltaMomentumHint.length).toBeGreaterThan(0);
     expect(snapshot.replayState.quality.recentStabilityTrend.length).toBeGreaterThan(0);
     expect(['low', 'medium', 'high']).toContain(snapshot.replayState.quality.riskLevel);
     expect(snapshot.replayState.quality.riskHint.length).toBeGreaterThan(0);
