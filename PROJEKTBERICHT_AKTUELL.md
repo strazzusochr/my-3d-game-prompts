@@ -258,6 +258,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Neuer Test `src/tests/hudLayoutPersistence.test.ts` prueft Storage-Key, Clamping, JSON-Fallback und deterministische Serialisierung.
 - Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Gesamtstand jetzt 249/249 Tests gruen.
 
+### 2.0.36 Sichtbarer Reset fuer HUD-Layouts vom 16.03.2026
+- Oben rechts existiert jetzt neben dem Edit-Button ein sichtbarer `Reset`-Button, damit frei verschobene HUD-Layouts nicht nur persistent bleiben, sondern auch jederzeit ohne manuellen Storage-Eingriff auf Werkzustand zurueckgesetzt werden koennen.
+- Der Reset setzt Panel-Offsets, Minimize-Zustaende, Zoomstufen und die globale HUD-Skalierung wieder auf Standardwerte und schaltet den Edit-Modus sauber aus.
+- Die Storage-Bereinigung wurde zentralisiert: `clearPersistedHudLayout` entfernt sowohl `hud-panel-layout-v1` als auch `hud-scale`, damit kein Altzustand zurueckbleibt.
+- Der Persistenztest wurde erweitert und verifiziert jetzt auch das gemeinsame Entfernen beider Storage-Keys.
+- Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Gesamtstand jetzt 250/250 Tests gruen.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.

@@ -8,6 +8,7 @@ type PanelUiEntry = {
 type PanelUiShape = Record<string, PanelUiEntry>;
 
 export const HUD_PANEL_LAYOUT_STORAGE_KEY = 'hud-panel-layout-v1';
+export const HUD_SCALE_STORAGE_KEY = 'hud-scale';
 
 const isFiniteNumber = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value);
 
@@ -41,3 +42,8 @@ export const loadPersistedPanelUi = <T extends PanelUiShape>(raw: string | null,
 };
 
 export const serializePanelUi = <T extends PanelUiShape>(state: T): string => JSON.stringify(state);
+
+export const clearPersistedHudLayout = (storage: Pick<Storage, 'removeItem'>): void => {
+  storage.removeItem(HUD_PANEL_LAYOUT_STORAGE_KEY);
+  storage.removeItem(HUD_SCALE_STORAGE_KEY);
+};

@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { HUD_PANEL_LAYOUT_STORAGE_KEY, loadPersistedPanelUi, serializePanelUi } from '../components/ui/hudLayoutPersistence';
+import { describe, expect, it, vi } from 'vitest';
+import { HUD_PANEL_LAYOUT_STORAGE_KEY, HUD_SCALE_STORAGE_KEY, clearPersistedHudLayout, loadPersistedPanelUi, serializePanelUi } from '../components/ui/hudLayoutPersistence';
 
 const fallback = {
   left: { minimized: false, zoomLevel: 0, offsetX: 0, offsetY: 0 },
@@ -33,5 +33,14 @@ describe('hud layout persistence', () => {
 
   it('serializes panel state deterministically', () => {
     expect(serializePanelUi(fallback)).toBe(JSON.stringify(fallback));
+  });
+
+  it('clears persisted layout and scale keys together', () => {
+    const storage = { removeItem: vi.fn() };
+
+    clearPersistedHudLayout(storage);
+
+    expect(storage.removeItem).toHaveBeenNthCalledWith(1, HUD_PANEL_LAYOUT_STORAGE_KEY);
+    expect(storage.removeItem).toHaveBeenNthCalledWith(2, HUD_SCALE_STORAGE_KEY);
   });
 });

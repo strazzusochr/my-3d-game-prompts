@@ -156,6 +156,10 @@
 - Persistenzhelper modularisiert: `src/components/ui/hudLayoutPersistence.ts` kapselt Laden, Sanitisierung, Clamping und Serialisierung gegen fehlerhafte Persistenzdaten.
 - Neue Testsuite `src/tests/hudLayoutPersistence.test.ts` deckt Storage-Key, Zoom-Clamping, JSON-Fallback und deterministische Serialisierung ab.
 - Vollverifikation nach HUD-Layout-Persistenz erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 249/249.
+- Sichtbarer HUD-Reset am 16.03.2026 umgesetzt: globaler `Reset`-Button oben rechts setzt frei verschobene Layouts, Minimize-Zustaende, Zoomstufen und HUD-Skalierung wieder auf den Standardzustand.
+- Persistenz-Clear zentralisiert: `clearPersistedHudLayout` entfernt sowohl `hud-panel-layout-v1` als auch `hud-scale`, damit Reset und Reload konsistent denselben Ausgangszustand verwenden.
+- Persistenz-Test erweitert: `src/tests/hudLayoutPersistence.test.ts` prueft jetzt zusaetzlich das gemeinsame Loeschen beider Storage-Keys.
+- Vollverifikation nach HUD-Layout-Reset erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 250/250.
 
 ## Naechster logischer Schritt
-- Kein offener Blocker im aktuellen HUD-/Streaming-Zyklus; naechster Ausbau kann inhaltlich auf sichtbaren HUD-Layout-Reset oder Spawn-HUD-Feinschliff gehen.
+- Kein offener Blocker im aktuellen HUD-/Streaming-Zyklus; naechster Ausbau kann inhaltlich auf Spawn-HUD-Feinschliff oder auf Import/Export fuer HUD-Layouts gehen.
