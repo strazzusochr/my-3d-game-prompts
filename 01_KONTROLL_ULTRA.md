@@ -12,6 +12,14 @@ Dieses Kontroll-Dokument definiert **700+ präzise Validierungs-Checks** für Co
 
 ## VALIDIERUNGS-PHILOSOPHIE
 
+## LIVE-PROZENT-KONTROLLPROTOKOLL
+
+Das aktive Prozentprotokoll fuer jeden Schritt und jeden Punkt (horizontal und vertikal) befindet sich in:
+
+KONTROLLPROTOKOLL_PROZENT_HORIZONTAL_VERTIKAL.md
+
+Dieses Protokoll ist verbindlich fuer laufende Fortschritts- und Nachweisbewertung.
+
 ### Zwei-Achsen-Ansatz
 
 **VERTIKAL-VALIDIERUNG:** Prüft von-Architektur-Ebene bis-Implementation-Ebene. Stellt-Sicher dass-Design-Decisions korrekt-Umgesetzt-Werden in-Code.
