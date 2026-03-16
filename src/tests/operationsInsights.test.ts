@@ -171,5 +171,6 @@ describe('operations insights', () => {
 
     expect(insight.trendSignal).toBe('volatile');
     expect(Math.abs(insight.trendMomentumScore)).toBeLessThanOrEqual(8);
+    expect(insight.trendTurbulenceScore).toBeGreaterThanOrEqual(25);
   });
 });

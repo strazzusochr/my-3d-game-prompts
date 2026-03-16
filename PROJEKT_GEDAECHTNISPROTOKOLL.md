@@ -140,6 +140,11 @@
 - Store-Integration abgeschlossen: `src/stores/gameStore.ts` hydratisiert Initialzustand aus Snapshot und schreibt nach relevanten Zustandsaenderungen aktualisierte Snapshots zurueck.
 - Persistenz-Testabdeckung erweitert: neue Testsuite `src/tests/runtimePersistence.test.ts` plus Store-Nachweis in `src/tests/gameStore.test.ts` verifizieren Speicherung, Sanitisierung und Snapshot-Update.
 - Vollverifikation nach Persistenz-Block erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 248/248.
+- Adaptive Triggerkurven fuer NPC-KI am 16.03.2026 umgesetzt: neues Systemmodul `src/systems/npcAdaptiveCurves.ts` fuehrt lageabhaengige Kurven fuer Synchronisierungs- und Fracture-Schwellen sowie Spawn-Skalierung ein.
+- Runtime-Verdrahtung abgeschlossen: `src/stores/gameStore.ts` nutzt nun adaptive Deltas aus Aggressordruck, Supportreserve, Trendmomentum und Turbulenz fuer trendgekoppelte Folgeevents.
+- Insight-Datenmodell erweitert: `src/systems/operationsInsights.ts` liefert jetzt zusaetzlich `trendTurbulenceScore` als robuste Schwingungsmetrik fuer volatile Lagen.
+- Testabdeckung erweitert: neue Suite `src/tests/npcAdaptiveCurves.test.ts` plus Turbulenz-Nachweis in `src/tests/operationsInsights.test.ts` verifizieren die Kurvenlogik regressionssicher.
+- Vollverifikation nach Adaptionsblock erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 251/251.
 
 ## Naechster logischer Schritt
-- Trend-/Missionspersistenz ist geschlossen; naechster Ausbaupunkt ist adaptive Triggerkurven fuer NPC-KI (situative Schwellwerte je Fraktionsdruck und Turbulenzklasse) mit regressionssicherer Testabdeckung.
+- Adaptive Triggerkurven sind geschlossen; naechster Ausbaupunkt ist visuelle/diagnostische Transparenz im HUD (Anzeige der aktiven Kurvenfaktoren und Trigger-Schwellen) inkl. Test- und Proof-Nachweis.

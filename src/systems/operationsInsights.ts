@@ -26,6 +26,7 @@ export interface OperationsInsight {
     phaseBand: 'NIGHT' | 'MORNING' | 'MIDDAY' | 'EVENING' | 'LATE';
     trendSignal: 'stabilizing' | 'deteriorating' | 'volatile' | 'flat';
     trendMomentumScore: number;
+    trendTurbulenceScore: number;
 }
 
 const trendWord = (delta: number) => {
@@ -115,6 +116,7 @@ export const getOperationsInsight = (input: OperationsInsightInput): OperationsI
         `Hook-Auslastung ${hookUtilization}%, ` +
         `Pfadgewicht ${missionPathWeightPercent}%, ` +
         `Momentum ${trendMomentumScore}, ` +
+        `Turbulenz ${trendTurbulenceScore}, ` +
         `Trend ${trendSignal}.`;
 
     let priority: OperationsInsight['priority'] = 'low';
@@ -150,5 +152,6 @@ export const getOperationsInsight = (input: OperationsInsightInput): OperationsI
         phaseBand,
         trendSignal,
         trendMomentumScore,
+        trendTurbulenceScore,
     };
 };

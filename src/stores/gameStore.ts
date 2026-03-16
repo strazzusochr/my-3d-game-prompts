@@ -5,6 +5,7 @@ import { EVENT_TIMELINE, TENSION_TIMELINE, PHASE_DESCRIPTIONS, NPC_COLORS, MAX_A
 import { INITIAL_MISSION_PROGRESS, type InteractionZoneId, applyInteractionOutcome } from '../systems/interactionZones';
 import { applyMissionPhaseHooks } from '../systems/missionPhaseHooks';
 import { getOperationsInsight } from '../systems/operationsInsights';
+import { getAdaptiveTriggerCurve } from '../systems/npcAdaptiveCurves';
 import { loadRuntimeSnapshot, saveRuntimeSnapshot, type RuntimeSnapshot } from './runtimePersistence';
 import { io } from 'socket.io-client';
 
@@ -458,10 +459,24 @@ const applyDynamicRoleResponses = (
     positiveWaveScale *= phaseScaleProfile.positive;
     fallbackWaveScale *= phaseScaleProfile.fallback;
 
+    const adaptiveCurve = getAdaptiveTriggerCurve({
+        aggressorPressure,
+        supportReserve,
+        trendSignal: insight.trendSignal,
+        trendMomentumScore: insight.trendMomentumScore,
+        trendTurbulenceScore: insight.trendTurbulenceScore,
+    });
+
+    const adaptiveSyncThreshold = Math.max(96, Math.min(116, phaseScaleProfile.syncThreshold + adaptiveCurve.syncThresholdDelta));
+    const adaptiveFractureThreshold = Math.max(88, Math.min(104, phaseScaleProfile.fractureThreshold + adaptiveCurve.fractureThresholdDelta));
+
+    positiveWaveScale *= adaptiveCurve.positiveScaleFactor;
+    fallbackWaveScale *= adaptiveCurve.fallbackScaleFactor;
+
     if (
         currentMinutes >= 20 * 60 + 30 &&
         getMissionCompletionPercent(missionProgress) >= 80 &&
-        insight.missionPathWeightPercent >= phaseScaleProfile.syncThreshold &&
+        insight.missionPathWeightPercent >= adaptiveSyncThreshold &&
         (insight.trendSignal === 'stabilizing' || (insight.trendSignal === 'flat' && insight.trendMomentumScore <= 2)) &&
         !firedSet.has('dyn-trend-synchronization')
     ) {
@@ -493,7 +508,7 @@ const applyDynamicRoleResponses = (
     if (
         currentMinutes >= 21 * 60 + 30 &&
         getMissionCompletionPercent(missionProgress) < 60 &&
-        insight.missionPathWeightPercent <= phaseScaleProfile.fractureThreshold &&
+        insight.missionPathWeightPercent <= adaptiveFractureThreshold &&
         insight.trendSignal !== 'stabilizing' &&
         insight.trendMomentumScore >= -1 &&
         !firedSet.has('dyn-trend-fracture-wave')

@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 15:12:00 +01:00
-- Repo-Head: f82e0d1 (vor Persistenz-Commit; Arbeitsstand mit Runtime-Persistenz lokal verifiziert)
-- Nachweislauf: npm run autonomy:full PASS nach Trend-/Missionspersistenz (inkl. lint PASS + tests 248/248 PASS + build PASS + live proof PASS)
-- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_248_248 + BUILD_PASS + RUNTIME_PERSISTENCE_PASS + MASTER_80000_PASS
-- Gates: Lint PASS, Tests 248/248 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, Runtime-Snapshot-Hydration und -Sanitisierung verifiziert, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: Runtime-Persistenz in Store/Test/Doku umgesetzt und per Vollproof verifiziert
+- Zeitstempel: 2026-03-16 15:21:00 +01:00
+- Repo-Head: 1b48e41 (vor Adaptive-Curves-Commit; Arbeitsstand lokal voll verifiziert)
+- Nachweislauf: npm run autonomy:full PASS nach adaptiven NPC-Triggerkurven (inkl. lint PASS + tests 251/251 PASS + build PASS + live proof PASS)
+- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_251_251 + BUILD_PASS + ADAPTIVE_NPC_CURVES_PASS + MASTER_80000_PASS
+- Gates: Lint PASS, Tests 251/251 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, adaptive Schwellwertkurven fuer Trend-Branches verifiziert, Masterquelle 80.000/80.000 PASS
+- Arbeitsbaum: Adaptive Curves in System/Store/Test/Doku umgesetzt und per Vollproof verifiziert
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -46,7 +46,7 @@ Bewertungsstufen:
 | S-001 | Browser-Erreichbarkeit Stream | 100 | 100 | 100 | PASS | URL erreichbar + manueller Browseraufruf 127.0.0.1:3001 bestaetigt |
 | S-002 | Workspace-Fehlercheck | 100 | 100 | 100 | PASS | No errors found |
 | S-003 | Lint-Gate | 100 | 100 | 100 | PASS | eslint ohne Fehler |
-| S-004 | Test-Gate | 100 | 100 | 100 | PASS | 248/248 Tests bestanden (11 Dateien, runtimePersistence.test.ts neu) |
+| S-004 | Test-Gate | 100 | 100 | 100 | PASS | 251/251 Tests bestanden (12 Dateien, npcAdaptiveCurves.test.ts neu) |
 | S-005 | Build-Gate | 100 | 100 | 100 | PASS | vite build erfolgreich |
 | S-006 | Live-Proof Profilfolge | 100 | 100 | 100 | PASS | low->medium->high->aaa->low |
 | S-007 | Health-/Transport-Nachweis | 100 | 100 | 100 | PASS | canvas-webrtc aktiv |
@@ -86,6 +86,7 @@ Bewertungsstufen:
 | P-026 | HUD-World-Fit zur Spielwelt kalibriert | Vertikal | 100 | PASS | Adaptive Viewport-Skalierung, schlankere Hauptpanels, responsive Bottom-Leiste und verdichtete Timeline-Cards mit Full-Proof bestaetigt |
 | P-027 | HUD-Micro-Pass fuer Priorisierung und Feindichte umgesetzt | Vertikal | 100 | PASS | Rechter Header/FPS-Cluster komprimiert, Timeline-Scrollbar subtilisiert und Bottom-Bar-Order bei geringer Hoehe priorisiert, erneut Full-Proof gruen |
 | P-028 | Trend-/Missionspersistenz fuer Runtimezustand umgesetzt | Vertikal | 100 | PASS | Snapshot-Modul mit Sanitisierung, Store-Hydration und Persistenztests; Full-Proof mit 248/248 Tests gruen |
+| P-029 | Adaptive Triggerkurven fuer NPC-KI umgesetzt | Vertikal | 100 | PASS | Kurvenmodul fuer Schwellwert-/Spawnfaktoren, Turbulenzwert im Insight, Store-Verdrahtung und neue Tests; Full-Proof mit 251/251 Tests gruen |
 
 ---
 

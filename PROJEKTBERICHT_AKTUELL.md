@@ -232,6 +232,31 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 	- `npm run build`: gruen,
 	- `npm run autonomy:full`: `AUTONOMY_PROOF_OK` + `AUTONOMY_FULL_OK`.
 
+### 2.0.31 Adaptive Triggerkurven fuer NPC-KI vom 16.03.2026
+- Die trendgekoppelten Runtime-Trigger wurden um adaptive Kurven erweitert, damit Schwellwerte und Spawn-Skalierung nicht nur phasenstatisch, sondern lageabhaengig reagieren.
+- Neues Systemmodul: `src/systems/npcAdaptiveCurves.ts`.
+- Eingangsparameter der Kurve:
+	- Aggressordruck (`aggressorPressure`),
+	- Supportreserve (`supportReserve`),
+	- Trendlage (`trendSignal`),
+	- Trendmomentum (`trendMomentumScore`),
+	- Turbulenz (`trendTurbulenceScore`).
+- Ergebnisparameter der Kurve:
+	- Delta fuer Synchronisierungs-Schwelle,
+	- Delta fuer Fracture-Schwelle,
+	- Faktor fuer positive Wellen,
+	- Faktor fuer Fallback-Wellen.
+- `operationsInsights` wurde um `trendTurbulenceScore` erweitert und liefert damit eine explizite Schwingungsmetrik fuer volatile Lagen.
+- `gameStore` nutzt diese Kurvenwerte direkt fuer `dyn-trend-synchronization` und `dyn-trend-fracture-wave`.
+- Testausbau:
+	- neue Suite `src/tests/npcAdaptiveCurves.test.ts`,
+	- erweiterter Turbulenz-Nachweis in `src/tests/operationsInsights.test.ts`.
+- Validierung nach Umsetzung:
+	- `npm run lint`: gruen,
+	- `vitest`: 251/251 gruen,
+	- `npm run build`: gruen,
+	- `npm run autonomy:full`: `AUTONOMY_PROOF_OK` + `AUTONOMY_FULL_OK`.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
