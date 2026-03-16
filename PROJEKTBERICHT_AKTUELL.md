@@ -238,3 +238,16 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - `npm run lint`: erfolgreich.
 - `npm run build`: erfolgreich.
 - Livecheck: `npm run dev:all` gestartet, Browserseite geoeffnet, Socket-Server meldete reale Client-Verbindungen; der Hintergrundprozess wurde anschliessend wieder beendet.
+
+### 8.10 NPC-KI/Behavior-Erweiterung vom 16.03.2026
+- Fuer die KI wurde ein eigenes Eskalationsmodul eingefuehrt, das lokale Lageparameter auswertet: Hostile-Nachbarn, Polizei-/Agitator-Dichte, Panik-Cluster und Spannungsniveau.
+- Dieses Modul steuert adaptive Zustandswechsel im Worker (unter anderem `FLEE`, `RETREAT`, `COMBAT`, `ATTACK`, `SHIELD_WALL`) und fuehrt bei Entspannung auf Rollen-Baselines zurueck.
+- Nicht-interruptible Rollen wie `GUARD`, `CLEANUP` und `SURROUND` bleiben stabil und werden nicht durch spontane Eskalation ueberschrieben.
+- Die bisherigen fest verdrahteten Einzelbewegungen bleiben erhalten, werden aber durch die adaptive Lageentscheidung um eine echte Reaktionsschicht erweitert.
+
+### 8.11 NPC-KI-Nachweis
+- Neuer Testblock `src/tests/behaviorEscalation.test.ts` validiert Non-Interrupt-Regeln, Eskalation, Deeskalation und Rollen-Baselines.
+- `npx vitest run`: erfolgreich, 193 von 193 Tests bestanden.
+- `npm run lint`: erfolgreich.
+- `npm run build`: erfolgreich.
+- Livecheck: `npm run dev:all` gestartet, Browserseite geoeffnet, Socket-Server meldete reale Client-Verbindung; der Hintergrundprozess wurde anschliessend wieder beendet.

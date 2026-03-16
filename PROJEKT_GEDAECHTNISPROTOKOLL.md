@@ -47,6 +47,8 @@
 - Interaktions-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 183/183 gruen, `npm run build` gruen, Browser-/Livecheck mit echter Socket-Verbindung bestaetigt; temporärer Hintergrundserver danach wieder beendet.
 - Feinschliff-Block am 16.03.2026 umgesetzt: missionsgebundene Zonen-Prerequisites (Lock/Unlock), HUD-Lock-Hinweise sowie weichere Player-Beschleunigung/Abbremsung mit Luftkontrolle integriert.
 - Feinschliff-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 186/186 gruen, `npm run build` gruen, Browser-/Livecheck mit echter Socket-Verbindung bestaetigt; temporärer Hintergrundserver danach wieder beendet.
+- NPC-KI-Block am 16.03.2026 ausgebaut: adaptives Eskalations-/Deeskalationsregelwerk fuer Polizei, Agitatoren, Demonstranten und Zivilisten als eigenes KI-Modul eingefuehrt und im Sim-Worker verdrahtet.
+- NPC-KI-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 193/193 gruen, `npm run build` gruen, Browser-/Livecheck mit echter Socket-Verbindung bestaetigt; temporärer Hintergrundserver danach wieder beendet.
 
 ## Naechster logischer Schritt
-- Auf Basis der nun stabilen Interaktionskette als naechstes NPC-KI/Behavior vertiefen und Missionseffekte direkt in Eskalations- und Reaktionsregeln ueberfuehren.
+- Auf Basis der nun adaptiven NPC-KI als naechstes Mission/24h-Szenario durch zusätzliche Folgeereignisse und direkte Event-Hooks in NPC-Reaktionspfade vertiefen.
