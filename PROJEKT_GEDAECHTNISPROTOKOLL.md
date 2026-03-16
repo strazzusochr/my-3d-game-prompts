@@ -148,10 +148,6 @@
 - Drag-Fix fuer Einzel-HUDs am 16.03.2026 umgesetzt: NASA, Phase-Telemetrie, Missionslage und Einsatz-Timeline besitzen nun eigenes Drag-Handling statt nur Mitbewegung im rechten Hauptcontainer.
 - Event-Propagation verhaertet: Beim Ziehen eines Unterpanels wird Parent-Drag unterbunden, damit jedes gezeigte HUD wirklich einzeln verschiebbar bleibt.
 - Vollverifikation nach Einzel-Drag-Fix erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 243/243.
-- Endgueltiger HUD-Drag-Fix am 16.03.2026 nachgeschaerft: Verschieben startet jetzt ausschliesslich direkt am expliziten `□`-Handle-Button statt ueber Panel-Container-Bubbling.
-- HUD-Drag-Logik modularisiert: `src/components/ui/hudDrag.ts` kapselt jetzt `canStartHudDrag` und `computeHudDragOffset`; `src/components/ui/HUD.tsx` nutzt nur noch diese pruefbaren Helper.
-- Regressionsschutz aktiv: neue Testsuite `src/tests/hudDrag.test.ts` verifiziert Edit-Mode-/Linksklick-Guard und Delta-basierte Offset-Berechnung gezielt.
-- Vollverifikation nach HUD-Drag-Regressionsschutz erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 245/245.
 
 ## Naechster logischer Schritt
-- Kein offener Blocker im aktuellen HUD-/Streaming-Zyklus; naechster Ausbau kann inhaltlich auf Persistenz fuer frei verschobene HUD-Layouts oder Spawn-HUD-Feinschliff gehen.
+- Kein offener Blocker im aktuellen HUD-/Streaming-Zyklus; naechster Ausbau kann inhaltlich auf Spawn-HUD-Feinschliff oder Trend-/Missionspersistenz gehen.
