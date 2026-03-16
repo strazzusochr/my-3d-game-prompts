@@ -187,5 +187,11 @@
 - Testabdeckung erweitert: `runtimePersistence.test.ts` und `gameStore.test.ts` pruefen Band/Hinweis im Snapshot und im zeitlichen Store-Verlauf (inkl. `recovered` >90m).
 - Vollverifikation nach Replay-Cooldown-Schwellenampel erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 253/253.
 
+- Replay-Qualitaets-Deltaindikator am 16.03.2026 umgesetzt: Store fuehrt jetzt `replayQualityDeltaEventsPerCheckpoint`, `replayQualityDeltaDirection` (`up`/`down`/`flat`) und `replayQualityDeltaHint` als Trendaenderung zum letzten Checkpoint.
+- Snapshot erweitert: `runtimePersistence` persistiert und sanitisiert Delta-Werte robust (inkl. Richtungs-/Hinweisableitung bei ungueltigen Inputs).
+- HUD-Operationsansicht erweitert: neue Delta-Kennzahlen (`Delta Events/Checkpoint`, `Delta-Richtung`, `Delta-Hinweis`) mit Richtungspfeil fuer direkte Operator-Lesbarkeit.
+- Testabdeckung erweitert: `runtimePersistence.test.ts` und `gameStore.test.ts` pruefen Delta-Felder im Store und Snapshot inklusive Sanitisierung.
+- Vollverifikation nach Replay-Qualitaets-Deltaindikator erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 253/253.
+
 ## Naechster logischer Schritt
-- Replay-Cooldown ist geschlossen; naechster Ausbaupunkt ist ein Replay-Qualitaets-Deltaindikator (Aenderung zum letzten Checkpoint) mit Persistenz und HUD-Trendpfeil.
+- Nach Deltaindikator folgt als naechster Ausbaupunkt eine Replay-Delta-Volatilitaetsampel (kurzfristig oszillierend vs. stabil) mit Persistenz und HUD-Badge.

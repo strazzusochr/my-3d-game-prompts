@@ -65,6 +65,9 @@ const resetStore = () => {
       replayQualityWindowMinutes: 90,
       replayQualityRebuildCount: 0,
       replayQualityAvgEvents: 0,
+      replayQualityDeltaEventsPerCheckpoint: 0,
+      replayQualityDeltaDirection: 'flat',
+      replayQualityDeltaHint: 'Replay-Eventlast stabil.',
       replayQualityStability: 'stable',
       replayQualityRecentTrend: [],
       replayRiskLevel: 'low',
@@ -512,7 +515,7 @@ describe('gameStore core flow', () => {
         ...state.interactionState,
         missionProgress: {
           ...state.interactionState.missionProgress,
-          prioritizedZoneIds: ['north-bridge', 'south-hub', 'east-avenue'],
+          prioritizedZoneIds: ['evacuation-board-north', 'evacuation-board-west', 'evacuation-board-south'],
         },
       },
     }));
@@ -532,7 +535,7 @@ describe('gameStore core flow', () => {
         ...state.interactionState,
         missionProgress: {
           ...state.interactionState.missionProgress,
-          prioritizedZoneIds: ['north-bridge', 'south-hub', 'east-avenue'],
+          prioritizedZoneIds: ['evacuation-board-north', 'evacuation-board-west', 'evacuation-board-south'],
         },
       },
     }));
@@ -553,7 +556,7 @@ describe('gameStore core flow', () => {
         missionProgress: {
           epochBriefingVerified: true,
           hazardMapPrepared: true,
-          prioritizedZoneIds: ['north-bridge', 'south-hub', 'east-avenue'],
+          prioritizedZoneIds: ['evacuation-board-north', 'evacuation-board-west', 'evacuation-board-south'],
         },
       },
     }));
@@ -602,6 +605,9 @@ describe('gameStore core flow', () => {
     expect(state.gameState.replayQualityWindowMinutes).toBe(90);
     expect(state.gameState.replayQualityRebuildCount).toBeGreaterThan(0);
     expect(state.gameState.replayQualityAvgEvents).toBeGreaterThanOrEqual(0);
+    expect(Math.abs(state.gameState.replayQualityDeltaEventsPerCheckpoint)).toBeLessThanOrEqual(999);
+    expect(['up', 'down', 'flat']).toContain(state.gameState.replayQualityDeltaDirection);
+    expect(state.gameState.replayQualityDeltaHint.length).toBeGreaterThan(0);
     expect(['stable', 'watch', 'critical']).toContain(state.gameState.replayQualityStability);
     expect(state.gameState.replayQualityRecentTrend.length).toBeGreaterThan(0);
     expect(['stable', 'watch', 'critical']).toContain(state.gameState.replayQualityRecentTrend[0]);
@@ -628,6 +634,9 @@ describe('gameStore core flow', () => {
           windowMinutes: number;
           rebuildCount: number;
           avgRebuildEvents: number;
+          deltaEventsPerCheckpoint: number;
+          deltaDirection: 'up' | 'down' | 'flat';
+          deltaHint: string;
           stability: 'stable' | 'watch' | 'critical';
           recentStabilityTrend: Array<'stable' | 'watch' | 'critical'>;
           riskLevel: 'low' | 'medium' | 'high';
@@ -649,6 +658,9 @@ describe('gameStore core flow', () => {
     expect(snapshot.replayState.quality.windowMinutes).toBe(90);
     expect(snapshot.replayState.quality.rebuildCount).toBeGreaterThan(0);
     expect(snapshot.replayState.quality.avgRebuildEvents).toBeGreaterThanOrEqual(0);
+    expect(Math.abs(snapshot.replayState.quality.deltaEventsPerCheckpoint)).toBeLessThanOrEqual(999);
+    expect(['up', 'down', 'flat']).toContain(snapshot.replayState.quality.deltaDirection);
+    expect(snapshot.replayState.quality.deltaHint.length).toBeGreaterThan(0);
     expect(snapshot.replayState.quality.recentStabilityTrend.length).toBeGreaterThan(0);
     expect(['low', 'medium', 'high']).toContain(snapshot.replayState.quality.riskLevel);
     expect(snapshot.replayState.quality.riskHint.length).toBeGreaterThan(0);

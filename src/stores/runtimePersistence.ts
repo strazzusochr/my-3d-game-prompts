@@ -46,6 +46,9 @@ interface RuntimeReplayQuality {
     windowMinutes: number;
     rebuildCount: number;
     avgRebuildEvents: number;
+    deltaEventsPerCheckpoint: number;
+    deltaDirection: 'up' | 'down' | 'flat';
+    deltaHint: 'Replay-Eventlast steigt.' | 'Replay-Eventlast sinkt.' | 'Replay-Eventlast stabil.';
     stability: 'stable' | 'watch' | 'critical';
     recentStabilityTrend: Array<'stable' | 'watch' | 'critical'>;
     riskLevel: 'low' | 'medium' | 'high';
@@ -210,6 +213,10 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
         typeof qualityObj.avgRebuildEvents === 'number' && Number.isFinite(qualityObj.avgRebuildEvents)
             ? qualityObj.avgRebuildEvents
             : 0;
+    const qualityDeltaEventsRaw =
+        typeof qualityObj.deltaEventsPerCheckpoint === 'number' && Number.isFinite(qualityObj.deltaEventsPerCheckpoint)
+            ? qualityObj.deltaEventsPerCheckpoint
+            : 0;
     const qualityStability =
         qualityObj.stability === 'critical' || qualityObj.stability === 'watch'
             ? qualityObj.stability
@@ -218,6 +225,24 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
         qualityObj.riskLevel === 'high' || qualityObj.riskLevel === 'medium'
             ? qualityObj.riskLevel
             : 'low';
+    const qualityDeltaDirection =
+        qualityObj.deltaDirection === 'up' || qualityObj.deltaDirection === 'down' || qualityObj.deltaDirection === 'flat'
+            ? qualityObj.deltaDirection
+            : qualityDeltaEventsRaw > 0
+                ? 'up'
+                : qualityDeltaEventsRaw < 0
+                    ? 'down'
+                    : 'flat';
+    const qualityDeltaHint =
+        qualityObj.deltaHint === 'Replay-Eventlast steigt.' ||
+        qualityObj.deltaHint === 'Replay-Eventlast sinkt.' ||
+        qualityObj.deltaHint === 'Replay-Eventlast stabil.'
+            ? qualityObj.deltaHint
+            : qualityDeltaDirection === 'up'
+                ? 'Replay-Eventlast steigt.'
+                : qualityDeltaDirection === 'down'
+                    ? 'Replay-Eventlast sinkt.'
+                    : 'Replay-Eventlast stabil.';
     const qualityRiskHint =
         qualityObj.riskHint === 'Replay-Risiko hoch: Rewind-Frequenz sofort senken.' ||
         qualityObj.riskHint === 'Rewind-Takt reduzieren und grobere Spruenge nutzen.'
@@ -281,6 +306,9 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
             windowMinutes: clamp(Math.round(qualityWindowRaw), 15, 240),
             rebuildCount: Math.max(0, Math.round(qualityRebuildCountRaw)),
             avgRebuildEvents: Math.max(0, Math.round(qualityAvgEventsRaw)),
+            deltaEventsPerCheckpoint: clamp(Math.round(qualityDeltaEventsRaw), -999, 999),
+            deltaDirection: qualityDeltaDirection,
+            deltaHint: qualityDeltaHint,
             stability: qualityStability,
             recentStabilityTrend: qualityTrend,
             riskLevel: qualityRiskLevel,

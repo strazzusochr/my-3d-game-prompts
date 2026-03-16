@@ -51,6 +51,8 @@ interface ReplayRebuildHistoryEntry {
 }
 
 type ReplayQualityStability = 'stable' | 'watch' | 'critical';
+type ReplayQualityDeltaDirection = 'up' | 'down' | 'flat';
+type ReplayQualityDeltaHint = 'Replay-Eventlast steigt.' | 'Replay-Eventlast sinkt.' | 'Replay-Eventlast stabil.';
 type ReplayRiskLevel = 'low' | 'medium' | 'high';
 type ReplayRiskHint =
     | 'Stabiler Replay-Betrieb.'
@@ -67,6 +69,9 @@ interface ReplayQualityState {
     windowMinutes: number;
     rebuildCount: number;
     avgRebuildEvents: number;
+    deltaEventsPerCheckpoint: number;
+    deltaDirection: ReplayQualityDeltaDirection;
+    deltaHint: ReplayQualityDeltaHint;
     stability: ReplayQualityStability;
     recentStabilityTrend: ReplayQualityStability[];
     riskLevel: ReplayRiskLevel;
@@ -101,6 +106,9 @@ interface GameStore {
         replayQualityWindowMinutes: number;
         replayQualityRebuildCount: number;
         replayQualityAvgEvents: number;
+        replayQualityDeltaEventsPerCheckpoint: number;
+        replayQualityDeltaDirection: ReplayQualityDeltaDirection;
+        replayQualityDeltaHint: ReplayQualityDeltaHint;
         replayQualityStability: ReplayQualityStability;
         replayQualityRecentTrend: ReplayQualityStability[];
         replayRiskLevel: ReplayRiskLevel;
@@ -184,6 +192,9 @@ const persistedReplayState = persistedRuntimeSnapshot?.replayState ?? {
         windowMinutes: REPLAY_QUALITY_WINDOW_MINUTES,
         rebuildCount: 0,
         avgRebuildEvents: 0,
+        deltaEventsPerCheckpoint: 0,
+        deltaDirection: 'flat' as ReplayQualityDeltaDirection,
+        deltaHint: 'Replay-Eventlast stabil.' as ReplayQualityDeltaHint,
         stability: 'stable' as ReplayQualityStability,
         recentStabilityTrend: [] as ReplayQualityStability[],
         riskLevel: 'low' as ReplayRiskLevel,
@@ -237,6 +248,7 @@ const getReplayQualityState = (
     referenceClock: string,
     previousTrend: ReplayQualityStability[],
     previousLastHighAnchorTime: string | null,
+    previousAvgRebuildEvents: number,
 ): ReplayQualityState => {
     const referenceMinutes = timeToMinutes(referenceClock);
     const inWindow = history.filter((entry) => {
@@ -249,6 +261,15 @@ const getReplayQualityState = (
     const rebuildCount = inWindow.length;
     const eventSum = inWindow.reduce((sum, entry) => sum + entry.rebuildEventCount, 0);
     const avgRebuildEvents = rebuildCount > 0 ? Math.round(eventSum / rebuildCount) : 0;
+    const deltaEventsPerCheckpoint = avgRebuildEvents - previousAvgRebuildEvents;
+    const deltaDirection: ReplayQualityDeltaDirection =
+        deltaEventsPerCheckpoint > 0 ? 'up' : deltaEventsPerCheckpoint < 0 ? 'down' : 'flat';
+    const deltaHint: ReplayQualityDeltaHint =
+        deltaDirection === 'up'
+            ? 'Replay-Eventlast steigt.'
+            : deltaDirection === 'down'
+                ? 'Replay-Eventlast sinkt.'
+                : 'Replay-Eventlast stabil.';
     const stability: ReplayQualityStability =
         rebuildCount >= 4 || avgRebuildEvents >= 20
             ? 'critical'
@@ -292,6 +313,9 @@ const getReplayQualityState = (
         windowMinutes: REPLAY_QUALITY_WINDOW_MINUTES,
         rebuildCount,
         avgRebuildEvents,
+        deltaEventsPerCheckpoint,
+        deltaDirection,
+        deltaHint,
         stability,
         recentStabilityTrend: pushReplayQualityTrend(previousTrend, stability),
         riskLevel,
@@ -325,6 +349,9 @@ const buildRuntimeSnapshot = (state: GameStore): RuntimeSnapshot => ({
             windowMinutes: state.gameState.replayQualityWindowMinutes,
             rebuildCount: state.gameState.replayQualityRebuildCount,
             avgRebuildEvents: state.gameState.replayQualityAvgEvents,
+            deltaEventsPerCheckpoint: state.gameState.replayQualityDeltaEventsPerCheckpoint,
+            deltaDirection: state.gameState.replayQualityDeltaDirection,
+            deltaHint: state.gameState.replayQualityDeltaHint,
             stability: state.gameState.replayQualityStability,
             recentStabilityTrend: state.gameState.replayQualityRecentTrend,
             riskLevel: state.gameState.replayRiskLevel,
@@ -1171,6 +1198,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
         replayQualityWindowMinutes: persistedReplayState.quality.windowMinutes,
         replayQualityRebuildCount: persistedReplayState.quality.rebuildCount,
         replayQualityAvgEvents: persistedReplayState.quality.avgRebuildEvents,
+        replayQualityDeltaEventsPerCheckpoint: persistedReplayState.quality.deltaEventsPerCheckpoint,
+        replayQualityDeltaDirection: persistedReplayState.quality.deltaDirection,
+        replayQualityDeltaHint: persistedReplayState.quality.deltaHint,
         replayQualityStability: persistedReplayState.quality.stability,
         replayQualityRecentTrend: persistedReplayState.quality.recentStabilityTrend,
         replayRiskLevel: persistedReplayState.quality.riskLevel,
@@ -1221,6 +1251,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityWindowMinutes: REPLAY_QUALITY_WINDOW_MINUTES,
                 replayQualityRebuildCount: 0,
                 replayQualityAvgEvents: 0,
+                replayQualityDeltaEventsPerCheckpoint: 0,
+                replayQualityDeltaDirection: 'flat',
+                replayQualityDeltaHint: 'Replay-Eventlast stabil.',
                 replayQualityStability: 'stable',
                 replayQualityRecentTrend: [],
                 replayRiskLevel: 'low',
@@ -1326,6 +1359,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 currentTime,
                 state.gameState.replayQualityRecentTrend,
                 state.gameState.replayRiskLastHighAnchorTime,
+                state.gameState.replayQualityAvgEvents,
             );
 
             return {
@@ -1346,6 +1380,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     replayQualityWindowMinutes: replayQuality.windowMinutes,
                     replayQualityRebuildCount: replayQuality.rebuildCount,
                     replayQualityAvgEvents: replayQuality.avgRebuildEvents,
+                    replayQualityDeltaEventsPerCheckpoint: replayQuality.deltaEventsPerCheckpoint,
+                    replayQualityDeltaDirection: replayQuality.deltaDirection,
+                    replayQualityDeltaHint: replayQuality.deltaHint,
                     replayQualityStability: replayQuality.stability,
                     replayQualityRecentTrend: replayQuality.recentStabilityTrend,
                     replayRiskLevel: replayQuality.riskLevel,
@@ -1404,6 +1441,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             newTime,
             state.gameState.replayQualityRecentTrend,
             state.gameState.replayRiskLastHighAnchorTime,
+            state.gameState.replayQualityAvgEvents,
         );
 
         workerManager.syncNpcs(dynamicState.npcs);
@@ -1425,6 +1463,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityWindowMinutes: replayQuality.windowMinutes,
                 replayQualityRebuildCount: replayQuality.rebuildCount,
                 replayQualityAvgEvents: replayQuality.avgRebuildEvents,
+                replayQualityDeltaEventsPerCheckpoint: replayQuality.deltaEventsPerCheckpoint,
+                replayQualityDeltaDirection: replayQuality.deltaDirection,
+                replayQualityDeltaHint: replayQuality.deltaHint,
                 replayQualityStability: replayQuality.stability,
                 replayQualityRecentTrend: replayQuality.recentStabilityTrend,
                 replayRiskLevel: replayQuality.riskLevel,
@@ -1485,6 +1526,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             newTime,
             state.gameState.replayQualityRecentTrend,
             state.gameState.replayRiskLastHighAnchorTime,
+            state.gameState.replayQualityAvgEvents,
         );
 
         workerManager.syncNpcs(dynamicState.npcs);
@@ -1506,6 +1548,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityWindowMinutes: replayQuality.windowMinutes,
                 replayQualityRebuildCount: replayQuality.rebuildCount,
                 replayQualityAvgEvents: replayQuality.avgRebuildEvents,
+                replayQualityDeltaEventsPerCheckpoint: replayQuality.deltaEventsPerCheckpoint,
+                replayQualityDeltaDirection: replayQuality.deltaDirection,
+                replayQualityDeltaHint: replayQuality.deltaHint,
                 replayQualityStability: replayQuality.stability,
                 replayQualityRecentTrend: replayQuality.recentStabilityTrend,
                 replayRiskLevel: replayQuality.riskLevel,
@@ -1552,6 +1597,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityWindowMinutes: REPLAY_QUALITY_WINDOW_MINUTES,
                 replayQualityRebuildCount: 0,
                 replayQualityAvgEvents: 0,
+                replayQualityDeltaEventsPerCheckpoint: 0,
+                replayQualityDeltaDirection: 'flat',
+                replayQualityDeltaHint: 'Replay-Eventlast stabil.',
                 replayQualityStability: 'stable',
                 replayQualityRecentTrend: [],
                 replayRiskLevel: 'low',

@@ -55,6 +55,9 @@ const baseSnapshot: RuntimeSnapshot = {
             windowMinutes: 90,
             rebuildCount: 1,
             avgRebuildEvents: 14,
+            deltaEventsPerCheckpoint: 3,
+            deltaDirection: 'up',
+            deltaHint: 'Replay-Eventlast steigt.',
             stability: 'watch',
             recentStabilityTrend: ['watch', 'stable'],
             riskLevel: 'medium',
@@ -86,6 +89,9 @@ describe('runtimePersistence', () => {
         expect(loaded?.replayState.rebuildHistory[0].anchorTime).toBe('18:20');
         expect(loaded?.replayState.quality.windowMinutes).toBe(90);
         expect(loaded?.replayState.quality.rebuildCount).toBe(1);
+        expect(loaded?.replayState.quality.deltaEventsPerCheckpoint).toBe(3);
+        expect(loaded?.replayState.quality.deltaDirection).toBe('up');
+        expect(loaded?.replayState.quality.deltaHint).toBe('Replay-Eventlast steigt.');
         expect(loaded?.replayState.quality.stability).toBe('watch');
         expect(loaded?.replayState.quality.recentStabilityTrend).toEqual(['watch', 'stable']);
         expect(loaded?.replayState.quality.riskLevel).toBe('medium');
@@ -130,6 +136,9 @@ describe('runtimePersistence', () => {
                         windowMinutes: 999,
                         rebuildCount: -3,
                         avgRebuildEvents: -7,
+                        deltaEventsPerCheckpoint: 1200,
+                        deltaDirection: 'invalid',
+                        deltaHint: 'invalid',
                         stability: 'broken',
                         recentStabilityTrend: ['critical', 'unknown', 'watch', 'stable'],
                         riskLevel: 'broken',
@@ -164,6 +173,9 @@ describe('runtimePersistence', () => {
         expect(loaded?.replayState.quality.windowMinutes).toBe(240);
         expect(loaded?.replayState.quality.rebuildCount).toBe(0);
         expect(loaded?.replayState.quality.avgRebuildEvents).toBe(0);
+        expect(loaded?.replayState.quality.deltaEventsPerCheckpoint).toBe(999);
+        expect(loaded?.replayState.quality.deltaDirection).toBe('up');
+        expect(loaded?.replayState.quality.deltaHint).toBe('Replay-Eventlast steigt.');
         expect(loaded?.replayState.quality.stability).toBe('stable');
         expect(loaded?.replayState.quality.recentStabilityTrend).toEqual(['critical', 'watch', 'stable']);
         expect(loaded?.replayState.quality.riskLevel).toBe('low');

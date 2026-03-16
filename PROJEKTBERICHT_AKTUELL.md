@@ -67,6 +67,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Testnachweis erweitert: Band-/Hinweis-Sanitisierung in `runtimePersistence.test.ts` und zeitbasierte Band-Umschaltung (`cooling`, `recovered`) in `gameStore.test.ts`.
 - Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 253 von 253 gruen, Build gruen.
 
+### 2.0.39 Replay-Qualitaets-Deltaindikator vom 16.03.2026
+- Die Replay-Auswertung wurde um einen Deltaindikator erweitert: `deltaEventsPerCheckpoint`, `deltaDirection` (`up`/`down`/`flat`) und `deltaHint` bilden die Aenderung der Eventlast zum vorherigen Checkpoint ab.
+- `runtimePersistence` persistiert diese Felder unter `replayState.quality` und sanitisiert Werte robust inklusive Richtungs-/Hinweisableitung bei inkonsistenten Inputs.
+- Das Operations-Panel zeigt die Deltawerte jetzt direkt als Kennzahlen mit Richtungspfeil (`UP ↑`, `DOWN ↓`, `FLAT →`) und eigenem Delta-Hinweis.
+- Testnachweis erweitert: `runtimePersistence.test.ts` und `gameStore.test.ts` validieren Deltafelder in Snapshot und Store inkl. Bounds/Sanitisierung.
+- Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 253 von 253 gruen, Build gruen.
+
 ### 2.0.1 Viewer- und Lastnachweis vom 16.03.2026
 - Zwei weitere Viewer-Seiten wurden geoeffnet und der Health-Endpunkt achtmal im Abstand von rund 1,5 Sekunden abgefragt.
 - Der Stream benoetigte eine kurze Aufwaermphase: zuerst `viewerFps=0`, danach stabile Werte zwischen 22 und 24 FPS.
