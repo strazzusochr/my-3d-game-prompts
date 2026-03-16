@@ -578,7 +578,13 @@ async function bootstrapRendererTransport(settings) {
       try { window.__rendererTransport.socket.disconnect(); } catch (error) {}
     }
 
-    const socket = window.io(publicOrigin, { transports: ['websocket'] });
+    const socket = window.io(publicOrigin, {
+      transports: ['polling', 'websocket'],
+      upgrade: true,
+      rememberUpgrade: false,
+      reconnection: true,
+      timeout: 20000,
+    });
     const peers = new Map();
     let frameCount = 0;
     let lastTime = performance.now();
@@ -980,7 +986,19 @@ function getClientHTML() {
     const video = document.getElementById('display');
     const loading = document.getElementById('loading');
     const fpsEl = document.getElementById('fps');
-    const socket = io({ transports: ['websocket'] });
+    const socket = io(window.location.origin, {
+      path: '/socket.io',
+      transports: ['polling', 'websocket'],
+      upgrade: true,
+      rememberUpgrade: false,
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 500,
+      reconnectionDelayMax: 3000,
+      timeout: 20000,
+      forceNew: false,
+      withCredentials: false,
+    });
     const buttons = Array.from(document.querySelectorAll('.qbtn'));
     const remoteHud = document.getElementById('remoteHud');
     const hudStage = document.getElementById('hudStage');
@@ -999,6 +1017,8 @@ function getClientHTML() {
     let hudState = null;
     let hudScale = Number(localStorage.getItem('remote-hud-scale')) || 1;
     let metrics = { rendererFps: 0, viewerFps: 0, transportSource: 'unknown' };
+    let connectErrorCount = 0;
+    let fallbackToPollingOnly = false;
 
     let frameCount = 0;
     let lastFpsTime = Date.now();
@@ -1235,7 +1255,19 @@ function getClientHTML() {
     setHudScale(hudScale);
     trackVideoFrames();
 
-    socket.emit('register-role', { role: 'viewer' });
+    function registerViewerRole() {
+      socket.emit('register-role', { role: 'viewer' });
+    }
+
+    socket.on('connect', () => {
+      connectErrorCount = 0;
+      registerViewerRole();
+      console.log('Connected to cloud renderer');
+      if (!rendererId) {
+        loading.style.display = 'block';
+        loading.innerHTML = '<div class="spinner"></div>Connected. Waiting for renderer...';
+      }
+    });
 
     socket.on('renderer-ready', async ({ rendererId: nextRendererId, profile }) => {
       if (profile) {
@@ -1338,13 +1370,31 @@ function getClientHTML() {
     document.addEventListener('contextmenu', (e) => e.preventDefault());
 
     // Reconnect handling
-    socket.on('disconnect', () => {
+    socket.on('disconnect', (reason) => {
       loading.style.display = 'block';
-      loading.innerHTML = '<div class="spinner"></div>Reconnecting...';
+      loading.innerHTML = '<div class="spinner"></div>Reconnecting... (' + String(reason || 'network') + ')';
       closePeer();
     });
-    socket.on('connect', () => {
-      console.log('Connected to cloud renderer');
+
+    socket.on('connect_error', (error) => {
+      connectErrorCount += 1;
+      loading.style.display = 'block';
+      loading.innerHTML = '<div class="spinner"></div>Socket reconnect fallback (polling/websocket)...';
+      console.warn('Socket connect_error:', error?.message || error);
+
+      // If websocket upgrades keep failing, force long-polling only to avoid black-screen hangs.
+      if (!fallbackToPollingOnly && connectErrorCount >= 3) {
+        fallbackToPollingOnly = true;
+        loading.innerHTML = '<div class="spinner"></div>WebSocket blocked. Switching to polling-only...';
+        try {
+          socket.io.opts.transports = ['polling'];
+          socket.io.opts.upgrade = false;
+          socket.disconnect();
+          socket.connect();
+        } catch (fallbackError) {
+          console.warn('Polling-only fallback failed:', fallbackError?.message || fallbackError);
+        }
+      }
     });
   </script>
 </body>
