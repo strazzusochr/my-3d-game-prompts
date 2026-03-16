@@ -113,10 +113,13 @@ export const HUD = () => {
         { key: 'dyn-critical-lockdown', label: 'SEK Lockdown (CRITICAL) aktiv', color: '#ff8888' },
         { key: 'dyn-mission-epoch-media', label: 'Mission Branch: Medienabschirmung', color: '#88ccff' },
         { key: 'dyn-mission-epoch-press-corridor', label: 'Mission Branch: Pressekorridor', color: '#77bbff' },
+        { key: 'dyn-mission-epoch-misinformation', label: 'Mission Branch: Fehlinfo-Welle', color: '#ff9966' },
         { key: 'dyn-mission-hazard-shield', label: 'Mission Branch: Gefahrenzonen-Schild', color: '#aaddff' },
         { key: 'dyn-mission-hazard-firebreak', label: 'Mission Branch: Firebreak-Kette', color: '#88ffd0' },
+        { key: 'dyn-mission-hazard-surge', label: 'Mission Branch: Hazard-Surge', color: '#ff8877' },
         { key: 'dyn-mission-fullchain-deescalation', label: 'Mission Branch: Vollkette Deeskalation', color: '#99ffbb' },
         { key: 'dyn-mission-fullchain-recovery', label: 'Mission Branch: Recovery-Welle', color: '#66ffcc' },
+        { key: 'dyn-mission-fragmented-command', label: 'Mission Branch: Fragmented Command', color: '#ff6666' },
     ].filter((response) => firedEventKeys.includes(response.key));
     const operationsInsight = getOperationsInsight({
         trendHistory: roleTrendHistory,

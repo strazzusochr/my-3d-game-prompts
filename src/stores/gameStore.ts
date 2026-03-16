@@ -341,10 +341,13 @@ const applyDynamicRoleResponses = (
             'dyn-critical-lockdown',
             'dyn-mission-epoch-media',
             'dyn-mission-epoch-press-corridor',
+            'dyn-mission-epoch-misinformation',
             'dyn-mission-hazard-shield',
             'dyn-mission-hazard-firebreak',
+            'dyn-mission-hazard-surge',
             'dyn-mission-fullchain-deescalation',
             'dyn-mission-fullchain-recovery',
+            'dyn-mission-fragmented-command',
         ]
             .filter((key) => firedSet.has(key)).length,
     });
@@ -403,6 +406,19 @@ const applyDynamicRoleResponses = (
     }
 
     if (
+        !missionProgress.epochBriefingVerified &&
+        currentMinutes >= 15 * 60 &&
+        !firedSet.has('dyn-mission-epoch-misinformation')
+    ) {
+        const spawned = spawnDynamicWave(nextNpcs, NPCType.DEMONSTRATOR, 3, [-10, 0, 20], 7, NPCMood.ANGRY, NPCBehavior.CHANT);
+        if (spawned !== nextNpcs) {
+            nextNpcs = spawned;
+            nextDayStats = applyDayStatsDelta(nextDayStats, { injured: 1, damage: 900 });
+            firedSet.add('dyn-mission-epoch-misinformation');
+        }
+    }
+
+    if (
         missionProgress.hazardMapPrepared &&
         currentMinutes >= 18 * 60 &&
         !firedSet.has('dyn-mission-hazard-shield')
@@ -426,6 +442,19 @@ const applyDynamicRoleResponses = (
             nextNpcs = spawned;
             nextDayStats = applyDayStatsDelta(nextDayStats, { injured: -1, damage: -600 });
             firedSet.add('dyn-mission-hazard-firebreak');
+        }
+    }
+
+    if (
+        !missionProgress.hazardMapPrepared &&
+        currentMinutes >= 20 * 60 &&
+        !firedSet.has('dyn-mission-hazard-surge')
+    ) {
+        const spawned = spawnDynamicWave(nextNpcs, NPCType.RIOTER, 4, [12, 0, 34], 9, NPCMood.RIOTING, NPCBehavior.THROW);
+        if (spawned !== nextNpcs) {
+            nextNpcs = spawned;
+            nextDayStats = applyDayStatsDelta(nextDayStats, { injured: 2, damage: 1800 });
+            firedSet.add('dyn-mission-hazard-surge');
         }
     }
 
@@ -466,6 +495,19 @@ const applyDynamicRoleResponses = (
             });
             nextDayStats = applyDayStatsDelta(nextDayStats, { injured: -1, damage: -1000 });
             firedSet.add('dyn-mission-fullchain-recovery');
+        }
+    }
+
+    if (
+        missionProgress.prioritizedZoneIds.length < 2 &&
+        currentMinutes >= 22 * 60 + 30 &&
+        !firedSet.has('dyn-mission-fragmented-command')
+    ) {
+        const spawned = spawnDynamicWave(nextNpcs, NPCType.EXTREMIST, 2, [24, 0, 52], 6, NPCMood.RIOTING, NPCBehavior.COMBAT);
+        if (spawned !== nextNpcs) {
+            nextNpcs = spawned;
+            nextDayStats = applyDayStatsDelta(nextDayStats, { injured: 2, damage: 1400 });
+            firedSet.add('dyn-mission-fragmented-command');
         }
     }
 

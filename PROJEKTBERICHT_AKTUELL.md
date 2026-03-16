@@ -114,6 +114,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Das Operations-Overlay zeigt nun auch diese zweite Wellenstufe als aktive Missions-Badges.
 - Validierung: `npm run autonomy:full` erneut erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 230 von 230 bestanden, Lint und Build gruen.
 
+### 2.0.15 Alternative Ergebnisbaeume vom 16.03.2026
+- Das Missionssystem wurde von einem nur positiv fortschreitenden Ast auf echte Alternativpfade erweitert.
+- Bei verpassten Missionsschritten aktivieren sich nun negative Fallback-Wellen: `dyn-mission-epoch-misinformation`, `dyn-mission-hazard-surge` und `dyn-mission-fragmented-command`.
+- Damit entstehen je nach Missionsdisziplin unterschiedliche Endlagen mit klar unterscheidbarem Belastungsprofil in den DayStats.
+- Das Operations-Overlay bildet diese positiven und negativen Branches als getrennte aktive Badges ab.
+- Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 233 von 233 bestanden, Lint und Build gruen.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
