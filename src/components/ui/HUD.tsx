@@ -4,6 +4,7 @@ import { EVENT_TIMELINE } from '../../systems/eventScheduler';
 import { getInteractionAvailability, getInteractionZoneById, getMissionChecklist } from '../../systems/interactionZones';
 import { getHudTelemetry } from '../../systems/hudTelemetry';
 import { getOperationsInsight } from '../../systems/operationsInsights';
+import { getAdaptiveTriggerCurve } from '../../systems/npcAdaptiveCurves';
 
 const StatusBar = ({ label, value, color }: { label: string, value: number, color: string }) => (
     <div style={{ marginBottom: '12px' }}>
@@ -166,6 +167,27 @@ export const HUD = () => {
         activeDynamicResponses: activeRoleResponses.length,
     });
     const trendView = roleTrendHistory.slice(-10);
+    const latestTrendPoint = trendView.length > 0 ? trendView[trendView.length - 1] : null;
+    const aggressorPressure = latestTrendPoint ? latestTrendPoint.aggressors - latestTrendPoint.security : 0;
+    const supportReserve = latestTrendPoint ? latestTrendPoint.support : 0;
+    const phaseScaleProfile = operationsInsight.phaseBand === 'MORNING'
+        ? { syncThreshold: 102, fractureThreshold: 93 }
+        : operationsInsight.phaseBand === 'MIDDAY'
+            ? { syncThreshold: 103, fractureThreshold: 92 }
+            : operationsInsight.phaseBand === 'EVENING'
+                ? { syncThreshold: 106, fractureThreshold: 96 }
+                : operationsInsight.phaseBand === 'LATE'
+                    ? { syncThreshold: 108, fractureThreshold: 98 }
+                    : { syncThreshold: 103, fractureThreshold: 94 };
+    const adaptiveCurvePreview = getAdaptiveTriggerCurve({
+        aggressorPressure,
+        supportReserve,
+        trendSignal: operationsInsight.trendSignal,
+        trendMomentumScore: operationsInsight.trendMomentumScore,
+        trendTurbulenceScore: operationsInsight.trendTurbulenceScore,
+    });
+    const adaptiveSyncThreshold = Math.max(96, Math.min(116, phaseScaleProfile.syncThreshold + adaptiveCurvePreview.syncThresholdDelta));
+    const adaptiveFractureThreshold = Math.max(88, Math.min(104, phaseScaleProfile.fractureThreshold + adaptiveCurvePreview.fractureThresholdDelta));
     const trendMax = Math.max(1, ...trendView.map((point) => Math.max(point.security, point.aggressors, point.support)));
     const mapTrendLine = (selector: (point: (typeof trendView)[number]) => number) => {
         if (trendView.length <= 1) return '';
@@ -1003,6 +1025,19 @@ export const HUD = () => {
                             <div style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px', background: 'rgba(255,255,255,0.02)' }}>
                                 <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', marginBottom: '10px' }}>
                                     Rollenverteilung
+                                </div>
+                                <div style={{ marginBottom: '10px', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '9px', background: 'rgba(0,0,0,0.24)' }}>
+                                    <div style={{ color: '#9edfff', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: '7px' }}>
+                                        Adaptive Triggerkurven (live)
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '5px', fontSize: '11px' }}>
+                                        <span style={{ color: '#7db3c7' }}>Sync-Schwelle</span><span style={{ color: '#66ddff', fontWeight: 700 }}>{adaptiveSyncThreshold}%</span>
+                                        <span style={{ color: '#7db3c7' }}>Fracture-Schwelle</span><span style={{ color: '#ff8a66', fontWeight: 700 }}>{adaptiveFractureThreshold}%</span>
+                                        <span style={{ color: '#7db3c7' }}>Positiv-Faktor</span><span style={{ color: '#88ffcc', fontWeight: 700 }}>{adaptiveCurvePreview.positiveScaleFactor.toFixed(2)}x</span>
+                                        <span style={{ color: '#7db3c7' }}>Fallback-Faktor</span><span style={{ color: '#ffbb77', fontWeight: 700 }}>{adaptiveCurvePreview.fallbackScaleFactor.toFixed(2)}x</span>
+                                        <span style={{ color: '#7db3c7' }}>Aggressordruck</span><span style={{ color: aggressorPressure > 0 ? '#ff7777' : '#99ffcc', fontWeight: 700 }}>{aggressorPressure >= 0 ? '+' : ''}{aggressorPressure}</span>
+                                        <span style={{ color: '#7db3c7' }}>Turbulenz</span><span style={{ color: '#c6d9ff', fontWeight: 700 }}>{operationsInsight.trendTurbulenceScore}</span>
+                                    </div>
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '10px' }}>
                                     {[

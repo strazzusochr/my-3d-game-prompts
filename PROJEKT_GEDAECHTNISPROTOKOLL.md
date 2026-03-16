@@ -145,6 +145,9 @@
 - Insight-Datenmodell erweitert: `src/systems/operationsInsights.ts` liefert jetzt zusaetzlich `trendTurbulenceScore` als robuste Schwingungsmetrik fuer volatile Lagen.
 - Testabdeckung erweitert: neue Suite `src/tests/npcAdaptiveCurves.test.ts` plus Turbulenz-Nachweis in `src/tests/operationsInsights.test.ts` verifizieren die Kurvenlogik regressionssicher.
 - Vollverifikation nach Adaptionsblock erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 251/251.
+- HUD-Transparenzblock am 16.03.2026 umgesetzt: Operations-Tab zeigt nun adaptive Triggerdiagnostik live (Sync-/Fracture-Schwellen, Positiv-/Fallback-Faktor, Aggressordruck und Turbulenzwert).
+- Sichtbarkeit auf Lageebene verankert: die im Store aktiven Kurvenparameter sind ohne Codezugriff direkt im HUD nachvollziehbar.
+- Vollverifikation nach HUD-Transparenzblock erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 251/251.
 
 ## Naechster logischer Schritt
-- Adaptive Triggerkurven sind geschlossen; naechster Ausbaupunkt ist visuelle/diagnostische Transparenz im HUD (Anzeige der aktiven Kurvenfaktoren und Trigger-Schwellen) inkl. Test- und Proof-Nachweis.
+- HUD-Transparenz ist geschlossen; naechster Ausbaupunkt ist Replay-Transparenz (Zeitreise-Indikator + Trigger-Rekonstruktionsstatus im HUD) mit Test- und Proof-Nachweis.

@@ -257,6 +257,22 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 	- `npm run build`: gruen,
 	- `npm run autonomy:full`: `AUTONOMY_PROOF_OK` + `AUTONOMY_FULL_OK`.
 
+### 2.0.32 HUD-Transparenz fuer adaptive Kurven vom 16.03.2026
+- Der Operations-Bereich im HUD wurde um eine dedizierte Live-Diagnosekarte erweitert.
+- Sichtbar sind jetzt in Echtzeit:
+	- adaptive Sync-Schwelle,
+	- adaptive Fracture-Schwelle,
+	- positiver Skalierungsfaktor,
+	- Fallback-Skalierungsfaktor,
+	- Aggressordruck,
+	- Turbulenzwert.
+- Damit ist die zuvor eingefuehrte Kurvenlogik nicht nur intern aktiv, sondern operativ nachvollziehbar fuer Steuerung und Debugging im laufenden Szenario.
+- Validierung nach Umsetzung:
+	- `npm run lint`: gruen,
+	- `vitest`: 251/251 gruen,
+	- `npm run build`: gruen,
+	- `npm run autonomy:full`: `AUTONOMY_PROOF_OK` + `AUTONOMY_FULL_OK`.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
