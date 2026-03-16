@@ -292,3 +292,17 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - `npx vitest run`: erfolgreich, 207 von 207 Tests bestanden.
 - `npm run lint`: erfolgreich.
 - `npm run build`: erfolgreich.
+
+### 8.18 DayStats-Runtime und Menue-Drilldowns vom 16.03.2026
+- Der Store berechnet Tageskennzahlen nun live aus Timeline-Ereignissen (`SPAWN`, `DESPAWN`, `MOOD_CHANGE`, `BEHAVIOR_CHANGE`) sowie aus Missionsinteraktionen.
+- Damit werden Verletzte, Festnahmen und Sachschaden nicht mehr nur angezeigt, sondern als laufende Lagewerte fortgeschrieben.
+- Fuer Zeitspruenge rueckwaerts werden die DayStats beim Rebuild des Tageszustands konsistent mitberechnet.
+- Das Statistik-Overlay wurde um tab-basierte Menuepfade erweitert: `Overview`, `Operations`, `Mission`.
+- In den Drilldowns werden operative Belastung, Phasenlage, Missionsfortschritt und kompakte Handlungsempfehlungen getrennt visualisiert.
+
+### 8.19 DayStats-/Drilldown-Nachweis
+- `src/tests/gameStore.test.ts` wurde um DayStats-Runtime-Tests erweitert (Event-Fuellung und missionbedingte Entlastung).
+- `npx vitest run`: erfolgreich, 209 von 209 Tests bestanden.
+- `npm run lint`: erfolgreich.
+- `npm run build`: erfolgreich.
+- Livecheck: lokaler Full-Stack gestartet, Browserseite geoeffnet, Socket-Client-Verbindung protokolliert; Hintergrundprozess anschliessend sauber beendet.

@@ -28,6 +28,7 @@ const PDC25_EPOCH2 = {
 };
 
 export const HUD = () => {
+    const [statsTab, setStatsTab] = useState<'overview' | 'operations' | 'mission'>('overview');
     const inGameTime = useGameStore(state => state.gameState.inGameTime);
     const isTimePaused = useGameStore(state => state.gameState.isTimePaused);
     const tensionLevel = useGameStore(state => state.gameState.tensionLevel);
@@ -600,11 +601,38 @@ export const HUD = () => {
                                 </div>
                             </div>
                             <button
-                                onClick={dismissStatistics}
+                                onClick={() => {
+                                    setStatsTab('overview');
+                                    dismissStatistics();
+                                }}
                                 style={{ ...btnStyle, minWidth: '90px', color: '#ffcc00' }}
                             >
                                 Schliessen
                             </button>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                            {[
+                                { id: 'overview', label: 'Overview' },
+                                { id: 'operations', label: 'Operations' },
+                                { id: 'mission', label: 'Mission' },
+                            ].map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setStatsTab(tab.id as 'overview' | 'operations' | 'mission')}
+                                    style={{
+                                        ...btnStyle,
+                                        minWidth: '120px',
+                                        padding: '6px 12px',
+                                        fontSize: '13px',
+                                        color: statsTab === tab.id ? '#00ccff' : '#9edfff',
+                                        borderColor: statsTab === tab.id ? 'rgba(0,204,255,0.55)' : 'rgba(255,255,255,0.15)',
+                                        background: statsTab === tab.id ? 'rgba(0,204,255,0.16)' : 'rgba(255,255,255,0.03)',
+                                    }}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', marginBottom: '14px' }}>
@@ -621,6 +649,7 @@ export const HUD = () => {
                             ))}
                         </div>
 
+                        {statsTab === 'overview' && (
                         <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px' }}>
                             <div style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px', background: 'rgba(255,255,255,0.02)' }}>
                                 <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', marginBottom: '10px' }}>
@@ -657,6 +686,57 @@ export const HUD = () => {
                                 </div>
                             </div>
                         </div>
+                        )}
+
+                        {statsTab === 'operations' && (
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                            <div style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px', background: 'rgba(255,255,255,0.02)' }}>
+                                <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', marginBottom: '10px' }}>
+                                    Operative Belastung
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '8px', fontSize: '13px' }}>
+                                    <span style={{ color: '#9edfff' }}>Eskalationsstufe</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{Math.floor(tensionLevel / 5)} / 20</span>
+                                    <span style={{ color: '#9edfff' }}>Aktive Einheiten</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{npcCount}</span>
+                                    <span style={{ color: '#9edfff' }}>Panikquote</span><span style={{ color: telemetry.panicRatioPercent > 45 ? '#ff7777' : '#ffcc66', fontWeight: 700 }}>{telemetry.panicRatioPercent}%</span>
+                                    <span style={{ color: '#9edfff' }}>Sachschaden</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{dayStats.damage.toLocaleString('de-DE')} EUR</span>
+                                    <span style={{ color: '#9edfff' }}>Verletzte</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{dayStats.injured}</span>
+                                    <span style={{ color: '#9edfff' }}>Festnahmen</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{dayStats.arrested}</span>
+                                </div>
+                            </div>
+                            <div style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px', background: 'rgba(255,255,255,0.02)' }}>
+                                <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', marginBottom: '10px' }}>
+                                    Einsatzempfehlung
+                                </div>
+                                <div style={{ color: '#9edfff', fontSize: '13px', lineHeight: 1.5 }}>
+                                    {telemetry.panicRatioPercent > 55
+                                        ? 'Prioritaet: Rueckzugsrouten sichern, Medizinachsen freihalten und Eskalationsgruppen separieren.'
+                                        : telemetry.activeHooks >= 3
+                                            ? 'Prioritaet: Hook-Kette stabil halten, sektoral deeskalieren und geordnete Abwanderung begleiten.'
+                                            : 'Prioritaet: Missionskette weiter abschliessen, um phasenabhaengige Automatik voll zu aktivieren.'}
+                                </div>
+                            </div>
+                        </div>
+                        )}
+
+                        {statsTab === 'mission' && (
+                        <div style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px', background: 'rgba(255,255,255,0.02)' }}>
+                            <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', marginBottom: '10px' }}>
+                                Missions-Drilldown
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '8px', fontSize: '13px', marginBottom: '10px' }}>
+                                <span style={{ color: '#9edfff' }}>Epoch-2 verifiziert</span><span style={{ color: missionProgress.epochBriefingVerified ? '#00ff88' : '#ffcc66', fontWeight: 700 }}>{missionProgress.epochBriefingVerified ? 'Ja' : 'Nein'}</span>
+                                <span style={{ color: '#9edfff' }}>Hazard vorbereitet</span><span style={{ color: missionProgress.hazardMapPrepared ? '#00ff88' : '#ffcc66', fontWeight: 700 }}>{missionProgress.hazardMapPrepared ? 'Ja' : 'Nein'}</span>
+                                <span style={{ color: '#9edfff' }}>Priorisierte Zonen</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{missionProgress.prioritizedZoneIds.length}/3</span>
+                                <span style={{ color: '#9edfff' }}>Hook-Auslastung</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{telemetry.activeHooks}/{telemetry.maxHooks}</span>
+                                <span style={{ color: '#9edfff' }}>Aktuelles Zeitfenster</span><span style={{ color: phaseWindowColor, fontWeight: 700 }}>{phaseWindowLabel}</span>
+                            </div>
+                            <div style={{ color: '#9edfff', fontSize: '12px', lineHeight: 1.45 }}>
+                                Naechster Fokus: {missionProgress.hazardMapPrepared
+                                    ? (missionProgress.prioritizedZoneIds.length < 3 ? 'weitere Risikozonen priorisieren' : 'Spaetphasen-Stabilisierung sichern')
+                                    : (missionProgress.epochBriefingVerified ? 'Hazard-Konsole aktivieren' : 'Epoch-Terminal abschliessen')}
+                            </div>
+                        </div>
+                        )}
                     </div>
                 </div>
             )}

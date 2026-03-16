@@ -25,6 +25,13 @@ export interface NPCData {
     behavior: NPCBehavior;
 }
 
+interface DayStats {
+    killed: number;
+    arrested: number;
+    injured: number;
+    damage: number;
+}
+
 interface GameStore {
     npcs: NPCData[];
     firedEventKeys: string[];
@@ -47,12 +54,7 @@ interface GameStore {
         masterVolume: number;
         muted: boolean;
     };
-    dayStats: {
-        killed: number;
-        arrested: number;
-        injured: number;
-        damage: number;  // Sachschaden in €
-    };
+    dayStats: DayStats;
     startGame: () => void;
     updateTime: (time: string) => void;
     advanceHour: () => void;
@@ -128,6 +130,83 @@ const moodToEmotionalState = (mood: NPCMood): EmotionalState => {
         default:
             return EmotionalState.NEUTRAL;
     }
+};
+
+const normalizeDayStats = (dayStats: DayStats): DayStats => ({
+    killed: Math.max(0, Math.round(dayStats.killed)),
+    arrested: Math.max(0, Math.round(dayStats.arrested)),
+    injured: Math.max(0, Math.round(dayStats.injured)),
+    damage: Math.max(0, Math.round(dayStats.damage)),
+});
+
+const applyDayStatsDelta = (dayStats: DayStats, delta: Partial<DayStats>): DayStats => normalizeDayStats({
+    killed: dayStats.killed + (delta.killed ?? 0),
+    arrested: dayStats.arrested + (delta.arrested ?? 0),
+    injured: dayStats.injured + (delta.injured ?? 0),
+    damage: dayStats.damage + (delta.damage ?? 0),
+});
+
+const getInteractionDayStatsDelta = (zoneId: InteractionZoneId): Partial<DayStats> => {
+    if (zoneId === 'epoch-terminal') {
+        return { injured: -1, damage: -2500 };
+    }
+
+    if (zoneId === 'hazard-console') {
+        return { injured: -2, damage: -9000 };
+    }
+
+    return { injured: -1, damage: -3000 };
+};
+
+const getEventDayStatsDelta = (
+    event: { action: string; npcType: NPCType; targetMood?: NPCMood; targetBehavior?: NPCBehavior },
+    effectiveCount: number,
+): Partial<DayStats> => {
+    const units = Math.max(0, effectiveCount);
+
+    if (event.action === 'SPAWN') {
+        if (event.npcType === NPCType.RIOTER || event.npcType === NPCType.EXTREMIST) {
+            return { injured: Math.ceil(units / 4), damage: units * 2200 };
+        }
+        if (event.npcType === NPCType.DEMONSTRATOR) {
+            return { damage: units * 120 };
+        }
+        if (event.npcType === NPCType.MEDIC || event.npcType === NPCType.FIREFIGHTER) {
+            return { injured: -Math.ceil(units / 3), damage: -units * 250 };
+        }
+    }
+
+    if (event.action === 'DESPAWN') {
+        if (event.npcType === NPCType.RIOTER || event.npcType === NPCType.EXTREMIST || event.npcType === NPCType.DEMONSTRATOR) {
+            return { arrested: Math.ceil(units * 0.75) };
+        }
+        if (event.npcType === NPCType.POLICE || event.npcType === NPCType.RIOT_POLICE || event.npcType === NPCType.SEK) {
+            return { injured: Math.ceil(units * 0.6) };
+        }
+    }
+
+    if (event.action === 'MOOD_CHANGE') {
+        if (event.targetMood === NPCMood.RIOTING) {
+            return { injured: Math.max(1, Math.ceil(units * 0.18)), damage: Math.max(1000, units * 800) };
+        }
+        if (event.targetMood === NPCMood.ANGRY) {
+            return { damage: Math.max(500, units * 220) };
+        }
+        if (event.targetMood === NPCMood.PEACEFUL) {
+            return { damage: -Math.max(300, units * 80) };
+        }
+    }
+
+    if (event.action === 'BEHAVIOR_CHANGE') {
+        if (event.targetBehavior === NPCBehavior.COMBAT || event.targetBehavior === NPCBehavior.THROW) {
+            return { injured: Math.max(1, Math.ceil(units * 0.14)), damage: Math.max(800, units * 550) };
+        }
+        if (event.targetBehavior === NPCBehavior.CLEANUP || event.targetBehavior === NPCBehavior.RETREAT) {
+            return { damage: -Math.max(400, units * 150) };
+        }
+    }
+
+    return {};
 };
 
 const applyMissionNpcEffects = (npcs: NPCData[], zoneId: InteractionZoneId): NPCData[] => {
@@ -256,6 +335,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             const previousMinutes = timeToMinutes(state.gameState.inGameTime);
             const firedSet = new Set(state.firedEventKeys);
             let npcs = [...state.npcs];
+            let dayStats = { ...state.dayStats };
             const moveCommands: { ids: number[], target: [number, number, number] }[] = [];
 
             // Process all events up to current time
@@ -265,6 +345,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
                 if (eventMinutes <= currentMinutes && !firedSet.has(eventKey)) {
                     firedSet.add(eventKey);
+
+                    const countForStats = event.count === -1
+                        ? npcs.filter((npc) => npc.type === event.npcType).length
+                        : Math.max(0, event.count);
+                    dayStats = applyDayStatsDelta(dayStats, getEventDayStatsDelta(event, countForStats));
 
                     if (event.action === 'SPAWN' && event.position) {
                         const maxCanSpawn = Math.max(0, MAX_ACTIVE_NPCS - npcs.length);
@@ -331,6 +416,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
             return {
                 npcs,
+                dayStats,
                 firedEventKeys: Array.from(firedSet),
                 gameState: {
                     ...state.gameState,
@@ -366,6 +452,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const currentMinutes = timeToMinutes(newTime);
         const firedSet = new Set<string>();
         let npcs: NPCData[] = [];
+        let dayStats: DayStats = { killed: 0, arrested: 0, injured: 0, damage: 0 };
 
         EVENT_TIMELINE.forEach((event, index) => {
             const eventKey = `evt-${index}`;
@@ -373,6 +460,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
             if (eventMinutes <= currentMinutes) {
                 firedSet.add(eventKey);
+
+                const countForStats = event.count === -1
+                    ? npcs.filter((npc) => npc.type === event.npcType).length
+                    : Math.max(0, event.count);
+                dayStats = applyDayStatsDelta(dayStats, getEventDayStatsDelta(event, countForStats));
 
                 if (event.action === 'SPAWN' && event.position) {
                     const maxCanSpawn = Math.max(0, MAX_ACTIVE_NPCS - npcs.length);
@@ -397,6 +489,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         workerManager.syncNpcs(npcs);
         set({
             npcs,
+            dayStats,
             firedEventKeys: Array.from(firedSet),
             gameState: { ...state.gameState, inGameTime: newTime, tensionLevel }
         });
@@ -429,6 +522,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const currentMinutes = timeToMinutes(newTime);
         const firedSet = new Set<string>();
         let npcs: NPCData[] = [];
+        let dayStats: DayStats = { killed: 0, arrested: 0, injured: 0, damage: 0 };
 
         EVENT_TIMELINE.forEach((event, index) => {
             const eventKey = `evt-${index}`;
@@ -436,6 +530,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
             if (eventMinutes <= currentMinutes) {
                 firedSet.add(eventKey);
+
+                const countForStats = event.count === -1
+                    ? npcs.filter((npc) => npc.type === event.npcType).length
+                    : Math.max(0, event.count);
+                dayStats = applyDayStatsDelta(dayStats, getEventDayStatsDelta(event, countForStats));
 
                 if (event.action === 'SPAWN' && event.position) {
                     const maxCanSpawn = Math.max(0, MAX_ACTIVE_NPCS - npcs.length);
@@ -460,6 +559,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         workerManager.syncNpcs(npcs);
         set({
             npcs,
+            dayStats,
             firedEventKeys: Array.from(firedSet),
             gameState: { ...state.gameState, inGameTime: newTime, tensionLevel }
         });
@@ -543,6 +643,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const nextMoral = Math.max(0, Math.min(100, state.gameState.moralScore + outcome.moralDelta));
         const nextTension = Math.max(0, Math.min(100, state.gameState.tensionLevel + outcome.tensionDelta));
         const nextNpcs = outcome.wasApplied ? applyMissionNpcEffects(state.npcs, zoneId) : state.npcs;
+        const nextDayStats = outcome.wasApplied
+            ? applyDayStatsDelta(state.dayStats, getInteractionDayStatsDelta(zoneId))
+            : state.dayStats;
 
         if (outcome.wasApplied && nextNpcs !== state.npcs) {
             workerManager.syncNpcs(nextNpcs);
@@ -550,6 +653,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
         return {
             npcs: nextNpcs,
+            dayStats: nextDayStats,
             interactionState: {
                 ...state.interactionState,
                 lastMessage: outcome.message,

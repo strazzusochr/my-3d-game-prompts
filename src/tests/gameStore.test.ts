@@ -283,4 +283,31 @@ describe('gameStore core flow', () => {
 
     expect(useGameStore.getState().gameState.showStatistics).toBe(true);
   });
+
+  it('fills dayStats while timeline events are evaluated', () => {
+    useGameStore.getState().evaluateEvents('12:20');
+    const stats = useGameStore.getState().dayStats;
+
+    expect(stats.injured).toBeGreaterThan(0);
+    expect(stats.damage).toBeGreaterThan(0);
+    expect(stats.arrested).toBeGreaterThanOrEqual(0);
+  });
+
+  it('reduces dayStats pressure after mission interactions', () => {
+    useGameStore.setState((state) => ({
+      ...state,
+      dayStats: { killed: 0, arrested: 3, injured: 6, damage: 20000 },
+    }));
+
+    useGameStore.getState().setNearbyInteraction('epoch-terminal');
+    useGameStore.getState().triggerInteraction();
+    useGameStore.getState().setNearbyInteraction('hazard-console');
+    useGameStore.getState().triggerInteraction();
+
+    const stats = useGameStore.getState().dayStats;
+
+    expect(stats.arrested).toBe(3);
+    expect(stats.injured).toBe(3);
+    expect(stats.damage).toBe(8500);
+  });
 });
