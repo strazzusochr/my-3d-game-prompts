@@ -38,6 +38,8 @@
 - Neuer GO-GO-GO-Zyklus erfolgreich: Browser-Check und Debug-Check ohne Fehler, danach `autonomy:full` komplett bis `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`.
 - Reihenfolgefix umgesetzt: `autonomy:full` baut nun vor Streamstart und verhindert damit fehlende Dist-Dateien beim Start.
 - Nachweislauf nach Reihenfolgefix erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`.
+- HUD-Drag-Entkopplung (commit cee7810): Controls loesen keinen Drag mehr aus dank `shouldBlockDrag`-Guard.
+- Expliziter Drag-Handle-Fix (commit 0184896): Verschieben nur noch ueber dedizierten `data-hud-drag-handle`-Button; `isDragHandleTarget`-Guard blockiert alle anderen MouseDown-Events als Drag-Ausloeser. Tests 243/243 gruen, `AUTONOMY_FULL_OK`.
 - Player-Core-Block am 16.03.2026 ausgebaut: gemeinsames Stadt-/Terrain-Layout extrahiert, Ground-Check, Jump-Arc, Slope-Projektion und einfache Building-Blocker fuer den Player implementiert.
 - Verifikation des Player-Core-Blocks erfolgreich: `npm run lint` gruen, `vitest` 176/176 gruen, `npm run build` gruen.
 - Browser-/Livecheck fuer den Player-Core-Block bestaetigt: lokaler Full-Stack per `npm run dev:all` gestartet, Browser-Seite geoeffnet, Socket-Client-Verbindung im Terminal protokolliert.
