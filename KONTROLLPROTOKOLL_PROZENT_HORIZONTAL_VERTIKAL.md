@@ -111,6 +111,7 @@ Bewertungsstufen:
 | P-051 | HUD-Teilsektionen im rechten Panel sortierbar + persistent gemacht | Vertikal | 100 | PASS | `src/components/ui/HUD.tsx`: Reihenfolge-Store `HUD_RIGHT_SECTION_ORDER_KEY` (Zeile 52), Sanitizer `sanitizeRightSubSectionOrder` (Zeile 59), Drag-Start `beginRightSubSectionDrag` (Zeile 497), Drop-Reorder `onRightSubSectionDrop` (Zeile 508), Render-Reihenfolge `rightSectionOrder.map` (Zeile 667), Sort-Handles NASA/Telemetrie/Mission/Timeline (Zeilen 684/740/792/824) |
 | P-052 | Sort-Reset fuer rechte HUD-Teilsektionen integriert | Vertikal | 100 | PASS | `src/components/ui/HUD.tsx`: Funktion `resetRightSubSectionOrder` (Zeile 550) setzt die persistierte Reihenfolge auf Default; neuer Header-Button `Sort-Reset` (Zeile 664) triggert den Ruecksetzpfad live |
 | P-053 | Socket-Origin-Allowlist fuer Vite-Devports erweitert + Health-Endpunkt integriert | Vertikal | 100 | PASS | `server/server.js`: `parseAllowedOrigins` (Zeile 6) enthaelt jetzt `5173/5174`; `PORT` frueh definiert (Zeile 23); neuer Endpoint `app.get('/health')` (Zeile 49) liefert Live-Status fuer Full-Stack-Checks |
+| P-054 | Full-Stack-Devlauf mit Frontend+Socket live verifiziert | Vertikal | 100 | PASS | `package.json` `dev:all` (Zeile 8) startet Vite+Socket parallel; Livecheck liefert `5173 => HTTP 200` und `3000/health => status: ok` |
 
 ---
 
@@ -133,6 +134,8 @@ Bewertungsstufen:
 | REF-013 | P-053 | `server/server.js` | `parseAllowedOrigins` | 6 | PASS | Default-Allowlist deckt `localhost/127.0.0.1` fuer Ports `5173` und `5174` ab |
 | REF-014 | P-053 | `server/server.js` | `const PORT = Number(process.env.SOCKET_PORT) \|\| 3000` | 23 | PASS | Health-Endpoint und Listener verwenden denselben konsistenten Portwert |
 | REF-015 | P-053 | `server/server.js` | `app.get('/health', ...)` | 49 | PASS | Livecheck liefert `status: ok` + `socketPort` + `allowedOrigins` |
+| REF-016 | P-054 | `package.json` | Script `dev:all` | 8 | PASS | Parallelstart (`vite` + `node server/server.js`) fuer Full-Stack-Livebetrieb |
+| REF-017 | P-054 | `server/server.js` | `app.get('/health', ...)` | 49 | PASS | Endpunkt antwortet waehrend `dev:all` live mit `status: ok` |
 
 ---
 
