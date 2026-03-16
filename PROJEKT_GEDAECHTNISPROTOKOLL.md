@@ -49,6 +49,8 @@
 - Feinschliff-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 186/186 gruen, `npm run build` gruen, Browser-/Livecheck mit echter Socket-Verbindung bestaetigt; temporärer Hintergrundserver danach wieder beendet.
 - NPC-KI-Block am 16.03.2026 ausgebaut: adaptives Eskalations-/Deeskalationsregelwerk fuer Polizei, Agitatoren, Demonstranten und Zivilisten als eigenes KI-Modul eingefuehrt und im Sim-Worker verdrahtet.
 - NPC-KI-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 193/193 gruen, `npm run build` gruen, Browser-/Livecheck mit echter Socket-Verbindung bestaetigt; temporärer Hintergrundserver danach wieder beendet.
+- Missions-Hook-Block am 16.03.2026 ausgebaut: erfolgreiche Interaktionen wirken nun direkt auf NPC-Mood/Behavior (Responder, Security, populationsbezogene Evakuierung pro Zonen-Sektor).
+- Missions-Hook-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 195/195 gruen, `npm run build` gruen, Browser-/Livecheck mit echter Socket-Verbindung bestaetigt; temporärer Hintergrundserver danach wieder beendet.
 
 ## Naechster logischer Schritt
-- Auf Basis der nun adaptiven NPC-KI als naechstes Mission/24h-Szenario durch zusätzliche Folgeereignisse und direkte Event-Hooks in NPC-Reaktionspfade vertiefen.
+- Auf Basis der nun gekoppelten Missions-Hooks als naechstes phasenbasierte 24h-Folgeereignisse (Kettenreaktionen je Zeitfenster) fuer NPC-KI und HUD-Storyline ausbauen.

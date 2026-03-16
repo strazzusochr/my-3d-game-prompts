@@ -31,6 +31,7 @@ vi.mock('../managers/WorkerManager', () => workerState);
 
 import { useGameStore } from '../stores/gameStore';
 import { INITIAL_MISSION_PROGRESS } from '../systems/interactionZones';
+import { NPCBehavior, NPCMood, NPCType, EmotionalState } from '../types/enums';
 
 const resetStore = () => {
   useGameStore.setState({
@@ -138,5 +139,91 @@ describe('gameStore core flow', () => {
 
     expect(state.interactionState.missionProgress.prioritizedZoneIds).toHaveLength(0);
     expect(state.interactionState.lastMessage).toContain('Hazard');
+  });
+
+  it('applies hazard mission effects to responders and security units', () => {
+    useGameStore.setState((state) => ({
+      ...state,
+      npcs: [
+        {
+          id: 9001,
+          type: NPCType.MEDIC,
+          position: [10, 1.2, 8],
+          rotation: 0,
+          outfitColor: '#ffffff',
+          emotionalState: EmotionalState.NEUTRAL,
+          mood: NPCMood.PEACEFUL,
+          behavior: NPCBehavior.IDLE,
+        },
+        {
+          id: 9002,
+          type: NPCType.POLICE,
+          position: [8, 1.2, 9],
+          rotation: 0,
+          outfitColor: '#1122aa',
+          emotionalState: EmotionalState.NEUTRAL,
+          mood: NPCMood.PEACEFUL,
+          behavior: NPCBehavior.PATROL,
+        },
+      ],
+    }));
+
+    useGameStore.getState().setNearbyInteraction('epoch-terminal');
+    useGameStore.getState().triggerInteraction();
+    useGameStore.getState().setNearbyInteraction('hazard-console');
+    useGameStore.getState().triggerInteraction();
+
+    const state = useGameStore.getState();
+    const medic = state.npcs.find((npc) => npc.id === 9001)!;
+    const police = state.npcs.find((npc) => npc.id === 9002)!;
+
+    expect(medic.behavior).toBe(NPCBehavior.CLEANUP);
+    expect(medic.mood).toBe(NPCMood.TENSE);
+    expect(police.behavior).toBe(NPCBehavior.SHIELD_WALL);
+    expect(police.mood).toBe(NPCMood.TENSE);
+  });
+
+  it('applies evacuation board effects only to the addressed zone sector', () => {
+    useGameStore.setState((state) => ({
+      ...state,
+      npcs: [
+        {
+          id: 9101,
+          type: NPCType.CIVILIAN,
+          position: [-12, 1.2, 18],
+          rotation: 0,
+          outfitColor: '#bbbbbb',
+          emotionalState: EmotionalState.PEACEFUL,
+          mood: NPCMood.PEACEFUL,
+          behavior: NPCBehavior.WANDER,
+        },
+        {
+          id: 9102,
+          type: NPCType.CIVILIAN,
+          position: [14, 1.2, -16],
+          rotation: 0,
+          outfitColor: '#bbbbbb',
+          emotionalState: EmotionalState.PEACEFUL,
+          mood: NPCMood.PEACEFUL,
+          behavior: NPCBehavior.WANDER,
+        },
+      ],
+    }));
+
+    useGameStore.getState().setNearbyInteraction('epoch-terminal');
+    useGameStore.getState().triggerInteraction();
+    useGameStore.getState().setNearbyInteraction('hazard-console');
+    useGameStore.getState().triggerInteraction();
+    useGameStore.getState().setNearbyInteraction('evacuation-board-north');
+    useGameStore.getState().triggerInteraction();
+
+    const state = useGameStore.getState();
+    const northCivilian = state.npcs.find((npc) => npc.id === 9101)!;
+    const southCivilian = state.npcs.find((npc) => npc.id === 9102)!;
+
+    expect(northCivilian.behavior).toBe(NPCBehavior.FLEE);
+    expect(northCivilian.mood).toBe(NPCMood.PANICKED);
+    expect(southCivilian.behavior).toBe(NPCBehavior.WANDER);
+    expect(southCivilian.mood).toBe(NPCMood.PEACEFUL);
   });
 });

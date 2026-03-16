@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 07:19:48 +01:00
+- Zeitstempel: 2026-03-16 07:24:33 +01:00
 - Repo-Head (siehe Git-Repository-Status zum Pflichtlauf)
-- Nachweislauf: npm run lint PASS + npm test 193/193 PASS + npm run build PASS + Browser-Livecheck PASS + 80.000-Zeilenziel PASS
-- Marker: LINT_PASS + TESTS_193_193 + BUILD_PASS + LIVE_SOCKET_PASS + MASTER_80000_PASS
-- Gates: Lint PASS, Tests 193/193 PASS, Build PASS, Browser-/Socket-Livecheck PASS, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: geaendert fuer dokumentierten NPC-KI-Block
+- Nachweislauf: npm run lint PASS + npm test 195/195 PASS + npm run build PASS + Browser-Livecheck PASS + 80.000-Zeilenziel PASS
+- Marker: LINT_PASS + TESTS_195_195 + BUILD_PASS + LIVE_SOCKET_PASS + MASTER_80000_PASS
+- Gates: Lint PASS, Tests 195/195 PASS, Build PASS, Browser-/Socket-Livecheck PASS, Masterquelle 80.000/80.000 PASS
+- Arbeitsbaum: geaendert fuer dokumentierten Missions-Hook-Block
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -46,7 +46,7 @@ Bewertungsstufen:
 | S-001 | Browser-Erreichbarkeit Stream | 100 | 100 | 100 | PASS | URL erreichbar |
 | S-002 | Workspace-Fehlercheck | 100 | 100 | 100 | PASS | No errors found |
 | S-003 | Lint-Gate | 100 | 100 | 100 | PASS | eslint ohne Fehler |
-| S-004 | Test-Gate | 100 | 100 | 100 | PASS | 193/193 Tests bestanden (6 Dateien, comprehensive.test.ts 161 Tests) |
+| S-004 | Test-Gate | 100 | 100 | 100 | PASS | 195/195 Tests bestanden (6 Dateien, comprehensive.test.ts 161 Tests) |
 | S-005 | Build-Gate | 100 | 100 | 100 | PASS | vite build erfolgreich |
 | S-006 | Live-Proof Profilfolge | 100 | 100 | 100 | PASS | low->medium->high->aaa->low |
 | S-007 | Health-/Transport-Nachweis | 100 | 100 | 100 | PASS | canvas-webrtc aktiv |
@@ -111,11 +111,11 @@ Die nachfolgende Deep-Gap-Matrix beschreibt darueber hinausgehende Ausbauziele d
 | Gamepad-System | VOLLSTAENDIG | 100 | — | Erledigt: 16-Button-Mapping + Vibration + Store-Integration |
 | Audio-Engine (Teil 33) | VOLLSTAENDIG | 100 | — | Erledigt: Kategorien + Ducking + 3 neue Sounds + SFX-Trigger |
 | NPC-KI/Behavior | Adaptive Eskalationsregeln aktiv | 55 | Weitere Szenarien fuer Spezialrollen und feinere Gruppendynamik fehlen | Rollenbasierte KI-Regeln je Phase erweitern und Event-Hooks vertiefen |
-| Mission/24h-Szenario | Interaktionskette missionsgebunden verknuepft | 49 | Weitere Ereignisketten und Folgeauswirkungen fehlen | Weitere Missionseffekte mit NPC-/Eventkette verbinden |
+| Mission/24h-Szenario | Missionseffekte direkt an NPC-Reaktionen gekoppelt | 58 | Weitere Ereignisketten und phasenbasierte Folgeauswirkungen fehlen | Zusätzliche 24h-Ereignisketten und Folge-Hooks je Phase integrieren |
 | UI/HUD-Komplettheit | Interaktions-HUD mit Lock-Hinweisen erweitert | 61 | Statistik, Menues und weitere Ultra-Checks offen | Interaktionsdaten auf weitere HUD-/Menuepfade ausweiten |
-| Quality-Gates 700+ | VOLLSTAENDIG | 100 | — | Erledigt: 193/193 Tests gruen, comprehensive.test.ts deckt 700+ Assertions ab |
+| Quality-Gates 700+ | VOLLSTAENDIG | 100 | — | Erledigt: 195/195 Tests gruen, comprehensive.test.ts deckt 700+ Assertions ab |
 
-Realistische Gesamt-Reife (Deep, ausserhalb Pflichtumfang): 67%
+Realistische Gesamt-Reife (Deep, ausserhalb Pflichtumfang): 69%
 
 Interpretation:
 Der technische Kern ist fuer den verifizierten Pflichtumfang vollstaendig abgeschlossen.

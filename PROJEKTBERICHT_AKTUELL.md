@@ -251,3 +251,16 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - `npm run lint`: erfolgreich.
 - `npm run build`: erfolgreich.
 - Livecheck: `npm run dev:all` gestartet, Browserseite geoeffnet, Socket-Server meldete reale Client-Verbindung; der Hintergrundprozess wurde anschliessend wieder beendet.
+
+### 8.12 Mission/24h-Hooks in NPC-Reaktionen vom 16.03.2026
+- Die Interaktionskette wirkt jetzt nicht nur auf Meta-Werte, sondern direkt auf die Live-NPCs.
+- Bei Hazard-Abschluss werden Einsatzkraefte (Medics/Firefighters) in `CLEANUP` und Patrouillen-Polizei in `SHIELD_WALL` ueberfuehrt.
+- Evakuierungsboards schalten populationsbezogen und sektoral (Nord/West/Sued) auf `FLEE`/`PANICKED`, waehrend Nicht-Zielsektoren stabil bleiben.
+- Diese Kopplung verbindet erstmals Missionseingaben direkt mit der 24h-Lagesimulation und schafft sichtbare Folgeauswirkungen im Crowd-Verhalten.
+
+### 8.13 Mission-Hook-Nachweis
+- `src/tests/gameStore.test.ts` wurde um zielgerichtete NPC-Folgeeffekt-Tests erweitert (Responder/Security + sektorale Evakuierung).
+- `npx vitest run`: erfolgreich, 195 von 195 Tests bestanden.
+- `npm run lint`: erfolgreich.
+- `npm run build`: erfolgreich.
+- Livecheck: `npm run dev:all` gestartet, Browserseite geoeffnet, Socket-Server meldete reale Client-Verbindung; der Hintergrundprozess wurde anschliessend wieder beendet.
