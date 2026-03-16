@@ -87,6 +87,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Abschlussmarker des Gesamtlaufs erneut erreicht: `AUTONOMY_FULL_OK`.
 - Ergebnis: Der GO-GO-GO-Standard ist fuer den aktuellen Stand stabil und konsistent reproduzierbar.
 
+### 2.0.11 Weitere GO-GO-GO Wiederholung vom 16.03.2026
+- Der Pflichtablauf wurde erneut vollstaendig ausgefuehrt: Browserdurchlauf, Debug-Pruefung, dann `autonomy:full`.
+- Quality-Gates blieben stabil: `lint` gruen, `vitest` 7 von 7 gruen, `build` erfolgreich.
+- Proof-Teil lief wieder mit kompletter Profilkette bis `AUTONOMY_PROOF_OK`.
+- Gesamtlauf endete erneut mit `AUTONOMY_FULL_OK`.
+- Ergebnis: Die Pipeline bleibt auch in weiterer Wiederholung stabil reproduzierbar.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
