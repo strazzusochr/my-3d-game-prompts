@@ -147,6 +147,12 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - End-to-End bleibt stabil: `AUTONOMY_FULL_OK` und `AUTONOMY_PROOF_OK`, Lint gruen, Build gruen, Teststand unveraendert 253/253.
 - Ergebnis: P-45 ist nicht nur umgesetzt, sondern nach Neustart-Methodik erneut reproduzierbar verifiziert.
 
+### 2.0.49 Port-Resolver Security-Regressionstest vom 16.03.2026
+- Neue Testsuite `src/tests/portCheckSecurity.test.ts` ergaenzt und an die bestehende Vitest-Pipeline angebunden.
+- Abdeckung erweitert um drei kritische Security-Pfade: blockierter Wunschport mit eindeutiger Fallback-Aufloesung ohne Port-Duplikate, konsistentes Env-Kompatibilitaetsmapping sowie frueher Fehlerabbruch bei ungueltigem Portwert.
+- Verifikation erfolgreich: `npm run autonomy:full` erneut komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 256/256, Lint und Build gruen.
+- Ergebnis: Die Port-Sicherheitslogik ist jetzt nicht nur implementiert, sondern auch automatisiert regressionsgesichert.
+
 ### 2.0.1 Viewer- und Lastnachweis vom 16.03.2026
 - Zwei weitere Viewer-Seiten wurden geoeffnet und der Health-Endpunkt achtmal im Abstand von rund 1,5 Sekunden abgefragt.
 - Der Stream benoetigte eine kurze Aufwaermphase: zuerst `viewerFps=0`, danach stabile Werte zwischen 22 und 24 FPS.

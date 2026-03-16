@@ -22,6 +22,8 @@
 - Doppelter Nachweis erfolgreich: `npm run autonomy:proof` gruen und danach `npm run autonomy:full` erneut komplett gruen mit `AUTONOMY_FULL_OK`/`AUTONOMY_PROOF_OK`.
 - P-45 Deep-Kontrolle von vorne am 16.03.2026 abgeschlossen: Sicherheitskriterien per Code/Config-Scan gegen `package.json`, `server/*`, `.env.example`, `.github/workflows/security-ci.yml`, `.github/dependabot.yml` erneut verifiziert.
 - Vollstaendiger Re-Nachweis fuer P-45 erfolgreich: `npm run security:memory-validate` gruen, `npm run port:check` gruen, `npm run autonomy:proof` gruen, `npm run autonomy:full` gruen (inkl. 253/253 Tests).
+- Port-Resolver-Regressionstest am 16.03.2026 ergaenzt: neue Suite `src/tests/portCheckSecurity.test.ts` prueft blockierten Wunschport mit eindeutiger Fallback-Aufloesung, Env-Mapping und Invalid-Port-Fehlerpfad.
+- Vollnachweis nach Testausbau erfolgreich: `npm run autonomy:full` erneut komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 256/256.
 - Persistente Nutzerpraeferenzen wurden um die neuen Ablaufregeln erweitert.
 - Aktueller Repository-Stand enthaelt bereits Test-, Lint- und Streaming-Anpassungen aus der vorigen Arbeitsphase.
 - Fuer den aktuellen Schritt wird ein professioneller Projektbericht erzeugt und der gegenwaertige Stand festgehalten.
@@ -240,4 +242,4 @@
 - Vollverifikation nach Replay-Delta-Anomalieindikator erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 253/253.
 
 ## Naechster logischer Schritt
-- Nach Delta-Anomalieindikator folgt als naechster Ausbaupunkt ein Replay-Delta-Konsistenzindikator (Stabilitaet ueber mehrere Checkpoints) mit kompakter Verlaufsampel.
+- Nach abgesicherter Port-Sicherheitslogik folgt als naechster Ausbaupunkt ein Replay-Delta-Konsistenzindikator (Stabilitaet ueber mehrere Checkpoints) mit kompakter Verlaufsampel.

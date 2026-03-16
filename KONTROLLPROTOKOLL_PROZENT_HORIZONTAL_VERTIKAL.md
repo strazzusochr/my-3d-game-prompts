@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 19:17:10 +01:00
+- Zeitstempel: 2026-03-16 19:24:25 +01:00
 - Repo-Head: main synchron auf lokal + origin/main + github/main (Head per `git rev-parse --short HEAD` pruefbar)
 - Nachweislauf: Post-Commit/Post-Push-Vollnachweis erfolgreich (git clean-check + autonomy:full)
-- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_253_253 + BUILD_PASS + P45_DEEP_RECHECK_FROM_START_PASS + LINE_1_107_RECHECK_PASS + CLEAN_WORKTREE_PASS + PUSH_ORIGIN_PASS + PUSH_GITHUB_PASS + MASTER_80000_PASS
-- Gates: Clean-Status PASS (`git status --short` leer), Lint PASS, Tests 253/253 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport aktiv, Push nach `origin/main` und `github/main` PASS, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: Kontroll-/Security-Stand committet und auf beide Remotes synchronisiert; Protokoll auf finalen Ist-Stand angehoben
+- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_256_256 + BUILD_PASS + P45_DEEP_RECHECK_FROM_START_PASS + LINE_1_107_RECHECK_PASS + PORT_RESOLVER_TESTS_PASS + CLEAN_WORKTREE_PASS + PUSH_ORIGIN_PASS + PUSH_GITHUB_PASS + MASTER_80000_PASS
+- Gates: Clean-Status PASS (`git status --short` leer), Lint PASS, Tests 256/256 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport aktiv, Push nach `origin/main` und `github/main` PASS, Masterquelle 80.000/80.000 PASS
+- Arbeitsbaum: Kontroll-/Security-Stand committet und auf beide Remotes synchronisiert; Port-Resolver-Securitytests als neuer regressionssicherer Gate-Baustein integriert
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -46,7 +46,7 @@ Bewertungsstufen:
 | S-001 | Browser-Erreichbarkeit Stream | 100 | 100 | 100 | PASS | URL erreichbar + manueller Browseraufruf 127.0.0.1:3001 bestaetigt |
 | S-002 | Workspace-Fehlercheck | 100 | 100 | 100 | PASS | No errors found |
 | S-003 | Lint-Gate | 100 | 100 | 100 | PASS | eslint ohne Fehler |
-| S-004 | Test-Gate | 100 | 100 | 100 | PASS | 253/253 Tests bestanden (12 Dateien, Replay-Cooldown-Band-Tests erweitert) |
+| S-004 | Test-Gate | 100 | 100 | 100 | PASS | 256/256 Tests bestanden (13 Dateien inkl. portCheckSecurity.test.ts) |
 | S-005 | Build-Gate | 100 | 100 | 100 | PASS | vite build erfolgreich |
 | S-006 | Live-Proof Profilfolge | 100 | 100 | 100 | PASS | low->medium->high->aaa->low |
 | S-007 | Health-/Transport-Nachweis | 100 | 100 | 100 | PASS | canvas-webrtc aktiv |
@@ -105,6 +105,7 @@ Bewertungsstufen:
 | P-045 | Security-Hardening und Supply-Chain-CI umgesetzt | Vertikal | 100 | PASS | Deep-Recheck von vorne ausgefuehrt: Code/Config-Scan + `security:memory-validate` + `port:check` + `autonomy:proof` + `autonomy:full` alle gruen; Status reproduzierbar bestaetigt |
 | P-046 | Port-Resolver als Runtime-Quelle in Stream/Autonomy verdrahtet | Vertikal | 100 | PASS | `port-check` als Modul exportiert, sicherer Stream-Wrapper aktiv, `autonomy:full` nutzt aufgeloeste Ports fuer BASE_URL/Health; Vollproof erneut gruen |
 | P-047 | Port-Resolver in standalone `autonomy:proof` aktiviert | Vertikal | 100 | PASS | `autonomy:proof` setzt aufgeloeste Ports fuer BASE_URL/Health, Standalone-Proof und anschliessender Vollproof gruen |
+| P-048 | Port-Resolver Security-Tests regressionssicher erweitert | Vertikal | 100 | PASS | Neue Vitest-Suite `src/tests/portCheckSecurity.test.ts` verifiziert Fallback-Eindeutigkeit bei blockiertem Wunschport, Env-Mapping und Invalid-Port-Fehlerpfad; Vollproof danach 256/256 gruen |
 
 ---
 
@@ -149,7 +150,7 @@ Die nachfolgende Deep-Gap-Matrix beschreibt darueber hinausgehende Ausbauziele d
 | NPC-KI/Behavior | Rollen-Automatik + Korrelations-Folgeevents + trendkorrelierte Branch-Reaktionen aktiv | 93 | Gegenseitige Fraktionsreaktionen und adaptive Schwellwerte fehlen noch | Eskalations-Gegenlogik und adaptive Triggerkurven integrieren |
 | Mission/24h-Szenario | Aftermath-Nacht-Kette + Korrelationsfolgeevents + gewichtete, trend-, fenster- und mehrpunktgekoppelte Missions-Ergebnisbaeume aktiv | 100 | — | Erledigt: Mehrpunkt-Momentum/Turbulenz als Triggerbasis integriert |
 | UI/HUD-Komplettheit | Operations-Korrelation + Folgeevent-Badges + Trendlinien + gewichtete und trendkorrelierte Branches sichtbar; Spawn-Neonmarker inkl. Feintuning, Phasenkalibrierung, Dichtepriorisierung und Dringlichkeitsstufen aktiv | 100 | — | Erledigt: Spawn-Ort-Visualisierung zeitgesteuert (T-10..T-5), entzerrt, je Tagesphase kalibriert, bei Last priorisiert und countdown-sensitiv hervorgehoben |
-| Quality-Gates 700+ | VOLLSTAENDIG | 100 | — | Erledigt: 253/253 Tests gruen, comprehensive.test.ts deckt 700+ Assertions ab |
+| Quality-Gates 700+ | VOLLSTAENDIG | 100 | — | Erledigt: 256/256 Tests gruen, comprehensive.test.ts deckt 700+ Assertions ab |
 
 Realistische Gesamt-Reife (Deep, ausserhalb Pflichtumfang): 100%
 
