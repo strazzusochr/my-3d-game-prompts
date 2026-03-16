@@ -237,13 +237,6 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Ergebnis: jedes gezeigte HUD aus den Screens kann im Edit-Modus einzeln verschoben, minimiert und ueber `-3` bis `+3` skaliert werden.
 - Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Tests weiterhin 243/243 gruen.
 
-### 2.0.33 Expliziter Drag-Handle pro HUD-Panel vom 16.03.2026
-- Problem: Beim Verschieben eines Panels bewegten sich fast alle anderen Panels mit, da jeder MouseDown-Event (auch von Buttons) als Drag-Start interpretiert wurde.
-- Loesung: Neuer expliziter Drag-Handle `[data-hud-drag-handle="true"]` pro Panel; `startPanelDrag` reagiert nur noch, wenn das Klickziel exakt auf diesem Handle liegt (`isDragHandleTarget`-Guard).
-- Jedes Panel-Control-Set hat nun einen sichtbaren `□`-Drag-Handle-Button links; Min/Open, Zoom-Plus, Zoom-Minus und Scale-Buttons loesen keinen Drag mehr aus.
-- Commits: `cee7810` (entkoppelt panel-controls von drag-events), `0184896` (verschieben nur noch ueber expliziten drag-handle).
-- Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Tests 243/243 gruen.
-
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
