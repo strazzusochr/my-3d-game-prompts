@@ -114,6 +114,7 @@ Bewertungsstufen:
 | P-054 | Full-Stack-Devlauf mit Frontend+Socket live verifiziert | Vertikal | 100 | PASS | `package.json` `dev:all` (Zeile 8) startet Vite+Socket parallel; Livecheck liefert `5173 => HTTP 200` und `3000/health => status: ok` |
 | P-055 | Reproduzierbarer Live-Verify-Check als Skript integriert und ausgefuehrt | Vertikal | 100 | PASS | `package.json` Script `verify:live` (Zeile 24) fuehrt `scripts/verify-live-stack.mjs` aus; Lauf mit `VITE_PORT=5175` + `SOCKET_PORT=3000` liefert `LIVE_STACK_OK` |
 | P-056 | Schritt nach Verwerfen sauber neu aufgesetzt und erneut verifiziert | Vertikal | 100 | PASS | Clean-Start bestaetigt (`git status` sauber), danach erneut `lint + build` sowie `verify:live` mit `VITE_PORT=5175`/`SOCKET_PORT=3000`; Ergebnis erneut `LIVE_STACK_OK` |
+| P-057 | Robuster Full-Stack-Starter `dev:all:safe` integriert und live verifiziert | Vertikal | 100 | PASS | `package.json` Script `dev:all:safe` (Zeile 9) startet `scripts/dev-all-safe.mjs`; Script loest freie Ports auf, startet Vite+Socket robust und liefert Portmarker; anschliessender `verify:live` Lauf (`VITE_PORT=3001`, `SOCKET_PORT=3000`) ergibt `LIVE_STACK_OK` |
 
 ---
 
@@ -144,6 +145,12 @@ Bewertungsstufen:
 | REF-021 | P-055 | `scripts/verify-live-stack.mjs` | `console.log('LIVE_STACK_OK')` | 53 | PASS | Erfolgsmarker fuer den Kontrollnachweis |
 | REF-022 | P-056 | `package.json` | Script `verify:live` | 24 | PASS | Derselbe Einstiegspunkt wurde im Neuaufsetzungs-Lauf erneut verwendet |
 | REF-023 | P-056 | `scripts/verify-live-stack.mjs` | `console.log('LIVE_STACK_OK')` | 53 | PASS | Erfolgsmarker im wiederholten Neuaufsetzungs-Lauf erneut erreicht |
+| REF-024 | P-057 | `package.json` | Script `dev:all:safe` | 9 | PASS | Neuer robuster Einstiegspunkt fuer Full-Stack-Start |
+| REF-025 | P-057 | `scripts/dev-all-safe.mjs` | `resolvePorts('all', ...)` | 15 | PASS | Konfliktfreie Portaufloesung vor Prozessstart |
+| REF-026 | P-057 | `scripts/dev-all-safe.mjs` | `console.log(DEV_ALL_SAFE_PORTS ...)` | 21 | PASS | Portmarker fuer reproduzierbare Folgechecks |
+| REF-027 | P-057 | `scripts/dev-all-safe.mjs` | `spawn('npm', ['run', 'dev'])` | 23 | PASS | Start des Vite-Prozesses im Safe-Runner |
+| REF-028 | P-057 | `scripts/dev-all-safe.mjs` | `spawn('node', ['server/server.js'])` | 30 | PASS | Start des Socket-Servers im Safe-Runner |
+| REF-029 | P-057 | `scripts/dev-all-safe.mjs` | `shutdown` | 44 | PASS | Kontrolliertes Terminieren beider Child-Prozesse |
 
 ---
 
