@@ -109,6 +109,8 @@ export const HUD = () => {
     const activeRoleResponses = [
         { key: 'dyn-evening-reinforcement', label: 'Hundertschaft dynamisch aktiviert', color: '#88ddff' },
         { key: 'dyn-late-triage', label: 'Triage-Korridor dynamisch aktiv', color: '#99ffcc' },
+        { key: 'dyn-high-medical-relief', label: 'Medical Relief (HIGH) aktiv', color: '#66ffcc' },
+        { key: 'dyn-critical-lockdown', label: 'SEK Lockdown (CRITICAL) aktiv', color: '#ff8888' },
     ].filter((response) => firedEventKeys.includes(response.key));
     const operationsInsight = getOperationsInsight({
         trendHistory: roleTrendHistory,

@@ -4,6 +4,7 @@ import { workerManager } from '../managers/WorkerManager';
 import { EVENT_TIMELINE, TENSION_TIMELINE, PHASE_DESCRIPTIONS, NPC_COLORS, MAX_ACTIVE_NPCS, timeToMinutes } from '../systems/eventScheduler';
 import { INITIAL_MISSION_PROGRESS, type InteractionZoneId, applyInteractionOutcome } from '../systems/interactionZones';
 import { applyMissionPhaseHooks } from '../systems/missionPhaseHooks';
+import { getOperationsInsight } from '../systems/operationsInsights';
 import { io } from 'socket.io-client';
 
 declare global {
@@ -244,6 +245,28 @@ const applyNpcState = (
     emotionalState: targetMood ? moodToEmotionalState(targetMood) : npc.emotionalState,
 });
 
+const getMissionCompletionPercent = (progress: typeof INITIAL_MISSION_PROGRESS) => {
+    const completed =
+        (progress.epochBriefingVerified ? 1 : 0) +
+        (progress.hazardMapPrepared ? 1 : 0) +
+        Math.min(progress.prioritizedZoneIds.length, 3);
+    return Math.round((completed / 5) * 100);
+};
+
+const getActiveHooks = (minutes: number, progress: typeof INITIAL_MISSION_PROGRESS) => {
+    let active = 0;
+    if (minutes >= 12 * 60 && minutes < 18 * 60 && progress.epochBriefingVerified) active += 1;
+    if (minutes >= 18 * 60 && progress.hazardMapPrepared) active += 1;
+    if (minutes >= 18 * 60 && progress.prioritizedZoneIds.length > 0) active += 1;
+    if (minutes >= 21 * 60 && progress.prioritizedZoneIds.length >= 3) active += 1;
+    return active;
+};
+
+const getPanicRatioPercent = (npcs: NPCData[]) => {
+    const panicCount = npcs.filter((npc) => npc.mood === NPCMood.PANICKED || npc.mood === NPCMood.RIOTING).length;
+    return npcs.length > 0 ? Math.round((panicCount / npcs.length) * 100) : 0;
+};
+
 const spawnDynamicWave = (
     npcs: NPCData[],
     type: NPCType,
@@ -268,6 +291,8 @@ const applyDynamicRoleResponses = (
     dayStats: DayStats,
     firedSet: Set<string>,
     currentMinutes: number,
+    missionProgress: typeof INITIAL_MISSION_PROGRESS,
+    roleTrendHistory: RoleTrendPoint[],
 ): WorldReplayState => {
     let nextNpcs = npcs;
     let nextDayStats = dayStats;
@@ -293,6 +318,49 @@ const applyDynamicRoleResponses = (
             nextNpcs = spawned;
             nextDayStats = applyDayStatsDelta(nextDayStats, { injured: -2, damage: -900 });
             firedSet.add('dyn-late-triage');
+        }
+    }
+
+    const insightHistory = upsertRoleTrendPoint(
+        roleTrendHistory,
+        buildRoleTrendPoint(minutesToClock(currentMinutes), nextNpcs),
+        MAX_ROLE_TREND_POINTS,
+    );
+
+    const insight = getOperationsInsight({
+        trendHistory: insightHistory,
+        dayStats: nextDayStats,
+        missionCompletionPercent: getMissionCompletionPercent(missionProgress),
+        panicRatioPercent: getPanicRatioPercent(nextNpcs),
+        activeHooks: getActiveHooks(currentMinutes, missionProgress),
+        maxHooks: 4,
+        activeDynamicResponses: ['dyn-evening-reinforcement', 'dyn-late-triage', 'dyn-high-medical-relief', 'dyn-critical-lockdown']
+            .filter((key) => firedSet.has(key)).length,
+    });
+
+    if (
+        insight.priority !== 'low' &&
+        currentMinutes >= 17 * 60 &&
+        !firedSet.has('dyn-high-medical-relief')
+    ) {
+        const spawned = spawnDynamicWave(nextNpcs, NPCType.MEDIC, 2, [34, 0, 22], 8, NPCMood.TENSE, NPCBehavior.CLEANUP);
+        if (spawned !== nextNpcs) {
+            nextNpcs = spawned;
+            nextDayStats = applyDayStatsDelta(nextDayStats, { injured: -1, damage: -700 });
+            firedSet.add('dyn-high-medical-relief');
+        }
+    }
+
+    if (
+        insight.priority === 'critical' &&
+        currentMinutes >= 20 * 60 &&
+        !firedSet.has('dyn-critical-lockdown')
+    ) {
+        const spawned = spawnDynamicWave(nextNpcs, NPCType.SEK, 4, [6, 0, 44], 7, NPCMood.TENSE, NPCBehavior.SURROUND);
+        if (spawned !== nextNpcs) {
+            nextNpcs = spawned;
+            nextDayStats = applyDayStatsDelta(nextDayStats, { injured: -2, damage: -1200 });
+            firedSet.add('dyn-critical-lockdown');
         }
     }
 
@@ -356,7 +424,7 @@ const buildRoleTrendHistoryToMinutes = (
     sorted.forEach((minutes) => {
         const replay = replayWorldStateToMinutes(minutes);
         const hooked = applyMissionPhaseHooks(replay.npcs, minutes, missionProgress);
-        const dynamic = applyDynamicRoleResponses(hooked, replay.dayStats, replay.firedSet, minutes);
+        const dynamic = applyDynamicRoleResponses(hooked, replay.dayStats, replay.firedSet, minutes, missionProgress, history);
         history = upsertRoleTrendPoint(history, buildRoleTrendPoint(minutesToClock(minutes), dynamic.npcs));
     });
 
@@ -604,7 +672,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
             const currentPhaseLabel = getPhaseLabelForMinutes(currentMinutes, state.gameState.currentPhaseLabel);
 
             npcs = applyMissionPhaseHooks(npcs, currentMinutes, state.interactionState.missionProgress);
-            const dynamicState = applyDynamicRoleResponses(npcs, dayStats, firedSet, currentMinutes);
+            const dynamicState = applyDynamicRoleResponses(
+                npcs,
+                dayStats,
+                firedSet,
+                currentMinutes,
+                state.interactionState.missionProgress,
+                state.roleTrendHistory,
+            );
             npcs = dynamicState.npcs;
             dayStats = dynamicState.dayStats;
 
@@ -658,7 +733,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const currentMinutes = timeToMinutes(newTime);
         const rebuilt = replayWorldStateToMinutes(currentMinutes);
         const npcs = applyMissionPhaseHooks(rebuilt.npcs, currentMinutes, state.interactionState.missionProgress);
-        const dynamicState = applyDynamicRoleResponses(npcs, rebuilt.dayStats, rebuilt.firedSet, currentMinutes);
+        const dynamicState = applyDynamicRoleResponses(
+            npcs,
+            rebuilt.dayStats,
+            rebuilt.firedSet,
+            currentMinutes,
+            state.interactionState.missionProgress,
+            [],
+        );
         const tensionLevel = getTensionLevelForMinutes(currentMinutes);
         const currentPhaseLabel = getPhaseLabelForMinutes(currentMinutes, state.gameState.currentPhaseLabel);
         const roleTrendHistory = buildRoleTrendHistoryToMinutes(currentMinutes, state.interactionState.missionProgress);
@@ -697,7 +779,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const currentMinutes = timeToMinutes(newTime);
         const rebuilt = replayWorldStateToMinutes(currentMinutes);
         const npcs = applyMissionPhaseHooks(rebuilt.npcs, currentMinutes, state.interactionState.missionProgress);
-        const dynamicState = applyDynamicRoleResponses(npcs, rebuilt.dayStats, rebuilt.firedSet, currentMinutes);
+        const dynamicState = applyDynamicRoleResponses(
+            npcs,
+            rebuilt.dayStats,
+            rebuilt.firedSet,
+            currentMinutes,
+            state.interactionState.missionProgress,
+            [],
+        );
         const tensionLevel = getTensionLevelForMinutes(currentMinutes);
         const currentPhaseLabel = getPhaseLabelForMinutes(currentMinutes, state.gameState.currentPhaseLabel);
         const roleTrendHistory = buildRoleTrendHistoryToMinutes(currentMinutes, state.interactionState.missionProgress);

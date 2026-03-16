@@ -350,6 +350,22 @@ describe('gameStore core flow', () => {
     expect(state.npcs.filter((npc) => npc.type === NPCType.MEDIC).length).toBeGreaterThanOrEqual(5);
   });
 
+  it('triggers high-priority medical relief from correlation engine', () => {
+    useGameStore.getState().evaluateEvents('19:00');
+    const state = useGameStore.getState();
+
+    expect(state.firedEventKeys).toContain('dyn-high-medical-relief');
+    expect(state.npcs.filter((npc) => npc.type === NPCType.MEDIC).length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('triggers critical lockdown reinforcement from correlation engine', () => {
+    useGameStore.getState().evaluateEvents('21:00');
+    const state = useGameStore.getState();
+
+    expect(state.firedEventKeys).toContain('dyn-critical-lockdown');
+    expect(state.npcs.filter((npc) => npc.type === NPCType.SEK).length).toBeGreaterThanOrEqual(29);
+  });
+
   it('rebuilds dynamic role responses correctly when rewinding', () => {
     useGameStore.getState().evaluateEvents('21:00');
     useGameStore.getState().rewindHour();
@@ -358,8 +374,9 @@ describe('gameStore core flow', () => {
 
     expect(state.gameState.inGameTime).toBe('20:00');
     expect(state.firedEventKeys).toContain('dyn-evening-reinforcement');
+    expect(state.firedEventKeys).toContain('dyn-high-medical-relief');
     expect(state.firedEventKeys).not.toContain('dyn-late-triage');
-    expect(state.npcs.filter((npc) => npc.type === NPCType.MEDIC)).toHaveLength(0);
+    expect(state.npcs.filter((npc) => npc.type === NPCType.MEDIC).length).toBeGreaterThanOrEqual(2);
     expect(state.roleTrendHistory.length).toBeGreaterThan(0);
     expect(state.roleTrendHistory.at(-1)?.time).toBe('20:00');
   });
