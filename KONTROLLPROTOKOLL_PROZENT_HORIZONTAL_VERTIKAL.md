@@ -24,7 +24,7 @@ Bewertungsstufen:
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
 - Zeitstempel: 2026-03-16 19:17:10 +01:00
-- Repo-Head: f734434 (lokal + origin/main + github/main synchron)
+- Repo-Head: 6bf9495 (lokal + origin/main + github/main synchron)
 - Nachweislauf: Post-Commit/Post-Push-Vollnachweis erfolgreich (git clean-check + autonomy:full)
 - Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_253_253 + BUILD_PASS + P45_DEEP_RECHECK_FROM_START_PASS + LINE_1_107_RECHECK_PASS + CLEAN_WORKTREE_PASS + PUSH_ORIGIN_PASS + PUSH_GITHUB_PASS + MASTER_80000_PASS
 - Gates: Clean-Status PASS (`git status --short` leer), Lint PASS, Tests 253/253 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport aktiv, Push nach `origin/main` und `github/main` PASS, Masterquelle 80.000/80.000 PASS
