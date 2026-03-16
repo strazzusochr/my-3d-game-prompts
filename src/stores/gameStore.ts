@@ -57,6 +57,7 @@ interface ReplayQualityState {
     rebuildCount: number;
     avgRebuildEvents: number;
     stability: ReplayQualityStability;
+    recentStabilityTrend: ReplayQualityStability[];
 }
 
 interface GameStore {
@@ -84,6 +85,7 @@ interface GameStore {
         replayQualityRebuildCount: number;
         replayQualityAvgEvents: number;
         replayQualityStability: ReplayQualityStability;
+        replayQualityRecentTrend: ReplayQualityStability[];
         // === CHUNK 11: Dynamisches System ===
         playerReputation: number;  // -100 (brutal) bis +100 (fair)
         moralScore: number;        // 0 (böse) bis 100 (gut)
@@ -160,6 +162,7 @@ const persistedReplayState = persistedRuntimeSnapshot?.replayState ?? {
         rebuildCount: 0,
         avgRebuildEvents: 0,
         stability: 'stable' as ReplayQualityStability,
+        recentStabilityTrend: [] as ReplayQualityStability[],
     },
 };
 
@@ -179,9 +182,21 @@ const pushReplayHistory = (
     return [entry, ...history].slice(0, MAX_REPLAY_HISTORY_POINTS);
 };
 
+const pushReplayQualityTrend = (
+    trend: ReplayQualityStability[],
+    nextStability: ReplayQualityStability,
+): ReplayQualityStability[] => {
+    const [latest] = trend;
+    if (latest === nextStability) {
+        return trend;
+    }
+    return [nextStability, ...trend].slice(0, 3);
+};
+
 const getReplayQualityState = (
     history: ReplayRebuildHistoryEntry[],
     referenceClock: string,
+    previousTrend: ReplayQualityStability[],
 ): ReplayQualityState => {
     const referenceMinutes = timeToMinutes(referenceClock);
     const inWindow = history.filter((entry) => {
@@ -206,6 +221,7 @@ const getReplayQualityState = (
         rebuildCount,
         avgRebuildEvents,
         stability,
+        recentStabilityTrend: pushReplayQualityTrend(previousTrend, stability),
     };
 };
 
@@ -232,6 +248,7 @@ const buildRuntimeSnapshot = (state: GameStore): RuntimeSnapshot => ({
             rebuildCount: state.gameState.replayQualityRebuildCount,
             avgRebuildEvents: state.gameState.replayQualityAvgEvents,
             stability: state.gameState.replayQualityStability,
+            recentStabilityTrend: state.gameState.replayQualityRecentTrend,
         },
     },
 });
@@ -1071,6 +1088,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         replayQualityRebuildCount: persistedReplayState.quality.rebuildCount,
         replayQualityAvgEvents: persistedReplayState.quality.avgRebuildEvents,
         replayQualityStability: persistedReplayState.quality.stability,
+        replayQualityRecentTrend: persistedReplayState.quality.recentStabilityTrend,
         playerReputation: persistedRuntimeSnapshot?.playerReputation ?? RUNTIME_DEFAULTS.playerReputation,
         moralScore: persistedRuntimeSnapshot?.moralScore ?? RUNTIME_DEFAULTS.moralScore,
         showStatistics: false,
@@ -1114,6 +1132,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityRebuildCount: 0,
                 replayQualityAvgEvents: 0,
                 replayQualityStability: 'stable',
+                replayQualityRecentTrend: [],
                 playerReputation: 0, moralScore: 50, showStatistics: false,
                 masterVolume: 0.5, muted: false
             }
@@ -1206,7 +1225,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
             const roleTrendHistory = crossedMidnight
                 ? [trendPoint]
                 : upsertRoleTrendPoint(state.roleTrendHistory, trendPoint);
-            const replayQuality = getReplayQualityState(state.gameState.replayRebuildHistory, currentTime);
+            const replayQuality = getReplayQualityState(
+                state.gameState.replayRebuildHistory,
+                currentTime,
+                state.gameState.replayQualityRecentTrend,
+            );
 
             return {
                 npcs,
@@ -1227,6 +1250,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     replayQualityRebuildCount: replayQuality.rebuildCount,
                     replayQualityAvgEvents: replayQuality.avgRebuildEvents,
                     replayQualityStability: replayQuality.stability,
+                    replayQualityRecentTrend: replayQuality.recentStabilityTrend,
                     showStatistics: crossedMidnight ? true : state.gameState.showStatistics,
                 }
             };
@@ -1272,7 +1296,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
             savedAtEpochMs: Date.now(),
         };
         const replayRebuildHistory = pushReplayHistory(state.gameState.replayRebuildHistory, replayEntry);
-        const replayQuality = getReplayQualityState(replayRebuildHistory, newTime);
+        const replayQuality = getReplayQualityState(
+            replayRebuildHistory,
+            newTime,
+            state.gameState.replayQualityRecentTrend,
+        );
 
         workerManager.syncNpcs(dynamicState.npcs);
         set({
@@ -1294,6 +1322,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityRebuildCount: replayQuality.rebuildCount,
                 replayQualityAvgEvents: replayQuality.avgRebuildEvents,
                 replayQualityStability: replayQuality.stability,
+                replayQualityRecentTrend: replayQuality.recentStabilityTrend,
             }
         });
         persistCurrentRuntimeSnapshot(get());
@@ -1341,7 +1370,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
             savedAtEpochMs: Date.now(),
         };
         const replayRebuildHistory = pushReplayHistory(state.gameState.replayRebuildHistory, replayEntry);
-        const replayQuality = getReplayQualityState(replayRebuildHistory, newTime);
+        const replayQuality = getReplayQualityState(
+            replayRebuildHistory,
+            newTime,
+            state.gameState.replayQualityRecentTrend,
+        );
 
         workerManager.syncNpcs(dynamicState.npcs);
         set({
@@ -1363,6 +1396,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityRebuildCount: replayQuality.rebuildCount,
                 replayQualityAvgEvents: replayQuality.avgRebuildEvents,
                 replayQualityStability: replayQuality.stability,
+                replayQualityRecentTrend: replayQuality.recentStabilityTrend,
             }
         });
         persistCurrentRuntimeSnapshot(get());
@@ -1402,6 +1436,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityRebuildCount: 0,
                 replayQualityAvgEvents: 0,
                 replayQualityStability: 'stable',
+                replayQualityRecentTrend: [],
                 playerReputation: get().gameState.playerReputation,
                 moralScore: get().gameState.moralScore,
                 showStatistics: false,

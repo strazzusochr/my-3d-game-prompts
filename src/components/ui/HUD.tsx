@@ -70,6 +70,7 @@ export const HUD = () => {
     const replayQualityRebuildCount = useGameStore(state => state.gameState.replayQualityRebuildCount);
     const replayQualityAvgEvents = useGameStore(state => state.gameState.replayQualityAvgEvents);
     const replayQualityStability = useGameStore(state => state.gameState.replayQualityStability);
+    const replayQualityRecentTrend = useGameStore(state => state.gameState.replayQualityRecentTrend);
     const playerReputation = useGameStore(state => state.gameState.playerReputation);
     const moralScore = useGameStore(state => state.gameState.moralScore);
     const npcCount = useGameStore(state => state.npcs.length);
@@ -1041,6 +1042,18 @@ export const HUD = () => {
                                                 Keine Rebuild-Historie vorhanden.
                                             </div>
                                         )}
+                                        <div style={{ marginTop: '8px', color: '#9edfff', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.7px' }}>
+                                            Replay-Stabilitaetstrend
+                                        </div>
+                                        <div style={{ marginTop: '6px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                                            {replayQualityRecentTrend.length > 0 ? replayQualityRecentTrend.map((state, index) => (
+                                                <span key={`${state}-${index}`} style={{ padding: '3px 7px', borderRadius: '999px', fontSize: '10px', fontWeight: 700, letterSpacing: '0.4px', color: state === 'critical' ? '#ff7777' : state === 'watch' ? '#ffcc66' : '#99ffcc', border: `1px solid ${state === 'critical' ? '#ff777766' : state === 'watch' ? '#ffcc6666' : '#99ffcc55'}`, background: 'rgba(0,0,0,0.24)' }}>
+                                                    {index === 0 ? 'JETZT' : `-${index}`} {state.toUpperCase()}
+                                                </span>
+                                            )) : (
+                                                <span style={{ color: '#67808d', fontSize: '11px' }}>Noch kein Trendverlauf erfasst.</span>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                                 <div style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px', background: 'rgba(255,255,255,0.02)' }}>

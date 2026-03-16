@@ -56,6 +56,7 @@ const baseSnapshot: RuntimeSnapshot = {
             rebuildCount: 1,
             avgRebuildEvents: 14,
             stability: 'watch',
+            recentStabilityTrend: ['watch', 'stable'],
         },
     },
 };
@@ -80,6 +81,7 @@ describe('runtimePersistence', () => {
         expect(loaded?.replayState.quality.windowMinutes).toBe(90);
         expect(loaded?.replayState.quality.rebuildCount).toBe(1);
         expect(loaded?.replayState.quality.stability).toBe('watch');
+        expect(loaded?.replayState.quality.recentStabilityTrend).toEqual(['watch', 'stable']);
     });
 
     it('liefert null bei ungueltigem JSON', () => {
@@ -117,6 +119,7 @@ describe('runtimePersistence', () => {
                         rebuildCount: -3,
                         avgRebuildEvents: -7,
                         stability: 'broken',
+                        recentStabilityTrend: ['critical', 'unknown', 'watch', 'stable'],
                     },
                 },
             }),
@@ -144,6 +147,7 @@ describe('runtimePersistence', () => {
         expect(loaded?.replayState.quality.rebuildCount).toBe(0);
         expect(loaded?.replayState.quality.avgRebuildEvents).toBe(0);
         expect(loaded?.replayState.quality.stability).toBe('stable');
+        expect(loaded?.replayState.quality.recentStabilityTrend).toEqual(['critical', 'watch', 'stable']);
     });
 
     it('entfernt Snapshot mit clearRuntimeSnapshot', () => {

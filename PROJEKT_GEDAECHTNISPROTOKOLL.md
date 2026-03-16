@@ -166,6 +166,11 @@
 - HUD-Operationsansicht erweitert: Badge `Replay-Qualitaet` sowie Kennzahlen `Rebuilds im Fenster` und `Avg Events/Rebuild` sind live sichtbar.
 - Testabdeckung erweitert: `runtimePersistence.test.ts` prueft Quality-Sanitisierung, `gameStore.test.ts` verifiziert Quality-Felder im Store und Snapshot nach Rewind.
 - Vollverifikation nach Replay-Qualitaetsblock erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 251/251.
+- Replay-Stabilitaetstrend am 16.03.2026 umgesetzt: Store fuehrt jetzt `replayQualityRecentTrend` (letzte drei Quality-Zustaende) mit Dedupe-Logik fuer aussagekraeftige Uebergangspunkte.
+- Snapshot erweitert: `runtimePersistence` persistiert den Trend als `replayState.quality.recentStabilityTrend` und sanitisiert Werte robust auf `stable`/`watch`/`critical`.
+- HUD-Operationsansicht erweitert: Bereich `Replay-Stabilitaetstrend` zeigt die letzten Trendpunkte als zeitnahe Badges (`JETZT`, `-1`, `-2`).
+- Testabdeckung erweitert: `runtimePersistence.test.ts` validiert Trend-Sanitisierung; `gameStore.test.ts` prueft Trendwerte im Store und Snapshot nach Rewind.
+- Vollverifikation nach Replay-Stabilitaetstrend erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 251/251.
 
 ## Naechster logischer Schritt
-- Replay-Qualitaet ist geschlossen; naechster Ausbaupunkt ist ein kurzer Replay-Stabilitaetstrend (z. B. letzte 3 Quality-Zustaende) im Operations-Panel inkl. Snapshot-Nachweis.
+- Replay-Stabilitaetstrend ist geschlossen; naechster Ausbaupunkt ist eine kompakte Replay-Risikoampel mit Last-Schwellenhinweis im Operations-Panel inkl. Snapshot-Nachweis.

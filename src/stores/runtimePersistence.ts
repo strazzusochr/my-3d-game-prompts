@@ -47,6 +47,7 @@ interface RuntimeReplayQuality {
     rebuildCount: number;
     avgRebuildEvents: number;
     stability: 'stable' | 'watch' | 'critical';
+    recentStabilityTrend: Array<'stable' | 'watch' | 'critical'>;
 }
 
 export interface RuntimeSnapshot {
@@ -191,6 +192,14 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
         qualityObj.stability === 'critical' || qualityObj.stability === 'watch'
             ? qualityObj.stability
             : 'stable';
+    const qualityTrend = Array.isArray(qualityObj.recentStabilityTrend)
+        ? qualityObj.recentStabilityTrend
+            .filter(
+                (item): item is 'stable' | 'watch' | 'critical' =>
+                    item === 'stable' || item === 'watch' || item === 'critical',
+            )
+            .slice(0, 3)
+        : [];
 
     return {
         mode,
@@ -203,6 +212,7 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
             rebuildCount: Math.max(0, Math.round(qualityRebuildCountRaw)),
             avgRebuildEvents: Math.max(0, Math.round(qualityAvgEventsRaw)),
             stability: qualityStability,
+            recentStabilityTrend: qualityTrend,
         },
     };
 };

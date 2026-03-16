@@ -35,6 +35,14 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Testnachweis erweitert: Sanitisierung fuer Quality-Felder in `runtimePersistence.test.ts` sowie Store-/Snapshot-Nachweise nach Rewind in `gameStore.test.ts`.
 - Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 251 von 251 gruen, Build gruen.
 
+### 2.0.35 Replay-Stabilitaetstrend (letzte 3 Zustaende) vom 16.03.2026
+- Die Replay-Quality wurde um einen kurzen Stabilitaetstrend erweitert: der Store fuehrt jetzt die letzten drei Quality-Zustaende als `replayQualityRecentTrend`.
+- Trendbildung ist bewusst signalorientiert: identische aufeinanderfolgende Werte werden dedupliziert, damit nur echte Zustandswechsel im Verlauf auftauchen.
+- `runtimePersistence` persistiert den Verlauf unter `replayState.quality.recentStabilityTrend` und begrenzt/sanitisiert ihn robust auf gueltige Zustandswerte.
+- Das Operations-Panel zeigt die letzten Trendpunkte als Badges (`JETZT`, `-1`, `-2`) fuer schnelle Lageeinschaetzung ohne Codezugriff.
+- Testnachweis erweitert: Trend-Sanitisierung in `runtimePersistence.test.ts`, Store- und Snapshot-Nachweis nach Rewind in `gameStore.test.ts`.
+- Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 251 von 251 gruen, Build gruen.
+
 ### 2.0.1 Viewer- und Lastnachweis vom 16.03.2026
 - Zwei weitere Viewer-Seiten wurden geoeffnet und der Health-Endpunkt achtmal im Abstand von rund 1,5 Sekunden abgefragt.
 - Der Stream benoetigte eine kurze Aufwaermphase: zuerst `viewerFps=0`, danach stabile Werte zwischen 22 und 24 FPS.
