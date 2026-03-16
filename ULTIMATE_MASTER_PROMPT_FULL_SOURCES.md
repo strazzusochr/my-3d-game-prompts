@@ -1,4 +1,15 @@
 # FULL SPEC SOURCES\n\nThis file contains the verbatim contents of every Markdown spec file in the repository, to ensure the AI agent has direct access to every requirement.
+
+Additional binary source tracked in this repository:
+
+## Autonomie-Masterpaket zur Steuerung eines KI-Coding-Agenten in Google Antigravity.pdf
+
+- Source type: PDF (binary)
+- Inclusion mode: referenced artifact (not verbatim embedded in this Markdown file)
+- Size (bytes): 48174
+- SHA-256: EE5459DF68E7064D4031D20ED74F9E415A85B1C9CCCA742241165EF851505AB6
+- Last modified: 2026-03-16 02:11:36
+
 \n\n---\n\n## 00_MASTER_START_PROMPT_ULTRA_EXPANDED.md\n
 # 🎮 CORONA CONTROL ULTIMATE - MASTER START PROMPT
 ## ULTRA-HYPERDETAIL KOMPLETTE PROJEKT-SPEZIFIKATION
@@ -4710,7 +4721,7 @@ Customer-NPCs: Zehn-Gäste sitzen-An-Tischen. Animations sipping-Coffee reading-
 
 Kleine-Details die-Straßen-Lebendig-Machen.
 
-M�lltonnen: Stadt-Wien-Design gelb-Kunststoff. Drei-Tonnen-Pro-Block. Deckel-Animation öffnen-schließen bei-Interaktion.
+M�lltonnen: Stadt-Wien-Design gelb-Kunststoff. Drei-Tonnen-Pro-Block. Deckel-Animation öffnen-schließen bei-Interaktion.
 
 Zeitungsboxen: Gratis-Zeitungen Heute Österreich. Metall-Gehäuse grün-Lackiert. Stack-Zeitungen drinnen player-Can-Take.
 
