@@ -108,6 +108,24 @@ Bewertungsstufen:
 | P-048 | Port-Resolver Security-Tests regressionssicher erweitert | Vertikal | 100 | PASS | Neue Vitest-Suite `src/tests/portCheckSecurity.test.ts` verifiziert Fallback-Eindeutigkeit bei blockiertem Wunschport, Env-Mapping und Invalid-Port-Fehlerpfad; Vollproof danach 256/256 gruen |
 | P-049 | HUD-Hauptpanels verschiebbar und persistent gemacht | Vertikal | 100 | PASS | `src/components/ui/HUD.tsx` um Drag-and-Drop fuer left/top/right/interaction/bottom erweitert; Positionen werden unter `hud-panel-positions-v1` gespeichert und nach Reload wiederhergestellt; Vollproof danach 256/256 gruen |
 | P-050 | HUD-Positions-Reset fuer Drag-Layouts integriert | Vertikal | 100 | PASS | In `src/components/ui/HUD.tsx` ist ein neuer `Reset`-Button in der rechten HUD-Steuerleiste aktiv und setzt gespeicherte Positionen auf Default (`hud-panel-positions-v1`) zurueck; Vollproof danach 256/256 gruen |
+| P-051 | HUD-Teilsektionen im rechten Panel sortierbar + persistent gemacht | Vertikal | 100 | PASS | `src/components/ui/HUD.tsx`: Reihenfolge-Store `HUD_RIGHT_SECTION_ORDER_KEY` (Zeile 52), Sanitizer `sanitizeRightSubSectionOrder` (Zeile 59), Drag-Start `beginRightSubSectionDrag` (Zeile 497), Drop-Reorder `onRightSubSectionDrop` (Zeile 508), Render-Reihenfolge `rightSectionOrder.map` (Zeile 667), Sort-Handles NASA/Telemetrie/Mission/Timeline (Zeilen 684/740/792/824) |
+
+---
+
+## B.1) FUNKTIONS-/ZEILEN-KONTROLLBLOCK (LIVE)
+
+| Ref-ID | Punkt-ID | Datei | Funktion/Element | Zeile | Status | Nachweis |
+|---|---|---|---|---:|---|---|
+| REF-001 | P-051 | `src/components/ui/HUD.tsx` | `HUD_RIGHT_SECTION_ORDER_KEY` | 52 | PASS | LocalStorage-Key fuer persistente Reihenfolge gesetzt |
+| REF-002 | P-051 | `src/components/ui/HUD.tsx` | `sanitizeRightSubSectionOrder` | 59 | PASS | Reihenfolge validiert, fehlende Keys werden vervollstaendigt |
+| REF-003 | P-051 | `src/components/ui/HUD.tsx` | `beginRightSubSectionDrag` | 497 | PASS | Drag-Start pro Teilsektion aktiv |
+| REF-004 | P-051 | `src/components/ui/HUD.tsx` | `onRightSubSectionDrop` | 508 | PASS | Reorder bei Drop korrekt umgesetzt |
+| REF-005 | P-051 | `src/components/ui/HUD.tsx` | `rightSectionOrder.map` | 667 | PASS | Rendering in persistenter Sortierreihenfolge |
+| REF-006 | P-051 | `src/components/ui/HUD.tsx` | Sort-Handle `nasa` | 684 | PASS | Subpanel `NASA` sortierbar |
+| REF-007 | P-051 | `src/components/ui/HUD.tsx` | Sort-Handle `telemetry` | 740 | PASS | Subpanel `Telemetrie` sortierbar |
+| REF-008 | P-051 | `src/components/ui/HUD.tsx` | Sort-Handle `mission` | 792 | PASS | Subpanel `Missionslage` sortierbar |
+| REF-009 | P-051 | `src/components/ui/HUD.tsx` | Sort-Handle `timeline` | 824 | PASS | Subpanel `Einsatz-Timeline` sortierbar |
+| REF-010 | YAML-FIX | `.github/workflows/security-ci.yml` | Workflow-Key `on:` | 2 | PASS | Parser-/Diagnosecheck im Workspace ohne Fehler |
 
 ---
 
