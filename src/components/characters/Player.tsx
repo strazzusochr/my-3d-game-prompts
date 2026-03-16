@@ -3,8 +3,19 @@ import { useFrame } from '@react-three/fiber';
 import { useKeyboardControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { useGameStore } from '../../stores/gameStore';
+import {
+    getGroundHeightAt,
+    getGroundNormalAt,
+    resolveWalkablePosition,
+} from '../3d/environment/cityLayout';
 
 const GAMEPAD_DEADZONE = 0.15;
+const PLAYER_HEIGHT_OFFSET = 1.2;
+const PLAYER_RADIUS = 0.45;
+const MAX_STEP_HEIGHT = 0.35;
+const GRAVITY = -24;
+const JUMP_VELOCITY = 8.5;
+const TERMINAL_VELOCITY = -18;
 
 const applyDeadzone = (value: number) => {
     if (Math.abs(value) < GAMEPAD_DEADZONE) return 0;
@@ -35,7 +46,7 @@ function vibrate(gamepad: Gamepad, strongMs = 150, strong = 0.4, weak = 0.2) {
 export const Player = () => {
     const meshRef = useRef<THREE.Group>(null);
     const [, getKeys] = useKeyboardControls();
-    const [position] = useState(new THREE.Vector3(0, 1.2, 10));
+    const [position] = useState(new THREE.Vector3(0, getGroundHeightAt(0, 10) + PLAYER_HEIGHT_OFFSET, 10));
     const [rotation, setRotation] = useState({ yaw: 0, pitch: -0.5 });
     const [zoom, setZoom] = useState(8);
 
@@ -64,6 +75,9 @@ export const Player = () => {
     // Previous button states for one-shot edge detection (avoid repeated fires while held)
     const prevButtonsRef = useRef<boolean[]>([]);
     const buttonCooldown = useRef<Record<number, number>>({});
+    const verticalVelocity = useRef(0);
+    const groundedRef = useRef(true);
+    const jumpQueued = useRef(false);
 
     const wasJustPressed = useCallback((gamepad: Gamepad, index: number): boolean => {
         const now = Date.now();
@@ -90,6 +104,7 @@ export const Player = () => {
         };
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Control') ctrlHeld.current = true;
+            if (e.code === 'Space') jumpQueued.current = true;
             if (e.key === 'ArrowUp') arrowKeys.current.up = true;
             if (e.key === 'ArrowDown') arrowKeys.current.down = true;
             if (e.key === 'ArrowLeft') arrowKeys.current.left = true;
@@ -223,6 +238,12 @@ export const Player = () => {
                 vibrate(gamepad, 100, 0.2, 0.1);
             }
 
+            // ── L3 (button 10): Jump ──────────────────────────────
+            if (wasJustPressed(gamepad, 10)) {
+                jumpQueued.current = true;
+                vibrate(gamepad, 80, 0.16, 0.08);
+            }
+
             // ── B (button 1): Reset pan offset ───────────────────
             if (wasJustPressed(gamepad, 1)) {
                 panOffset.current.set(0, 0, 0);
@@ -259,14 +280,57 @@ export const Player = () => {
         const sideInput = THREE.MathUtils.clamp(keySideInput + gpMoveX, -1, 1);
         const gamepadSprint = gamepad ? (gamepad.buttons[5]?.pressed ?? false) : false;
         const activeSpeed = gamepadSprint ? speed * 1.7 : speed;
+        const currentGroundHeight = getGroundHeightAt(position.x, position.z) + PLAYER_HEIGHT_OFFSET;
+        const distanceToGround = position.y - currentGroundHeight;
+
+        groundedRef.current = distanceToGround <= 0.05 && verticalVelocity.current <= 0;
+
+        if (jumpQueued.current && groundedRef.current && !ctrlHeld.current) {
+            verticalVelocity.current = JUMP_VELOCITY;
+            groundedRef.current = false;
+        }
+        jumpQueued.current = false;
+
+        verticalVelocity.current = Math.max(
+            TERMINAL_VELOCITY,
+            verticalVelocity.current + GRAVITY * delta,
+        );
+
+        const targetPosition = position.clone();
 
         if (!ctrlHeld.current) {
             frontVector.set(0, 0, fwdInput);
             sideVector.set(sideInput, 0, 0);
             const moveRot = new THREE.Euler(0, rotation.yaw, 0);
-            direction.subVectors(frontVector, sideVector).normalize().applyEuler(moveRot).multiplyScalar(activeSpeed * delta);
-            position.add(direction);
+            direction.subVectors(frontVector, sideVector);
+
+            if (direction.lengthSq() > 0) {
+                direction.normalize().applyEuler(moveRot);
+
+                if (groundedRef.current) {
+                    direction.projectOnPlane(getGroundNormalAt(position.x, position.z)).normalize();
+                }
+
+                direction.multiplyScalar(activeSpeed * delta);
+                targetPosition.add(direction);
+            }
         }
+
+        const resolvedPosition = resolveWalkablePosition(position, targetPosition, PLAYER_RADIUS);
+        const resolvedGroundHeight = getGroundHeightAt(resolvedPosition.x, resolvedPosition.z) + PLAYER_HEIGHT_OFFSET;
+        const nextVerticalPosition = position.y + verticalVelocity.current * delta;
+        const stepHeight = resolvedGroundHeight - position.y;
+
+        if (nextVerticalPosition <= resolvedGroundHeight && stepHeight <= MAX_STEP_HEIGHT) {
+            resolvedPosition.y = resolvedGroundHeight;
+            verticalVelocity.current = 0;
+            groundedRef.current = true;
+        } else {
+            resolvedPosition.y = nextVerticalPosition;
+            groundedRef.current = false;
+        }
+
+        position.copy(resolvedPosition);
 
         if (meshRef.current) {
             meshRef.current.position.copy(position);

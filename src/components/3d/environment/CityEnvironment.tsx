@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useGameStore } from '../../../stores/gameStore';
+import { BUILDING_LOTS, STREET_SEGMENTS } from './cityLayout';
 
 const Tree = ({ position }: { position: [number, number, number] }) => (
     <group position={position}>
@@ -53,37 +54,21 @@ const StreetLamp = ({ position }: { position: [number, number, number] }) => {
 
 export const CityEnvironment = () => {
     const buildings = useMemo(() => {
-        return [...Array(144)].map((_, i) => {
-            const cols = 12;
-            const spacing = 50; // Increased spacing for real streets
-            const x = ((i % cols) - (cols / 2 - 0.5)) * spacing;
-            const z = (Math.floor(i / cols) - (cols / 2 - 0.5)) * spacing;
-            
-            // Carve out center (Park remains approx 80x80)
-            if (Math.abs(x) < 45 && Math.abs(z) < 45) return null;
-
-            const height = 15 + (Math.abs(x) + Math.abs(z)) * 0.05 + Math.random() * 15;
-            return { x, z, height, id: i, width: 25, depth: 25 };
-        }).filter(b => b !== null);
+        return BUILDING_LOTS.map((lot) => ({
+            ...lot,
+            height: 15 + (Math.abs(lot.x) + Math.abs(lot.z)) * 0.05 + Math.random() * 15,
+        }));
     }, []);
 
     // Create a series of planes for the streets to avoid Z-fighting and ensure visibility
     const streets = useMemo(() => {
-        const lines = [];
-        const spacing = 50;
-        const totalSize = 600;
-        
-        // Vertical streets
-        for(let x = -300; x <= 300; x += spacing) {
-            if (Math.abs(x) < 40) continue; // Skip park center
-            lines.push({ x, z: 0, w: 15, d: totalSize, id: `v-${x}` });
-        }
-        // Horizontal streets
-        for(let z = -300; z <= 300; z += spacing) {
-            if (Math.abs(z) < 40) continue; // Skip park center
-            lines.push({ x: 0, z, w: totalSize, d: 15, id: `h-${z}` });
-        }
-        return lines;
+        return STREET_SEGMENTS.map((segment) => ({
+            id: segment.id,
+            x: segment.x,
+            z: segment.z,
+            w: segment.width,
+            d: segment.depth,
+        }));
     }, []);
 
     return (

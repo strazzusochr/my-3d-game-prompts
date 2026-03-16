@@ -172,3 +172,24 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 ## 7. Dokumentationsstatus
 - Dieses Dokument bildet den aktuellen professionellen Zwischenstand ab.
 - Es dient kuenftig als Referenz fuer Folgeentscheidungen, Validierung und Fortschrittsdokumentation.
+
+## 8. Player-Core Ausbau vom 16.03.2026
+
+### 8.1 Umgesetzte Technik
+- Der bisher freie Kamera-/Positions-Mover in `Player.tsx` wurde zu einem einfachen, aber echten Player-Core mit Bodenbezug erweitert.
+- Die Stadtgeometrie wurde in ein gemeinsames Layout-Modul ausgelagert: Gebaeudelots, Strassensegmente, Parkflaeche und Sidewalk-Zonen sind nun fuer Render- und Bewegungslogik konsistent beschrieben.
+- Neu implementiert wurden Ground-Sampling, Ground-Normal-Berechnung, Jump-Arc mit Schwerkraft, Step-/Ground-Snap sowie ein einfaches Obstacle-Resolution-Verhalten gegen Gebaeudeflaechen.
+- Die horizontale Bewegung wird im Ground-Zustand auf die lokale Bodenebene projiziert, wodurch sauberes Slope-Handling an Hoehenkanten moeglich ist.
+- Fuer Gamepad-Nutzung wurde zusaetzlich `L3` als Sprung-Trigger angeschlossen; Tastatur-Sprung erfolgt ueber `Space`.
+
+### 8.2 Test- und Nachweisstand
+- Neuer Testblock `src/tests/playerPhysics.test.ts` validiert Terrainklassen, Sidewalk-/Building-Erkennung, Kollisionsaufloesung und Oberflaechennormalen.
+- Gesamtstand nach dem Ausbau: `vitest` 176 von 176 Tests gruen.
+- `npm run lint` blieb fehlerfrei.
+- `npm run build` blieb erfolgreich.
+- Fuer den Browser-/Livecheck wurde zunaechst ein reiner Preview-Lauf geoeffnet; dabei waren Socket-Proxyfehler ohne Backend erwartbar.
+- Anschliessend wurde der Vollstack ueber `npm run dev:all` gestartet; die Seite wurde im Browser geoeffnet und der Socket-Server protokollierte eine echte Client-Verbindung.
+
+### 8.3 Bewertung
+- Der Player-Core ist deutlich naeher an einem echten Character-Controller als zuvor, weil die Spielfigur nun nicht mehr rein frei durch den Raum gleitet.
+- Noch offen fuer eine spaetere Ausbaustufe sind vollstaendige Rapier-Kollision, robustes Sliden entlang komplexer Geometrie, echte Interaktionsflaechen und feinere Physikparameter fuer Grenzfaelle.
