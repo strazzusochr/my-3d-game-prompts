@@ -148,6 +148,10 @@
 - HUD-Transparenzblock am 16.03.2026 umgesetzt: Operations-Tab zeigt nun adaptive Triggerdiagnostik live (Sync-/Fracture-Schwellen, Positiv-/Fallback-Faktor, Aggressordruck und Turbulenzwert).
 - Sichtbarkeit auf Lageebene verankert: die im Store aktiven Kurvenparameter sind ohne Codezugriff direkt im HUD nachvollziehbar.
 - Vollverifikation nach HUD-Transparenzblock erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 251/251.
+- Replay-Transparenzblock am 16.03.2026 umgesetzt: Store fuehrt jetzt expliziten Zeitreise-/Rebuild-Status (`replayMode`, `replayRebuildStatus`, `replayRebuildEventCount`, `replayAnchorTime`) fuer Rewind-Runden.
+- HUD-Operationsansicht erweitert: Zeitreise-Indikator und Trigger-Rekonstruktionsstatus inkl. Eventanzahl und Ankerzeit sind live sichtbar.
+- Testnachweis erweitert: `src/tests/gameStore.test.ts` prueft Rewind-Rebuildstatus direkt nach Ruecksprung.
+- Vollverifikation nach Replay-Transparenzblock erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 251/251.
 
 ## Naechster logischer Schritt
-- HUD-Transparenz ist geschlossen; naechster Ausbaupunkt ist Replay-Transparenz (Zeitreise-Indikator + Trigger-Rekonstruktionsstatus im HUD) mit Test- und Proof-Nachweis.
+- Replay-Transparenz ist geschlossen; naechster Ausbaupunkt ist Persistenz der Replay-Metadaten im Runtime-Snapshot inkl. Reload-Nachweis.

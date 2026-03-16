@@ -57,6 +57,10 @@ const resetStore = () => {
       tensionLevel: 10,
       timeSpeed: 1,
       currentPhaseLabel: 'start',
+      replayMode: 'live',
+      replayRebuildStatus: 'idle',
+      replayRebuildEventCount: 0,
+      replayAnchorTime: '06:00',
       playerReputation: 0,
       moralScore: 50,
       showStatistics: false,
@@ -577,6 +581,10 @@ describe('gameStore core flow', () => {
     expect(state.npcs.filter((npc) => npc.type === NPCType.MEDIC).length).toBeGreaterThanOrEqual(2);
     expect(state.roleTrendHistory.length).toBeGreaterThan(0);
     expect(state.roleTrendHistory.at(-1)?.time).toBe('20:00');
+    expect(state.gameState.replayMode).toBe('rewind');
+    expect(state.gameState.replayRebuildStatus).toBe('reconstructed');
+    expect(state.gameState.replayRebuildEventCount).toBeGreaterThan(0);
+    expect(state.gameState.replayAnchorTime).toBe('20:00');
   });
 
   it('records role trend snapshots while time progresses', () => {

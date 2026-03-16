@@ -61,6 +61,10 @@ export const HUD = () => {
     const tensionLevel = useGameStore(state => state.gameState.tensionLevel);
     const timeSpeed = useGameStore(state => state.gameState.timeSpeed);
     const currentPhaseLabel = useGameStore(state => state.gameState.currentPhaseLabel);
+    const replayMode = useGameStore(state => state.gameState.replayMode);
+    const replayRebuildStatus = useGameStore(state => state.gameState.replayRebuildStatus);
+    const replayRebuildEventCount = useGameStore(state => state.gameState.replayRebuildEventCount);
+    const replayAnchorTime = useGameStore(state => state.gameState.replayAnchorTime);
     const playerReputation = useGameStore(state => state.gameState.playerReputation);
     const moralScore = useGameStore(state => state.gameState.moralScore);
     const npcCount = useGameStore(state => state.npcs.length);
@@ -990,6 +994,14 @@ export const HUD = () => {
                                     <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', marginBottom: '10px' }}>
                                         Operative Belastung
                                     </div>
+                                    <div style={{ marginBottom: '8px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                                        <span style={{ padding: '3px 8px', borderRadius: '999px', fontSize: '10px', fontWeight: 700, letterSpacing: '0.5px', color: replayMode === 'rewind' ? '#ffb366' : '#99ffcc', border: `1px solid ${replayMode === 'rewind' ? '#ffb36666' : '#99ffcc55'}`, background: 'rgba(0,0,0,0.24)' }}>
+                                            Zeitreise: {replayMode === 'rewind' ? 'AKTIV' : 'LIVE'}
+                                        </span>
+                                        <span style={{ padding: '3px 8px', borderRadius: '999px', fontSize: '10px', fontWeight: 700, letterSpacing: '0.5px', color: replayRebuildStatus === 'reconstructed' ? '#66ddff' : '#7a8d99', border: `1px solid ${replayRebuildStatus === 'reconstructed' ? '#66ddff66' : '#7a8d9955'}`, background: 'rgba(0,0,0,0.24)' }}>
+                                            Trigger-Rebuild: {replayRebuildStatus === 'reconstructed' ? 'OK' : 'IDLE'}
+                                        </span>
+                                    </div>
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '8px', fontSize: '13px' }}>
                                         <span style={{ color: '#9edfff' }}>Eskalationsstufe</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{Math.floor(tensionLevel / 5)} / 20</span>
                                         <span style={{ color: '#9edfff' }}>Aktive Einheiten</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{npcCount}</span>
@@ -997,6 +1009,8 @@ export const HUD = () => {
                                         <span style={{ color: '#9edfff' }}>Sachschaden</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{dayStats.damage.toLocaleString('de-DE')} EUR</span>
                                         <span style={{ color: '#9edfff' }}>Verletzte</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{dayStats.injured}</span>
                                         <span style={{ color: '#9edfff' }}>Festnahmen</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{dayStats.arrested}</span>
+                                        <span style={{ color: '#9edfff' }}>Rebuild-Events</span><span style={{ color: replayRebuildStatus === 'reconstructed' ? '#66ddff' : '#9edfff', fontWeight: 700 }}>{replayRebuildEventCount}</span>
+                                        <span style={{ color: '#9edfff' }}>Rebuild-Anker</span><span style={{ color: '#c6d9ff', fontWeight: 700 }}>{replayAnchorTime}</span>
                                     </div>
                                 </div>
                                 <div style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px', background: 'rgba(255,255,255,0.02)' }}>

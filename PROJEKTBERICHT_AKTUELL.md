@@ -273,6 +273,21 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 	- `npm run build`: gruen,
 	- `npm run autonomy:full`: `AUTONOMY_PROOF_OK` + `AUTONOMY_FULL_OK`.
 
+### 2.0.33 Replay-Transparenz fuer Zeitreise und Trigger-Rebuild vom 16.03.2026
+- Der Store fuehrt jetzt explizite Replay-Metadaten fuer Rueckspruenge:
+	- `replayMode` (`live`/`rewind`),
+	- `replayRebuildStatus` (`idle`/`reconstructed`),
+	- `replayRebuildEventCount`,
+	- `replayAnchorTime`.
+- Bei `rewindHour`/`rewindMinute` wird damit sichtbar, dass Trigger und Weltstand rekonstruiert wurden.
+- Das Operations-HUD zeigt diese Informationen live in der Belastungskarte an (Zeitreise-Status, Rebuild-Status, Eventanzahl, Ankerzeit).
+- Testergänzung: `gameStore.test.ts` verifiziert die neuen Rebuild-Metadaten nach Ruecksprung.
+- Validierung nach Umsetzung:
+	- `npm run lint`: gruen,
+	- `vitest`: 251/251 gruen,
+	- `npm run build`: gruen,
+	- `npm run autonomy:full`: `AUTONOMY_PROOF_OK` + `AUTONOMY_FULL_OK`.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.

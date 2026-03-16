@@ -60,6 +60,10 @@ interface GameStore {
         tensionLevel: number;
         timeSpeed: number;
         currentPhaseLabel: string;
+        replayMode: 'live' | 'rewind';
+        replayRebuildStatus: 'idle' | 'reconstructed';
+        replayRebuildEventCount: number;
+        replayAnchorTime: string;
         // === CHUNK 11: Dynamisches System ===
         playerReputation: number;  // -100 (brutal) bis +100 (fair)
         moralScore: number;        // 0 (böse) bis 100 (gut)
@@ -963,6 +967,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         tensionLevel: getTensionLevelForMinutes(timeToMinutes(persistedInGameTime)),
         timeSpeed: persistedRuntimeSnapshot?.timeSpeed ?? RUNTIME_DEFAULTS.timeSpeed,
         currentPhaseLabel: '🌅 Tagesbeginn — Stadt erwacht',
+        replayMode: 'live',
+        replayRebuildStatus: 'idle',
+        replayRebuildEventCount: 0,
+        replayAnchorTime: persistedInGameTime,
         playerReputation: persistedRuntimeSnapshot?.playerReputation ?? RUNTIME_DEFAULTS.playerReputation,
         moralScore: persistedRuntimeSnapshot?.moralScore ?? RUNTIME_DEFAULTS.moralScore,
         showStatistics: false,
@@ -997,6 +1005,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 isPlaying: true, isTimePaused: false, inGameTime: '06:00', 
                 tensionLevel: 10, timeSpeed: 1, 
                 currentPhaseLabel: '🌅 Tagesbeginn — Stadt erwacht',
+                replayMode: 'live',
+                replayRebuildStatus: 'idle',
+                replayRebuildEventCount: 0,
+                replayAnchorTime: '06:00',
                 playerReputation: 0, moralScore: 50, showStatistics: false,
                 masterVolume: 0.5, muted: false
             }
@@ -1100,6 +1112,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     inGameTime: currentTime,
                     tensionLevel,
                     currentPhaseLabel,
+                    replayMode: 'live',
+                    replayRebuildStatus: 'idle',
+                    replayRebuildEventCount: 0,
+                    replayAnchorTime: currentTime,
                     showStatistics: crossedMidnight ? true : state.gameState.showStatistics,
                 }
             };
@@ -1145,7 +1161,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
             dayStats: dynamicState.dayStats,
             firedEventKeys: Array.from(dynamicState.firedSet),
             roleTrendHistory,
-            gameState: { ...state.gameState, inGameTime: newTime, tensionLevel, currentPhaseLabel }
+            gameState: {
+                ...state.gameState,
+                inGameTime: newTime,
+                tensionLevel,
+                currentPhaseLabel,
+                replayMode: 'rewind',
+                replayRebuildStatus: 'reconstructed',
+                replayRebuildEventCount: dynamicState.firedSet.size,
+                replayAnchorTime: newTime,
+            }
         });
         persistCurrentRuntimeSnapshot(get());
     },
@@ -1192,7 +1217,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
             dayStats: dynamicState.dayStats,
             firedEventKeys: Array.from(dynamicState.firedSet),
             roleTrendHistory,
-            gameState: { ...state.gameState, inGameTime: newTime, tensionLevel, currentPhaseLabel }
+            gameState: {
+                ...state.gameState,
+                inGameTime: newTime,
+                tensionLevel,
+                currentPhaseLabel,
+                replayMode: 'rewind',
+                replayRebuildStatus: 'reconstructed',
+                replayRebuildEventCount: dynamicState.firedSet.size,
+                replayAnchorTime: newTime,
+            }
         });
         persistCurrentRuntimeSnapshot(get());
     },
@@ -1222,6 +1256,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 isPlaying: true, isTimePaused: false, inGameTime: '00:00', 
                 tensionLevel: 10, timeSpeed: get().gameState.timeSpeed, 
                 currentPhaseLabel: '🌅 Tagesbeginn — Stadt erwacht',
+                replayMode: 'live',
+                replayRebuildStatus: 'idle',
+                replayRebuildEventCount: 0,
+                replayAnchorTime: '00:00',
                 playerReputation: get().gameState.playerReputation,
                 moralScore: get().gameState.moralScore,
                 showStatistics: false,
