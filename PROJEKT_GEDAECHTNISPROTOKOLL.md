@@ -28,6 +28,8 @@
 - Vollnachweis nach HUD-Drag erfolgreich: `npm run lint` gruen, `npm run autonomy:full` erneut komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand bleibt 256/256.
 - HUD-Reset-Block am 16.03.2026 umgesetzt: neuer `Reset`-Button setzt gespeicherte Positionen der dragbaren Hauptpanels auf Default zurueck (`hud-panel-positions-v1` bleibt konsistent).
 - Vollnachweis nach HUD-Reset erfolgreich: `npm run lint` gruen, `npm run autonomy:full` erneut komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand bleibt 256/256.
+- Editor-Hotfix am 16.03.2026 umgesetzt: `.github/workflows/security-ci.yml` Header auf quoted `'on'` normalisiert und TS-Deklaration fuer `../../scripts/security/port-check.mjs` in `src/types/security-port-check.d.ts` ergaenzt.
+- Fehlerstatus danach sauber: Workflow- und TypeScript-Diagnosen verschwunden, gezielter Testlauf `npm exec vitest run src/tests/portCheckSecurity.test.ts` mit 3/3 gruen.
 - Persistente Nutzerpraeferenzen wurden um die neuen Ablaufregeln erweitert.
 - Aktueller Repository-Stand enthaelt bereits Test-, Lint- und Streaming-Anpassungen aus der vorigen Arbeitsphase.
 - Fuer den aktuellen Schritt wird ein professioneller Projektbericht erzeugt und der gegenwaertige Stand festgehalten.
