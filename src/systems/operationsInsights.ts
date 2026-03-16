@@ -23,6 +23,7 @@ export interface OperationsInsight {
     correlationLine: string;
     confidencePercent: number;
     missionPathWeightPercent: number;
+    phaseBand: 'NIGHT' | 'MORNING' | 'MIDDAY' | 'EVENING' | 'LATE';
     trendSignal: 'stabilizing' | 'deteriorating' | 'volatile' | 'flat';
 }
 
@@ -46,13 +47,35 @@ export const getOperationsInsight = (input: OperationsInsightInput): OperationsI
 
     const hookUtilization = input.maxHooks > 0 ? Math.round((input.activeHooks / input.maxHooks) * 100) : 0;
 
+    const lastMinutes = last?.time
+        ? (() => {
+            const [hRaw, mRaw] = last.time.split(':');
+            const h = Number(hRaw);
+            const m = Number(mRaw);
+            if (!Number.isFinite(h) || !Number.isFinite(m)) return 0;
+            return Math.max(0, Math.min(23 * 60 + 59, h * 60 + m));
+        })()
+        : 0;
+
+    const phaseBand: OperationsInsight['phaseBand'] =
+        lastMinutes >= 21 * 60 ? 'LATE' :
+            lastMinutes >= 18 * 60 ? 'EVENING' :
+                lastMinutes >= 12 * 60 ? 'MIDDAY' :
+                    lastMinutes >= 6 * 60 ? 'MORNING' : 'NIGHT';
+
+    const phaseWeightAdjust = phaseBand === 'MORNING' ? 4 :
+        phaseBand === 'MIDDAY' ? 8 :
+            phaseBand === 'EVENING' ? -6 :
+                phaseBand === 'LATE' ? -10 : 2;
+
     const missionPathWeightRaw =
         100 +
         Math.round((input.missionCompletionPercent - 50) * 0.35) +
         Math.round((hookUtilization - 50) * 0.2) +
         Math.round((input.activeDynamicResponses - 2) * 4) -
         Math.round((input.panicRatioPercent - 30) * 0.3) -
-        Math.max(0, (latestAggressors - latestSecurity) * 3);
+        Math.max(0, (latestAggressors - latestSecurity) * 3) +
+        phaseWeightAdjust;
 
     const missionPathWeightPercent = Math.max(60, Math.min(140, missionPathWeightRaw));
 
@@ -69,6 +92,7 @@ export const getOperationsInsight = (input: OperationsInsightInput): OperationsI
         `Aggression ${trendWord(deltaAggressors)} (${deltaAggressors >= 0 ? '+' : ''}${deltaAggressors}), ` +
         `Sicherheit ${trendWord(deltaSecurity)} (${deltaSecurity >= 0 ? '+' : ''}${deltaSecurity}), ` +
         `Panik ${deltaPanic >= 0 ? '+' : ''}${deltaPanic}pp, ` +
+        `Fenster ${phaseBand}, ` +
         `Hook-Auslastung ${hookUtilization}%, ` +
         `Pfadgewicht ${missionPathWeightPercent}%, ` +
         `Trend ${trendSignal}.`;
@@ -103,6 +127,7 @@ export const getOperationsInsight = (input: OperationsInsightInput): OperationsI
         correlationLine,
         confidencePercent,
         missionPathWeightPercent,
+        phaseBand,
         trendSignal,
     };
 };

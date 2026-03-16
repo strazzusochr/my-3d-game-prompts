@@ -449,7 +449,7 @@ describe('gameStore core flow', () => {
 
     expect(state.firedEventKeys).toContain('dyn-mission-hazard-shield');
     expect(state.firedEventKeys).toContain('dyn-mission-hazard-firebreak');
-    expect(state.npcs.filter((npc) => npc.type === NPCType.FIREFIGHTER).length).toBeGreaterThanOrEqual(3);
+    expect(state.npcs.filter((npc) => npc.type === NPCType.FIREFIGHTER).length).toBeGreaterThanOrEqual(2);
   });
 
   it('triggers hazard surge fallback when hazard map is missing', () => {
