@@ -258,4 +258,29 @@ describe('gameStore core flow', () => {
     expect(organizer.behavior).toBe(NPCBehavior.GATHER);
     expect(organizer.mood).toBe(NPCMood.TENSE);
   });
+
+  it('opens and dismisses statistics overlay explicitly', () => {
+    const state = useGameStore.getState();
+
+    state.showStatisticsPanel();
+    expect(useGameStore.getState().gameState.showStatistics).toBe(true);
+
+    state.dismissStatistics();
+    expect(useGameStore.getState().gameState.showStatistics).toBe(false);
+  });
+
+  it('shows statistics overlay automatically when time crosses midnight', () => {
+    useGameStore.setState((state) => ({
+      ...state,
+      gameState: {
+        ...state.gameState,
+        inGameTime: '23:59',
+        showStatistics: false,
+      },
+    }));
+
+    useGameStore.getState().evaluateEvents('00:00');
+
+    expect(useGameStore.getState().gameState.showStatistics).toBe(true);
+  });
 });

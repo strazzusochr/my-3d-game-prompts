@@ -53,6 +53,9 @@
 - Missions-Hook-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 195/195 gruen, `npm run build` gruen, Browser-/Livecheck mit echter Socket-Verbindung bestaetigt; temporärer Hintergrundserver danach wieder beendet.
 - 24h-Phasen-Hook-Block am 16.03.2026 ausgebaut: Zeitfenster-gebundene Folgeeffekte je Missionsfortschritt direkt in den Evaluationspfad integriert (Mittagslage, Evakuierungsphase, Spaetphase).
 - 24h-Phasen-Hook-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 201/201 gruen, `npm run build` gruen, Browser-/Livecheck mit echter Socket-Verbindung bestaetigt; temporärer Hintergrundserver danach wieder beendet.
+- HUD-Telemetrie-/Statistik-Block am 16.03.2026 ausgebaut: phasenbasierte Live-Metriken (Fenster, Hook-Readiness, Panikquote, Behavior-Counter) direkt im HUD integriert; zusaetzlich Statistik-Overlay mit Store-Tageswerten und Verhaltensbalken angebunden.
+- Store-Erweiterung umgesetzt: explizite Aktion zum Oeffnen der Statistikansicht sowie automatische Einblendung bei Tageswechsel ueber Mitternacht.
+- HUD-Telemetrie-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 207/207 gruen (neuer Testblock `hudTelemetry.test.ts` + Store-Tests erweitert), `npm run build` gruen.
 
 ## Naechster logischer Schritt
-- Auf Basis der nun aktiven 24h-Phasen-Hooks als naechstes HUD-/Statistik-Komplettheit ausbauen und phasenspezifische Lagekennzahlen sichtbar machen.
+- DayStats in Runtime fachlich fuellen (Ereigniszaehler pro Missions-/KI-Outcome) und das Statistik-Overlay um menuebasierte Drilldowns erweitern.

@@ -65,6 +65,7 @@ interface GameStore {
     resetDayCycle: () => void;
     setTimeSpeed: (speed: number) => void;
     adjustReputation: (delta: number) => void;
+    showStatisticsPanel: () => void;
     dismissStatistics: () => void;
     setMasterVolume: (vol: number) => void;
     setMuted: (muted: boolean) => void;
@@ -252,6 +253,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     evaluateEvents: (currentTime: string) => {
         set((state) => {
             const currentMinutes = timeToMinutes(currentTime);
+            const previousMinutes = timeToMinutes(state.gameState.inGameTime);
             const firedSet = new Set(state.firedEventKeys);
             let npcs = [...state.npcs];
             const moveCommands: { ids: number[], target: [number, number, number] }[] = [];
@@ -325,10 +327,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 socket.emit('update-time', currentTime);
             }
 
+            const crossedMidnight = previousMinutes > currentMinutes;
+
             return {
                 npcs,
                 firedEventKeys: Array.from(firedSet),
-                gameState: { ...state.gameState, inGameTime: currentTime, tensionLevel, currentPhaseLabel }
+                gameState: {
+                    ...state.gameState,
+                    inGameTime: currentTime,
+                    tensionLevel,
+                    currentPhaseLabel,
+                    showStatistics: crossedMidnight ? true : state.gameState.showStatistics,
+                }
             };
         });
     },
@@ -497,6 +507,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
             ...state.gameState, 
             playerReputation: Math.max(-100, Math.min(100, state.gameState.playerReputation + delta))
         }
+    })),
+
+    showStatisticsPanel: () => set((state) => ({
+        gameState: { ...state.gameState, showStatistics: true }
     })),
 
     dismissStatistics: () => set((state) => ({
