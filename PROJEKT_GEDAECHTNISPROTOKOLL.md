@@ -261,3 +261,5 @@
 
 - Finaler YAML-Parser-Reset am 16.03.2026 durchgefuehrt: Triggerblock in `.github/workflows/security-ci.yml` auf klassisches Actions-Format (`on:` + Blocklisten fuer `branches`) zurueckgestellt, um quoted-key-Inkompatibilitaeten in einzelnen Editor-Parsern auszuschliessen.
 - Abschlusspruefung erfolgreich: `.github/workflows/security-ci.yml` meldet lokal `No errors found`; Datei startet ohne BOM und ohne versteckte Steuerzeichen.
+- Frischer Vollbeweis am 16.03.2026 nach Reload-/Diagnosephase erfolgreich: `npm run lint` gruen, `npm exec vitest run` 256/256 gruen, `npm run build` gruen und `npm run autonomy:proof` mit `AUTONOMY_PROOF_OK` erfolgreich.
+- Laufzeitstatus im Proof bestaetigt: `stream=7860`, `internal=3000`, initial `profile=low`, `transport=canvas-webrtc`; Profilkette `low -> medium -> high -> aaa -> low` ohne Fehler durchlaufen.
