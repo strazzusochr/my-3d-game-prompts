@@ -547,6 +547,13 @@ export const HUD = () => {
         }
     };
 
+    const resetRightSubSectionOrder = () => {
+        setRightSectionOrder(RIGHT_SUB_SECTION_DEFAULT_ORDER);
+        if (typeof window !== 'undefined') {
+            window.localStorage.setItem(HUD_RIGHT_SECTION_ORDER_KEY, JSON.stringify(RIGHT_SUB_SECTION_DEFAULT_ORDER));
+        }
+    };
+
     return (
         <div style={{ pointerEvents: 'none', position: 'absolute', inset: 0, fontFamily: '"Outfit", "Segoe UI", sans-serif' }}>
             <div
@@ -654,6 +661,7 @@ export const HUD = () => {
                             <button onClick={() => togglePanelMinimize('right')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }} title="Panel minimieren">Min</button>
                             <button onClick={() => togglePanelZoom2('right')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }} title="Panel x2">x2</button>
                             <button onClick={resetHudPanelPositions} style={{ ...btnStyle, minWidth: '54px', padding: '4px 8px', fontSize: '11px' }} title="Panel-Positionen zuruecksetzen">Reset</button>
+                            <button onClick={resetRightSubSectionOrder} style={{ ...btnStyle, minWidth: '70px', padding: '4px 8px', fontSize: '11px' }} title="Reihenfolge der rechten Teilsektionen zuruecksetzen">Sort-Reset</button>
                             <button onClick={decreaseHudScale} style={{ ...btnStyle, minWidth: '34px', padding: '4px 8px', fontSize: '14px' }} title="HUD kleiner">-</button>
                             <button onClick={resetHudScale} style={{ ...btnStyle, minWidth: '56px', padding: '4px 8px', fontSize: '12px' }} title="HUD zurücksetzen">{Math.round(effectiveHudScale * 100)}%</button>
                             <button onClick={increaseHudScale} style={{ ...btnStyle, minWidth: '34px', padding: '4px 8px', fontSize: '14px' }} title="HUD größer">+</button>

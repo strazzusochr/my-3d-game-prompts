@@ -109,6 +109,7 @@ Bewertungsstufen:
 | P-049 | HUD-Hauptpanels verschiebbar und persistent gemacht | Vertikal | 100 | PASS | `src/components/ui/HUD.tsx` um Drag-and-Drop fuer left/top/right/interaction/bottom erweitert; Positionen werden unter `hud-panel-positions-v1` gespeichert und nach Reload wiederhergestellt; Vollproof danach 256/256 gruen |
 | P-050 | HUD-Positions-Reset fuer Drag-Layouts integriert | Vertikal | 100 | PASS | In `src/components/ui/HUD.tsx` ist ein neuer `Reset`-Button in der rechten HUD-Steuerleiste aktiv und setzt gespeicherte Positionen auf Default (`hud-panel-positions-v1`) zurueck; Vollproof danach 256/256 gruen |
 | P-051 | HUD-Teilsektionen im rechten Panel sortierbar + persistent gemacht | Vertikal | 100 | PASS | `src/components/ui/HUD.tsx`: Reihenfolge-Store `HUD_RIGHT_SECTION_ORDER_KEY` (Zeile 52), Sanitizer `sanitizeRightSubSectionOrder` (Zeile 59), Drag-Start `beginRightSubSectionDrag` (Zeile 497), Drop-Reorder `onRightSubSectionDrop` (Zeile 508), Render-Reihenfolge `rightSectionOrder.map` (Zeile 667), Sort-Handles NASA/Telemetrie/Mission/Timeline (Zeilen 684/740/792/824) |
+| P-052 | Sort-Reset fuer rechte HUD-Teilsektionen integriert | Vertikal | 100 | PASS | `src/components/ui/HUD.tsx`: Funktion `resetRightSubSectionOrder` (Zeile 550) setzt die persistierte Reihenfolge auf Default; neuer Header-Button `Sort-Reset` (Zeile 664) triggert den Ruecksetzpfad live |
 
 ---
 
@@ -126,6 +127,8 @@ Bewertungsstufen:
 | REF-008 | P-051 | `src/components/ui/HUD.tsx` | Sort-Handle `mission` | 792 | PASS | Subpanel `Missionslage` sortierbar |
 | REF-009 | P-051 | `src/components/ui/HUD.tsx` | Sort-Handle `timeline` | 824 | PASS | Subpanel `Einsatz-Timeline` sortierbar |
 | REF-010 | YAML-FIX | `.github/workflows/security-ci.yml` | Workflow-Key `on:` | 2 | PASS | Parser-/Diagnosecheck im Workspace ohne Fehler |
+| REF-011 | P-052 | `src/components/ui/HUD.tsx` | `resetRightSubSectionOrder` | 550 | PASS | Reihenfolge wird auf `RIGHT_SUB_SECTION_DEFAULT_ORDER` zurueckgesetzt und lokal gespeichert |
+| REF-012 | P-052 | `src/components/ui/HUD.tsx` | `Sort-Reset` Button (`onClick={resetRightSubSectionOrder}`) | 664 | PASS | Live im Header erreichbar, Ruecksetzen ohne Reload moeglich |
 
 ---
 
