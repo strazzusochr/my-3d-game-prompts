@@ -232,6 +232,7 @@ export const HUD = () => {
     const effectiveHudScale = Number((hudScale * viewportHudFit).toFixed(3));
     const timelineMaxHeight = Math.max(160, Math.min(360, Math.round((viewportHeight * 0.34) / effectiveHudScale)));
     const compactBottomLayout = viewportHeight < 920;
+    const bottomOrderStyle = (order: number): React.CSSProperties => (compactBottomLayout ? { order } : {});
 
     const switchStreamProfile = async (profile: 'low' | 'medium' | 'high' | 'aaa') => {
         try {
@@ -330,15 +331,15 @@ export const HUD = () => {
                 ...panelScaleStyle('right', 'top right')
             }}>
                 {/* Header with FPS */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                    <h3 style={{ margin: 0, color: '#00ccff', fontSize: '17px', textTransform: 'uppercase', letterSpacing: '1.2px', fontWeight: '800' }}>Streifen-Protokoll</h3>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <h3 style={{ margin: 0, color: '#00ccff', fontSize: '16px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800' }}>Streifen-Protokoll</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <div style={{ 
-                            padding: '4px 8px',
+                            padding: '3px 7px',
                             background: 'rgba(0,0,0,0.4)',
                             borderRadius: '4px',
                             fontFamily: 'monospace',
-                            fontSize: '12px',
+                            fontSize: '11px',
                             fontWeight: 'bold',
                             color: fps > 50 ? '#00ff88' : fps > 30 ? '#ffaa00' : '#ff4444',
                             border: `1px solid ${fps > 50 ? 'rgba(0,255,136,0.2)' : fps > 30 ? 'rgba(255,170,0,0.2)' : 'rgba(255,68,68,0.2)'}`,
@@ -497,6 +498,8 @@ export const HUD = () => {
                             maxHeight: `${timelineMaxHeight}px`,
                             overflowY: 'auto',
                             paddingRight: '10px',
+                            scrollbarWidth: 'thin',
+                            scrollbarColor: 'rgba(120,190,220,0.45) rgba(0,0,0,0)',
                             display: 'flex',
                             flexDirection: 'column',
                             gap: '8px'
@@ -643,7 +646,7 @@ export const HUD = () => {
                 transformOrigin: 'center bottom',
                 scale: panelUi.bottom.zoom2 ? 2 : 1,
             }}>
-                <div style={{ display: 'flex', gap: '6px', pointerEvents: 'auto', background: 'rgba(10,10,10,0.62)', border: '2px solid rgba(255,255,255,0.09)', borderRadius: '10px', padding: '5px 7px' }}>
+                <div style={{ display: 'flex', gap: '6px', pointerEvents: 'auto', background: 'rgba(10,10,10,0.62)', border: '2px solid rgba(255,255,255,0.09)', borderRadius: '10px', padding: '5px 7px', ...bottomOrderStyle(1) }}>
                     <button
                         onClick={() => togglePanelMinimize('bottom')}
                         style={{ ...btnStyle, minWidth: '52px', padding: '4px 8px', fontSize: '11px', color: panelUi.bottom.minimized ? '#ffcc00' : '#9edfff' }}
@@ -663,7 +666,7 @@ export const HUD = () => {
                 {!panelUi.bottom.minimized && (
                 <>
                 {/* Reverse Speed */}
-                <div style={{ display: 'flex', gap: '2px' }}>
+                <div style={{ display: 'flex', gap: '2px', ...bottomOrderStyle(2) }}>
                     {revSpeeds.reverse().map(s => (
                         <button 
                             key={s} 
@@ -682,29 +685,31 @@ export const HUD = () => {
                     ))}
                 </div>
 
-                <div style={{ height: '36px', width: '2px', background: 'rgba(255,255,255,0.15)' }} />
+                <div style={{ height: '36px', width: '2px', background: 'rgba(255,255,255,0.15)', ...bottomOrderStyle(2) }} />
 
                 {/* Hour and Minute buttons + Pause */}
-                <button onClick={rewindHour} style={{...btnStyle, color: timeColor}} title="1 Stunde zurück">-1H</button>
-                <button onClick={rewindMinute} style={{...btnStyle, color: timeColor}} title="1 Minute zurück">-1M</button>
-                <button 
-                    onClick={toggleTimePause} 
-                    style={{ 
-                        ...btnStyle, 
-                        minWidth: '60px',
-                        borderColor: isTimePaused ? '#2e7d32' : '#c62828',
-                        color: isTimePaused ? '#4caf50' : '#ff5252'
-                    }}
-                >
-                    {isTimePaused ? '▶' : '⏸'}
-                </button>
-                <button onClick={advanceMinute} style={{...btnStyle, color: timeColor}} title="1 Minute vor">+1M</button>
-                <button onClick={advanceHour} style={{...btnStyle, color: timeColor}} title="1 Stunde vor">+1H</button>
+                <div style={{ display: 'flex', gap: '2px', ...bottomOrderStyle(1) }}>
+                    <button onClick={rewindHour} style={{...btnStyle, color: timeColor}} title="1 Stunde zurück">-1H</button>
+                    <button onClick={rewindMinute} style={{...btnStyle, color: timeColor}} title="1 Minute zurück">-1M</button>
+                    <button 
+                        onClick={toggleTimePause} 
+                        style={{ 
+                            ...btnStyle, 
+                            minWidth: '60px',
+                            borderColor: isTimePaused ? '#2e7d32' : '#c62828',
+                            color: isTimePaused ? '#4caf50' : '#ff5252'
+                        }}
+                    >
+                        {isTimePaused ? '▶' : '⏸'}
+                    </button>
+                    <button onClick={advanceMinute} style={{...btnStyle, color: timeColor}} title="1 Minute vor">+1M</button>
+                    <button onClick={advanceHour} style={{...btnStyle, color: timeColor}} title="1 Stunde vor">+1H</button>
+                </div>
 
-                <div style={{ height: '36px', width: '2px', background: 'rgba(255,255,255,0.15)' }} />
+                <div style={{ height: '36px', width: '2px', background: 'rgba(255,255,255,0.15)', ...bottomOrderStyle(1) }} />
 
                 {/* Forward Speed */}
-                <div style={{ display: 'flex', gap: '2px' }}>
+                <div style={{ display: 'flex', gap: '2px', ...bottomOrderStyle(2) }}>
                     {fwdSpeeds.map(s => (
                         <button 
                             key={s} 
@@ -723,10 +728,10 @@ export const HUD = () => {
                     ))}
                 </div>
 
-                <div style={{ height: '36px', width: '2px', background: 'rgba(255,255,255,0.15)' }} />
+                <div style={{ height: '36px', width: '2px', background: 'rgba(255,255,255,0.15)', ...bottomOrderStyle(2) }} />
 
                 {/* Time + Datum + Direction */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', ...bottomOrderStyle(1) }}>
                     <span style={{ 
                         color: isReverse ? '#ff6666' : timeColor,
                         fontSize: '22px',
@@ -740,14 +745,14 @@ export const HUD = () => {
                         Mi, 17. März 2021
                     </span>
                 </div>
-                <span style={{ color: isReverse ? '#ff4444' : '#00ccff', fontWeight: 'bold', fontSize: '20px' }}>
+                <span style={{ color: isReverse ? '#ff4444' : '#00ccff', fontWeight: 'bold', fontSize: '20px', ...bottomOrderStyle(1) }}>
                     {absSpeed}x
                 </span>
 
-                <div style={{ height: '36px', width: '2px', background: 'rgba(255,255,255,0.15)' }} />
+                <div style={{ height: '36px', width: '2px', background: 'rgba(255,255,255,0.15)', ...bottomOrderStyle(1) }} />
 
                 {/* Eskalation + NPC Count */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', pointerEvents: 'auto', background: 'rgba(10,10,10,0.6)', padding: '10px 20px', borderRadius: '12px', backdropFilter: 'blur(5px)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', pointerEvents: 'auto', background: 'rgba(10,10,10,0.6)', padding: '10px 20px', borderRadius: '12px', backdropFilter: 'blur(5px)', ...bottomOrderStyle(1) }}>
                     <span style={{ 
                         color: tensionLevel > 70 ? '#ff4444' : tensionLevel > 40 ? '#ffaa00' : '#00ccff',
                         fontWeight: 'bold', fontSize: '18px', fontFamily: '"Outfit", "Segoe UI", sans-serif'
@@ -757,9 +762,9 @@ export const HUD = () => {
                     <span style={{ color: '#00ccff', fontWeight: 'bold', fontSize: '22px' }}>👥{npcCount}</span>
                 </div>
 
-                <div style={{ height: '36px', width: '2px', background: 'rgba(255,255,255,0.15)' }} />
+                <div style={{ height: '36px', width: '2px', background: 'rgba(255,255,255,0.15)', ...bottomOrderStyle(2) }} />
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', pointerEvents: 'auto', background: 'rgba(10,10,10,0.6)', padding: '8px 14px', borderRadius: '12px', backdropFilter: 'blur(5px)', border: '2px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', pointerEvents: 'auto', background: 'rgba(10,10,10,0.6)', padding: '8px 14px', borderRadius: '12px', backdropFilter: 'blur(5px)', border: '2px solid rgba(255,255,255,0.08)', ...bottomOrderStyle(2) }}>
                     <button
                         onClick={showStatisticsPanel}
                         style={{ ...btnStyle, minWidth: '70px', padding: '6px 10px', fontSize: '13px', color: '#9edfff' }}
@@ -772,10 +777,10 @@ export const HUD = () => {
                     </span>
                 </div>
 
-                <div style={{ height: '36px', width: '2px', background: 'rgba(255,255,255,0.15)' }} />
+                <div style={{ height: '36px', width: '2px', background: 'rgba(255,255,255,0.15)', ...bottomOrderStyle(2) }} />
 
                 {/* Volume / Audio Controls */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', pointerEvents: 'auto', background: 'rgba(10,10,10,0.6)', padding: '10px 16px', borderRadius: '12px', backdropFilter: 'blur(5px)', border: '2px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', pointerEvents: 'auto', background: 'rgba(10,10,10,0.6)', padding: '10px 16px', borderRadius: '12px', backdropFilter: 'blur(5px)', border: '2px solid rgba(255,255,255,0.08)', ...bottomOrderStyle(2) }}>
                     <button 
                         onClick={() => setMuted(!muted)}
                         style={{
@@ -803,9 +808,9 @@ export const HUD = () => {
                     </span>
                 </div>
 
-                <div style={{ height: '36px', width: '2px', background: 'rgba(255,255,255,0.15)' }} />
+                <div style={{ height: '36px', width: '2px', background: 'rgba(255,255,255,0.15)', ...bottomOrderStyle(2) }} />
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', pointerEvents: 'auto', background: 'rgba(10,10,10,0.6)', padding: '8px 14px', borderRadius: '12px', backdropFilter: 'blur(5px)', border: '2px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', pointerEvents: 'auto', background: 'rgba(10,10,10,0.6)', padding: '8px 14px', borderRadius: '12px', backdropFilter: 'blur(5px)', border: '2px solid rgba(255,255,255,0.08)', ...bottomOrderStyle(2) }}>
                     {([
                         ['low', 'LOW'],
                         ['medium', 'MEDIUM'],

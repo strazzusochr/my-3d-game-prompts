@@ -133,6 +133,9 @@
 - Bottom-Leiste responsive verhaertet: Umbruch-Layout mit kompakter Zwei-Reihen-Tendenz bei geringerer Viewport-Hoehe statt Ueberladung am unteren Bildrand.
 - Einsatz-Timeline visuell verdichtet: dynamische Max-Hoehe nach Viewport sowie kompaktere Event-Cards (Abstaende, Schrift, Padding) fuer bessere Lesbarkeit bei gleichzeitig mehr Weltanteil.
 - Vollverifikation nach Cinematic-Pass erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 243/243.
+- HUD-Micro-Pass am 16.03.2026 abgeschlossen: rechter Header/FPS-Cluster weiter komprimiert und Timeline-Scrollbar bewusst subtil gesetzt (`scrollbarWidth: thin`, reduzierte Farbintensitaet).
+- Bottom-Bar-Priorisierung bei flacher Hoehe aktiviert: zentrale Gameplay-Steuerung (`Min/x2`, Zeitlauf/Pause, Uhr/Speed, Eskalation/NPC) wird im kompakten Layout vor nachrangigen Bloecken einsortiert.
+- Vollverifikation nach Micro-Pass erfolgreich: `npm run autonomy:full` erneut komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Profilfolge `low -> medium -> high -> aaa -> low` stabil.
 
 ## Naechster logischer Schritt
 - Kein offener Blocker im aktuellen HUD-/Streaming-Zyklus; naechster Ausbau kann inhaltlich auf Spawn-HUD-Feinschliff oder Trend-/Missionspersistenz gehen.

@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 12:08:39 +01:00
+- Zeitstempel: 2026-03-16 12:12:43 +01:00
 - Repo-Head: 01ea711 (nach Spawn-Marker-Logik-Extraktion und Testabdeckung)
-- Nachweislauf: npm run autonomy:full PASS nach HUD-World-Fit/Cinematic-Pass (inkl. lint PASS + tests 243/243 PASS + build PASS + live proof PASS)
-- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_243_243 + BUILD_PASS + HUD_WORLD_FIT_PASS + STREAM_PROFILE_UI_PASS + MASTER_80000_PASS
-- Gates: Lint PASS, Tests 243/243 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, HUD-Verhaeltnisse (adaptive Skalierung + Panel-Entschlackung + responsive Bottom-Leiste + kompaktere Timeline) validiert, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: HUD-Cinematic-Pass in `src/components/ui/HUD.tsx` umgesetzt und durch Vollproof verifiziert
+- Nachweislauf: npm run autonomy:full PASS nach HUD-Micro-Pass (inkl. lint PASS + tests 243/243 PASS + build PASS + live proof PASS)
+- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_243_243 + BUILD_PASS + HUD_WORLD_FIT_PASS + HUD_MICRO_PASS + MASTER_80000_PASS
+- Gates: Lint PASS, Tests 243/243 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, rechter Header/FPS-Cluster und Timeline-Scrollbar verdichtet sowie Bottom-Bar-Priorisierung bei flacher Hoehe validiert, Masterquelle 80.000/80.000 PASS
+- Arbeitsbaum: HUD-Micro-Pass in `src/components/ui/HUD.tsx` umgesetzt und per Vollproof verifiziert
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -84,6 +84,7 @@ Bewertungsstufen:
 | P-024 | SpawnMarker-Logik regressionssicher getestet | Vertikal | 100 | PASS | Logik in separates Modul extrahiert, neue Tests fuer Zeitfenster/Grouping/Priorisierung/Dringlichkeit |
 | P-025 | HUD um 25 Prozent verkleinert und Gameplay-Panels steuerbar gemacht | Vertikal | 100 | PASS | HUD-Default 75%, Min/x2 fuer Haupt- und Unterpanels, sichtbare Low/Medium/High/AAA-Buttons, Live-Proof danach gruen |
 | P-026 | HUD-World-Fit zur Spielwelt kalibriert | Vertikal | 100 | PASS | Adaptive Viewport-Skalierung, schlankere Hauptpanels, responsive Bottom-Leiste und verdichtete Timeline-Cards mit Full-Proof bestaetigt |
+| P-027 | HUD-Micro-Pass fuer Priorisierung und Feindichte umgesetzt | Vertikal | 100 | PASS | Rechter Header/FPS-Cluster komprimiert, Timeline-Scrollbar subtilisiert und Bottom-Bar-Order bei geringer Hoehe priorisiert, erneut Full-Proof gruen |
 
 ---
 

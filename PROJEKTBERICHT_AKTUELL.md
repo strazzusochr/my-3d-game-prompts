@@ -212,6 +212,12 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Die Einsatz-Timeline wurde fuer Dichte und Lesbarkeit ausbalanciert: dynamische Max-Hoehe nach Viewport sowie kompaktere Event-Cards (Text/Padding/Abstaende).
 - Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint/Test/Build gruen, Profilfolge `low -> medium -> high -> aaa -> low` und `canvas-webrtc` in allen Profilen bestaetigt.
 
+### 2.0.29 HUD-Micro-Pass (Priorisierung und Feindichte) vom 16.03.2026
+- Der rechte HUD-Header wurde nochmals verdichtet: kleinere Abstaende und kompaktere FPS-Kapsel, damit die rechte Spalte ruhiger in die Szene integriert ist.
+- Die Timeline erhielt eine subtilere Scrollbar-Darstellung, um visuelle Stoerung zu minimieren und den Fokus auf Inhalte statt Chrome zu legen.
+- Die Bottom-Leiste priorisiert bei niedriger Viewport-Hoehe nun die Kernsteuerung (Zeit/Pause/Speed/Eskalation) vor den nachrangigen Bloecken (Stats/Audio/Profile).
+- Validierung: `npm run autonomy:full` erneut erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Tests weiterhin 243/243 gruen.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
