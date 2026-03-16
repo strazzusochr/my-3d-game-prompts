@@ -152,10 +152,6 @@
 - HUD-Drag-Logik modularisiert: `src/components/ui/hudDrag.ts` kapselt jetzt `canStartHudDrag` und `computeHudDragOffset`; `src/components/ui/HUD.tsx` nutzt nur noch diese pruefbaren Helper.
 - Regressionsschutz aktiv: neue Testsuite `src/tests/hudDrag.test.ts` verifiziert Edit-Mode-/Linksklick-Guard und Delta-basierte Offset-Berechnung gezielt.
 - Vollverifikation nach HUD-Drag-Regressionsschutz erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 245/245.
-- HUD-Layout-Persistenz am 16.03.2026 umgesetzt: `src/components/ui/HUD.tsx` laedt/speichert Panel-Offsets, Minimize und Zoom jetzt ueber `localStorage` unter dem Key `hud-panel-layout-v1`.
-- Persistenzhelper modularisiert: `src/components/ui/hudLayoutPersistence.ts` kapselt Laden, Sanitisierung, Clamping und Serialisierung gegen fehlerhafte Persistenzdaten.
-- Neue Testsuite `src/tests/hudLayoutPersistence.test.ts` deckt Storage-Key, Zoom-Clamping, JSON-Fallback und deterministische Serialisierung ab.
-- Vollverifikation nach HUD-Layout-Persistenz erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 249/249.
 
 ## Naechster logischer Schritt
-- Kein offener Blocker im aktuellen HUD-/Streaming-Zyklus; naechster Ausbau kann inhaltlich auf sichtbaren HUD-Layout-Reset oder Spawn-HUD-Feinschliff gehen.
+- Kein offener Blocker im aktuellen HUD-/Streaming-Zyklus; naechster Ausbau kann inhaltlich auf Persistenz fuer frei verschobene HUD-Layouts oder Spawn-HUD-Feinschliff gehen.

@@ -5,7 +5,6 @@ import { getInteractionAvailability, getInteractionZoneById, getMissionChecklist
 import { getHudTelemetry } from '../../systems/hudTelemetry';
 import { getOperationsInsight } from '../../systems/operationsInsights';
 import { canStartHudDrag, computeHudDragOffset } from './hudDrag';
-import { HUD_PANEL_LAYOUT_STORAGE_KEY, loadPersistedPanelUi, serializePanelUi } from './hudLayoutPersistence';
 
 const StatusBar = ({ label, value, color }: { label: string, value: number, color: string }) => (
     <div style={{ marginBottom: '12px' }}>
@@ -85,11 +84,7 @@ export const HUD = () => {
         return Number.isFinite(stored) && stored >= 0.5 && stored <= 1.2 ? stored : 0.68;
     });
     const [viewportHudFit, setViewportHudFit] = useState(1);
-    const [panelUi, setPanelUi] = useState<PanelUiState>(() => {
-        const fallback = makeDefaultPanelState();
-        if (typeof window === 'undefined') return fallback;
-        return loadPersistedPanelUi(window.localStorage.getItem(HUD_PANEL_LAYOUT_STORAGE_KEY), fallback);
-    });
+    const [panelUi, setPanelUi] = useState<PanelUiState>(() => makeDefaultPanelState());
     const [layoutEditMode, setLayoutEditMode] = useState(false);
     const [viewportHeight, setViewportHeight] = useState(1080);
     const [streamProfileState, setStreamProfileState] = useState<{ active: 'low' | 'medium' | 'high' | 'aaa' | 'unknown'; status: string }>({
@@ -197,12 +192,6 @@ export const HUD = () => {
             window.localStorage.setItem('hud-scale', String(hudScale));
         }
     }, [hudScale]);
-
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            window.localStorage.setItem(HUD_PANEL_LAYOUT_STORAGE_KEY, serializePanelUi(panelUi));
-        }
-    }, [panelUi]);
 
     useEffect(() => {
         if (typeof window === 'undefined') return;

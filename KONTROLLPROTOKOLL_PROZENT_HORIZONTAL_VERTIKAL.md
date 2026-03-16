@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 14:01:10 +01:00
-- Repo-Head: 59e1b80 (vor Persistenz-Commit, Vollproof zum Layoutspeicher gruen)
-- Nachweislauf: npm run autonomy:full PASS nach HUD-Layout-Persistenz (inkl. lint PASS + tests 249/249 PASS + build PASS + live proof PASS)
-- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_249_249 + BUILD_PASS + HUD_DRAG_HANDLE_PASS + HUD_LAYOUT_PERSISTENCE_PASS + MASTER_80000_PASS
-- Gates: Lint PASS, Tests 249/249 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, frei verschobene HUD-Layouts werden nun robust geladen/gespeichert und gegen defekte LocalStorage-Daten abgesichert, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: HUD-Layout-Persistenz in `src/components/ui/hudLayoutPersistence.ts` extrahiert, `src/components/ui/HUD.tsx` daran angebunden und per Vollproof verifiziert
+- Zeitstempel: 2026-03-16 13:46:23 +01:00
+- Repo-Head: 7d8a6ac (nach HUD-Drag-Regressionsschutz)
+- Nachweislauf: npm run autonomy:full PASS nach HUD-Drag-Helper-Regressionstest (inkl. lint PASS + tests 245/245 PASS + build PASS + live proof PASS)
+- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_245_245 + BUILD_PASS + HUD_DRAG_HANDLE_PASS + HUD_DRAG_REGRESSION_PASS + MASTER_80000_PASS
+- Gates: Lint PASS, Tests 245/245 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, dedizierter Drag-Handle weiter sauber isoliert und jetzt per Regressionstest abgesichert, Masterquelle 80.000/80.000 PASS
+- Arbeitsbaum: HUD-Drag-Helper in `src/components/ui/hudDrag.ts` extrahiert, `src/components/ui/HUD.tsx` darauf umgestellt und per Vollproof verifiziert
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -46,7 +46,7 @@ Bewertungsstufen:
 | S-001 | Browser-Erreichbarkeit Stream | 100 | 100 | 100 | PASS | URL erreichbar + manueller Browseraufruf 127.0.0.1:3001 bestaetigt |
 | S-002 | Workspace-Fehlercheck | 100 | 100 | 100 | PASS | No errors found |
 | S-003 | Lint-Gate | 100 | 100 | 100 | PASS | eslint ohne Fehler |
-| S-004 | Test-Gate | 100 | 100 | 100 | PASS | 249/249 Tests bestanden (12 Dateien, comprehensive.test.ts 161 Tests) |
+| S-004 | Test-Gate | 100 | 100 | 100 | PASS | 245/245 Tests bestanden (11 Dateien, comprehensive.test.ts 161 Tests) |
 | S-005 | Build-Gate | 100 | 100 | 100 | PASS | vite build erfolgreich |
 | S-006 | Live-Proof Profilfolge | 100 | 100 | 100 | PASS | low->medium->high->aaa->low |
 | S-007 | Health-/Transport-Nachweis | 100 | 100 | 100 | PASS | canvas-webrtc aktiv |
@@ -90,7 +90,6 @@ Bewertungsstufen:
 | P-030 | Einzelne Unter-HUDs separat verschiebbar umgesetzt | Vertikal | 100 | PASS | NASA/Telemetrie/Mission/Timeline mit eigenem Drag-Handling + gestoppter Event-Propagation, dadurch echte Einzelverschiebung bei gleichbleibendem Min/Zoom |
 | P-031 | Expliziter Drag-Handle pro HUD-Panel umgesetzt | Vertikal | 100 | PASS | Verschieben nur noch ueber dedizierten `□`-Drag-Handle moeglich; kein ungewolltes Mitbewegen anderer Panels beim Klicken von Min/Zoom/Scale-Buttons mehr |
 | P-032 | HUD-Drag regressionssicher getestet | Vertikal | 100 | PASS | Neue Helper `canStartHudDrag` und `computeHudDragOffset` in eigenes Modul extrahiert und via `src/tests/hudDrag.test.ts` dauerhaft auf Edit-Mode/Button-Guard und Delta-Berechnung abgesichert |
-| P-033 | HUD-Layout-Persistenz umgesetzt und getestet | Vertikal | 100 | PASS | Panel-Zustaende werden nun ueber `hud-panel-layout-v1` geladen/gespeichert; `src/tests/hudLayoutPersistence.test.ts` sichert Storage-Key, Clamping, Fallback und Serialisierung dauerhaft ab |
 
 ---
 
