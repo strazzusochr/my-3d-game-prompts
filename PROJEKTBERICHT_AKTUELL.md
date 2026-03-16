@@ -265,6 +265,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Der Persistenztest wurde erweitert und verifiziert jetzt auch das gemeinsame Entfernen beider Storage-Keys.
 - Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Gesamtstand jetzt 250/250 Tests gruen.
 
+### 2.0.37 Import und Export fuer HUD-Layouts vom 16.03.2026
+- Das Layout-System kann jetzt nicht nur lokal persistieren und resetten, sondern komplette HUD-Setups auch als JSON exportieren und wieder importieren.
+- Oben rechts wurden dafuer zwei weitere globale Buttons ergaenzt: `Export` erstellt ein transportables Layout-Bundle inklusive HUD-Skalierung und kopiert es bevorzugt in die Zwischenablage; `Import` liest ein eingefuegtes JSON-Bundle wieder ein.
+- Die Bundle-Logik liegt zentral in `src/components/ui/hudLayoutPersistence.ts`: `serializeHudLayoutBundle` und `loadImportedHudLayoutBundle` sichern Clamping, Fallback und verdauliche JSON-Struktur.
+- `HUD.tsx` zeigt zusaetzlich einen knappen Statushinweis fuer Export-, Import- und Reset-Aktionen an, damit die Layout-Werkzeuge im Spielbild direkt Rueckmeldung geben.
+- Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Gesamtstand jetzt 252/252 Tests gruen.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.

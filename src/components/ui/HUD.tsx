@@ -5,7 +5,15 @@ import { getInteractionAvailability, getInteractionZoneById, getMissionChecklist
 import { getHudTelemetry } from '../../systems/hudTelemetry';
 import { getOperationsInsight } from '../../systems/operationsInsights';
 import { canStartHudDrag, computeHudDragOffset } from './hudDrag';
-import { HUD_PANEL_LAYOUT_STORAGE_KEY, clearPersistedHudLayout, loadPersistedPanelUi, serializePanelUi } from './hudLayoutPersistence';
+import {
+    HUD_PANEL_LAYOUT_STORAGE_KEY,
+    HUD_SCALE_STORAGE_KEY,
+    clearPersistedHudLayout,
+    loadImportedHudLayoutBundle,
+    loadPersistedPanelUi,
+    serializeHudLayoutBundle,
+    serializePanelUi,
+} from './hudLayoutPersistence';
 
 const StatusBar = ({ label, value, color }: { label: string, value: number, color: string }) => (
     <div style={{ marginBottom: '12px' }}>
@@ -91,6 +99,7 @@ export const HUD = () => {
         return loadPersistedPanelUi(window.localStorage.getItem(HUD_PANEL_LAYOUT_STORAGE_KEY), fallback);
     });
     const [layoutEditMode, setLayoutEditMode] = useState(false);
+    const [layoutTransferStatus, setLayoutTransferStatus] = useState<string | null>(null);
     const [viewportHeight, setViewportHeight] = useState(1080);
     const [streamProfileState, setStreamProfileState] = useState<{ active: 'low' | 'medium' | 'high' | 'aaa' | 'unknown'; status: string }>({
         active: 'unknown',
@@ -194,7 +203,7 @@ export const HUD = () => {
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            window.localStorage.setItem('hud-scale', String(hudScale));
+            window.localStorage.setItem(HUD_SCALE_STORAGE_KEY, String(hudScale));
         }
     }, [hudScale]);
 
@@ -225,9 +234,36 @@ export const HUD = () => {
         setPanelUi(makeDefaultPanelState());
         setHudScale(0.68);
         setLayoutEditMode(false);
+        setLayoutTransferStatus('HUD-Layout auf Standard zurueckgesetzt');
         if (typeof window !== 'undefined') {
             clearPersistedHudLayout(window.localStorage);
         }
+    };
+
+    const exportHudLayout = async () => {
+        const payload = serializeHudLayoutBundle(panelUi, hudScale);
+        if (typeof window === 'undefined') return;
+        try {
+            if (window.navigator?.clipboard?.writeText) {
+                await window.navigator.clipboard.writeText(payload);
+                setLayoutTransferStatus('HUD-Layout in die Zwischenablage kopiert');
+                return;
+            }
+        } catch {
+            // Fallback below opens prompt if clipboard access is blocked.
+        }
+        window.prompt('HUD-Layout Export kopieren', payload);
+        setLayoutTransferStatus('HUD-Layout als JSON angezeigt');
+    };
+
+    const importHudLayout = () => {
+        if (typeof window === 'undefined') return;
+        const raw = window.prompt('HUD-Layout JSON einfuegen');
+        if (!raw) return;
+        const next = loadImportedHudLayoutBundle(raw, makeDefaultPanelState(), 0.68);
+        setPanelUi(next.panelUi);
+        setHudScale(next.hudScale);
+        setLayoutTransferStatus('HUD-Layout importiert');
     };
 
     const togglePanelMinimize = (panel: HudPanelKey) => {
@@ -343,7 +379,36 @@ export const HUD = () => {
                     transformOrigin: 'top left'
                 }}
             >
-            <div style={{ position: 'absolute', top: '16px', right: '16px', pointerEvents: 'auto', zIndex: 50, display: 'flex', gap: '8px' }}>
+            <div style={{ position: 'absolute', top: '16px', right: '16px', pointerEvents: 'auto', zIndex: 50, display: 'flex', gap: '8px', alignItems: 'center' }}>
+                {layoutTransferStatus && (
+                    <div style={{ color: '#9edfff', fontSize: '11px', padding: '6px 10px', background: 'rgba(8,20,30,0.74)', border: '1px solid rgba(0,200,255,0.28)', borderRadius: '10px', maxWidth: '220px' }}>
+                        {layoutTransferStatus}
+                    </div>
+                )}
+                <button
+                    onClick={importHudLayout}
+                    style={{
+                        ...squareControlStyle(),
+                        minWidth: '64px',
+                        minHeight: '36px',
+                        fontSize: '12px',
+                    }}
+                    title="HUD-Layout aus JSON importieren"
+                >
+                    Import
+                </button>
+                <button
+                    onClick={() => void exportHudLayout()}
+                    style={{
+                        ...squareControlStyle(),
+                        minWidth: '64px',
+                        minHeight: '36px',
+                        fontSize: '12px',
+                    }}
+                    title="HUD-Layout exportieren"
+                >
+                    Export
+                </button>
                 <button
                     onClick={resetHudLayout}
                     style={{
