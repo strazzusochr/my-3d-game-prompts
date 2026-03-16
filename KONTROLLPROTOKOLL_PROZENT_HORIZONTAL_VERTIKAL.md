@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 04:24:31
-- Repo-Head: 3bdc810
+- Zeitstempel: 2026-03-16 04:29:14
+- Repo-Head: 25f108b
 - Nachweislauf: npm run autonomy:full = PASS
 - Marker: AUTONOMY_PROOF_OK + AUTONOMY_FULL_OK
 - Gates: Lint PASS, Tests 7/7 PASS, Build PASS, Live-Proof PASS
-- Arbeitsbaum: lokale Aenderung in Player (Gamepad-Basis), sonst stabil
+- Arbeitsbaum: sauber
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -99,3 +99,22 @@ Der Gesamtwert kombiniert verifizierte Runtime-Gates (sehr hoch) mit langfristig
 3. Jede Prozentaenderung erfordert einen kurzen Nachweistext in der Zeile.
 4. Ein Punkt darf nur 100% erhalten, wenn ein reproduzierbarer Nachweis vorliegt.
 5. Wenn ein Schritt fehlschlaegt, wird H% und V% fuer diesen Schritt auf maximal 50% reduziert, bis ein gruener Re-Run erfolgt.
+
+---
+
+## E) DEEP-GAP-MATRIX (WAS FEHLT ZUM KOMPLETTEN GAME)
+
+| Bereich | Ist-Status | Reifegrad % | Kritische Luecke | Naechster Umsetzungsschritt |
+|---|---|---:|---|---|
+| Player-Core | Basis vorhanden | 55 | Kein kompletter Physik-Character-Controller laut Ultra-Spec | Character-Controller mit Ground-Check, Jump-Arc, Slope-Handling fertigziehen |
+| Gamepad-System | Basis vorhanden | 35 | Noch kein vollstaendiges Button-Mapping + DPad/Trigger-Flows | Vollmapping + Actions + UI-Hinweise + Tests |
+| Audio-Engine (Teil 33) | Teilweise vorhanden | 25 | Kein vollstaendiges Event-basiertes Footstep/Breathing/Voice-Layering | Audio-State-Maschine + Event-Marker + Spatial-Pools |
+| NPC-KI/Behavior | Teilweise vorhanden | 40 | Keine tiefe BT/State-Machine-Abdeckung fuer alle Szenarien | Behavior-Tree Nodes + Eskalationsregeln ausbauen |
+| Mission/24h-Szenario | Teilweise vorhanden | 45 | Nicht alle 24h-Hyperdetail-Ketten vollständig integriert | Ereigniskette priorisiert in Meilensteinen ausrollen |
+| UI/HUD-Komplettheit | Teilweise vorhanden | 50 | Viele Ultra-Checks offen (Interaktion, Statistik, Menues) | HUD-Checklisten in Blöcken abarbeiten |
+| Quality-Gates 700+ | Begonnen | 20 | Vollabdeckung der Checkpunkte fehlt | Checklist-Automatisierung + fortlaufendes Abarbeiten |
+
+Realistische Gesamt-Reife (Deep): 39%
+
+Interpretation:
+Der technische Kern laeuft stabil mit reproduzierbarer Beweispflicht, aber die vollständige Ultra-Spec ist noch weit von 100% entfernt.
