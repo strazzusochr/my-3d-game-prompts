@@ -6,11 +6,11 @@ import { getHudTelemetry } from '../../systems/hudTelemetry';
 import { getOperationsInsight } from '../../systems/operationsInsights';
 
 const StatusBar = ({ label, value, color }: { label: string, value: number, color: string }) => (
-    <div style={{ marginBottom: '16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', fontWeight: '800', color: '#ffcc00', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '6px', textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>
+    <div style={{ marginBottom: '12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: '800', color: '#ffcc00', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '5px', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>
             <span>{label}</span>
         </div>
-        <div style={{ height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ height: '7px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
             <div style={{ height: '100%', width: `${value}%`, background: color, boxShadow: `0 0 10px ${color}` }} />
         </div>
     </div>
@@ -80,9 +80,11 @@ export const HUD = () => {
     const [hudScale, setHudScale] = useState(() => {
         if (typeof window === 'undefined') return 1;
         const stored = Number(window.localStorage.getItem('hud-scale'));
-        return Number.isFinite(stored) && stored >= 0.6 && stored <= 1.4 ? stored : 0.75;
+        return Number.isFinite(stored) && stored >= 0.5 && stored <= 1.2 ? stored : 0.68;
     });
+    const [viewportHudFit, setViewportHudFit] = useState(1);
     const [panelUi, setPanelUi] = useState<PanelUiState>(() => makeDefaultPanelState());
+    const [viewportHeight, setViewportHeight] = useState(1080);
     const [streamProfileState, setStreamProfileState] = useState<{ active: 'low' | 'medium' | 'high' | 'aaa' | 'unknown'; status: string }>({
         active: 'unknown',
         status: 'Profilsteuerung bereit',
@@ -189,9 +191,23 @@ export const HUD = () => {
         }
     }, [hudScale]);
 
-    const decreaseHudScale = () => setHudScale((value) => Math.max(0.6, Number((value - 0.1).toFixed(2))));
-    const increaseHudScale = () => setHudScale((value) => Math.min(1.4, Number((value + 0.1).toFixed(2))));
-    const resetHudScale = () => setHudScale(0.75);
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const applyFit = () => {
+            const widthFit = window.innerWidth / 1920;
+            const heightFit = window.innerHeight / 1080;
+            const fit = Math.min(widthFit, heightFit);
+            setViewportHudFit(Math.min(1, Math.max(0.8, fit)));
+            setViewportHeight(window.innerHeight);
+        };
+        applyFit();
+        window.addEventListener('resize', applyFit);
+        return () => window.removeEventListener('resize', applyFit);
+    }, []);
+
+    const decreaseHudScale = () => setHudScale((value) => Math.max(0.5, Number((value - 0.05).toFixed(2))));
+    const increaseHudScale = () => setHudScale((value) => Math.min(1.2, Number((value + 0.05).toFixed(2))));
+    const resetHudScale = () => setHudScale(0.68);
 
     const togglePanelMinimize = (panel: HudPanelKey) => {
         setPanelUi((prev) => ({
@@ -213,6 +229,9 @@ export const HUD = () => {
     });
 
     const streamProfile = streamProfileState.active;
+    const effectiveHudScale = Number((hudScale * viewportHudFit).toFixed(3));
+    const timelineMaxHeight = Math.max(160, Math.min(360, Math.round((viewportHeight * 0.34) / effectiveHudScale)));
+    const compactBottomLayout = viewportHeight < 920;
 
     const switchStreamProfile = async (profile: 'low' | 'medium' | 'high' | 'aaa') => {
         try {
@@ -232,19 +251,19 @@ export const HUD = () => {
     };
 
     return (
-        <div style={{ pointerEvents: 'none', position: 'absolute', inset: 0, fontFamily: '"Outfit", sans-serif' }}>
+        <div style={{ pointerEvents: 'none', position: 'absolute', inset: 0, fontFamily: '"Outfit", "Segoe UI", sans-serif' }}>
             <div
                 style={{
                     position: 'absolute',
                     inset: 0,
-                    width: `${100 / hudScale}%`,
-                    height: `${100 / hudScale}%`,
-                    transform: `scale(${hudScale})`,
+                    width: `${100 / effectiveHudScale}%`,
+                    height: `${100 / effectiveHudScale}%`,
+                    transform: `scale(${effectiveHudScale})`,
                     transformOrigin: 'top left'
                 }}
             >
             {/* Left Panel */}
-            <div style={{ pointerEvents: 'auto', position: 'absolute', top: '40px', left: '40px', width: '380px', padding: '24px', background: 'rgba(10,10,10,0.85)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', ...panelScaleStyle('left', 'top left') }}>
+            <div style={{ pointerEvents: 'auto', position: 'absolute', top: '24px', left: '24px', width: '292px', padding: '16px', background: 'rgba(10,10,10,0.82)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', boxShadow: '0 8px 24px rgba(0,0,0,0.45)', ...panelScaleStyle('left', 'top left') }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                     <div style={{ color: '#9edfff', fontSize: '11px', letterSpacing: '0.8px', textTransform: 'uppercase' }}>Status-HUD</div>
                     <div style={{ display: 'flex', gap: '4px' }}>
@@ -267,7 +286,7 @@ export const HUD = () => {
             </div>
 
             {/* Top Center Badge + Phase Label */}
-            <div style={{ position: 'absolute', top: '40px', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', ...panelScaleStyle('top', 'top center') }}>
+            <div style={{ position: 'absolute', top: '24px', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', ...panelScaleStyle('top', 'top center') }}>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '6px', pointerEvents: 'auto' }}>
                     <button onClick={() => togglePanelMinimize('top')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }}>Min</button>
                     <button onClick={() => togglePanelZoom2('top')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }}>x2</button>
@@ -302,17 +321,17 @@ export const HUD = () => {
 
             {/* Combined Right Panel (Missions + FPS + Current Event) */}
             <div style={{ 
-                position: 'absolute', top: '20px', right: '20px', width: '380px', padding: '24px', 
+                position: 'absolute', top: '20px', right: '20px', width: '296px', padding: '12px', 
                 background: 'transparent', // Auf User-Wunsch: "mach den schwarzen rand wieder durchsichtig"
                 border: 'none', 
                 color: '#fff', 
                 pointerEvents: 'auto',
-                textShadow: '0 1px 4px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.6)',
+                textShadow: '0 1px 3px rgba(0,0,0,0.85), 0 0 8px rgba(0,0,0,0.55)',
                 ...panelScaleStyle('right', 'top right')
             }}>
                 {/* Header with FPS */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                    <h3 style={{ margin: 0, color: '#00ccff', fontSize: '18px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: '800' }}>Streifen-Protokoll</h3>
+                    <h3 style={{ margin: 0, color: '#00ccff', fontSize: '17px', textTransform: 'uppercase', letterSpacing: '1.2px', fontWeight: '800' }}>Streifen-Protokoll</h3>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <div style={{ 
                             padding: '4px 8px',
@@ -331,7 +350,7 @@ export const HUD = () => {
                             <button onClick={() => togglePanelMinimize('right')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }} title="Panel minimieren">Min</button>
                             <button onClick={() => togglePanelZoom2('right')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }} title="Panel x2">x2</button>
                             <button onClick={decreaseHudScale} style={{ ...btnStyle, minWidth: '34px', padding: '4px 8px', fontSize: '14px' }} title="HUD kleiner">-</button>
-                            <button onClick={resetHudScale} style={{ ...btnStyle, minWidth: '56px', padding: '4px 8px', fontSize: '12px' }} title="HUD zurücksetzen">{Math.round(hudScale * 100)}%</button>
+                            <button onClick={resetHudScale} style={{ ...btnStyle, minWidth: '56px', padding: '4px 8px', fontSize: '12px' }} title="HUD zurücksetzen">{Math.round(effectiveHudScale * 100)}%</button>
                             <button onClick={increaseHudScale} style={{ ...btnStyle, minWidth: '34px', padding: '4px 8px', fontSize: '14px' }} title="HUD größer">+</button>
                         </div>
                     </div>
@@ -475,7 +494,7 @@ export const HUD = () => {
                     <div 
                         ref={timelineRef}
                         style={{
-                            maxHeight: '260px',
+                            maxHeight: `${timelineMaxHeight}px`,
                             overflowY: 'auto',
                             paddingRight: '10px',
                             display: 'flex',
@@ -529,20 +548,20 @@ export const HUD = () => {
                                     key={`timeline-${ev.time}-${index}`}
                                     style={{
                                         display: 'flex',
-                                        gap: '12px',
-                                        fontSize: '14px', // Vergrößert wie Streifen-Protokoll
+                                        gap: '10px',
+                                        fontSize: '12px',
                                         fontFamily: 'monospace',
-                                        padding: '10px 12px',
+                                        padding: '8px 10px',
                                         background: bgHighlight,
                                         borderRadius: '6px',
                                         borderLeft: `3px solid ${borderCol}`,
                                         opacity: 1
                                     }}
                                 >
-                                    <div style={{ fontWeight: 'bold', color: titleColor, minWidth: '45px' }}>{ev.time}</div>
+                                    <div style={{ fontWeight: 'bold', color: titleColor, minWidth: '42px' }}>{ev.time}</div>
                                     <div style={{ flex: 1 }}>
                                         <div style={{ color: textColor }}>{ev.action} {ev.npcType} {ev.count > 0 ? `(${ev.count}x)` : ''}</div>
-                                        <div style={{ color: descColor, marginTop: '4px', fontSize: '13px', fontStyle: 'italic', fontFamily: '"Outfit", sans-serif' }}>
+                                        <div style={{ color: descColor, marginTop: '3px', fontSize: '11px', fontStyle: 'italic', fontFamily: '"Outfit", sans-serif' }}>
                                             {ev.description.replace(/^.{5} — /, '')}
                                         </div>
                                     </div>
@@ -608,14 +627,19 @@ export const HUD = () => {
             <div style={{ 
                 pointerEvents: 'none', // click through leiste
                 position: 'absolute', 
-                bottom: '40px', 
+                bottom: compactBottomLayout ? '22px' : '40px', 
                 left: '50%', 
                 transform: 'translateX(-50%)', 
                 padding: '0', 
                 background: 'transparent', 
                 display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
                 alignItems: 'center',
-                gap: '16px', 
+                alignContent: 'center',
+                gap: compactBottomLayout ? '8px' : '10px', 
+                rowGap: compactBottomLayout ? '6px' : '8px',
+                width: compactBottomLayout ? 'min(1160px, calc(100vw - 36px))' : 'min(1700px, calc(100vw - 48px))',
                 transformOrigin: 'center bottom',
                 scale: panelUi.bottom.zoom2 ? 2 : 1,
             }}>
@@ -705,14 +729,14 @@ export const HUD = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
                     <span style={{ 
                         color: isReverse ? '#ff6666' : timeColor,
-                        fontSize: '28px', // verdoppelt
+                        fontSize: '22px',
                         fontWeight: 'bold', 
-                        fontFamily: 'monospace',
+                        fontFamily: '"Outfit", "Segoe UI", sans-serif',
                         textShadow: `0 0 12px ${isReverse ? 'rgba(255,68,68,0.4)' : timeShadow}`
                     }}>
                         {isReverse ? '◀ ' : ''}{inGameTime}{!isReverse ? ' ▶' : ''}
                     </span>
-                    <span style={{ color: '#666', fontSize: '14px', fontFamily: 'monospace', letterSpacing: '1px' }}>
+                    <span style={{ color: '#666', fontSize: '12px', fontFamily: '"Outfit", "Segoe UI", sans-serif', letterSpacing: '0.8px' }}>
                         Mi, 17. März 2021
                     </span>
                 </div>
@@ -726,7 +750,7 @@ export const HUD = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', pointerEvents: 'auto', background: 'rgba(10,10,10,0.6)', padding: '10px 20px', borderRadius: '12px', backdropFilter: 'blur(5px)' }}>
                     <span style={{ 
                         color: tensionLevel > 70 ? '#ff4444' : tensionLevel > 40 ? '#ffaa00' : '#00ccff',
-                        fontWeight: 'bold', fontSize: '20px', fontFamily: 'monospace'
+                        fontWeight: 'bold', fontSize: '18px', fontFamily: '"Outfit", "Segoe UI", sans-serif'
                     }}>
                         ⚡{tensionLevel}%
                     </span>
@@ -1071,16 +1095,17 @@ export const HUD = () => {
 
 const btnStyle: React.CSSProperties = {
     background: 'rgba(10,10,10,0.6)',
-    border: '2px solid rgba(255,255,255,0.08)',
+    border: '1px solid rgba(255,255,255,0.12)',
     color: '#888',
-    padding: '6px 12px', // verdoppelt
-    borderRadius: '8px',
+    padding: '4px 8px',
+    borderRadius: '7px',
     cursor: 'pointer',
-    fontSize: '16px', // verdoppelt
-    fontWeight: 'bold',
+    fontSize: '12px',
+    fontWeight: 700,
     transition: 'all 0.15s ease',
     outline: 'none',
-    minWidth: '45px', // verdoppelt
+    minWidth: '34px',
     pointerEvents: 'auto',
-    backdropFilter: 'blur(5px)',
+    backdropFilter: 'blur(4px)',
+    fontFamily: '"Outfit", "Segoe UI", sans-serif',
 };

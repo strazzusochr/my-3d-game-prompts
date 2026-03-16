@@ -205,6 +205,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Die Stream-Profilbuttons sind im HUD jetzt explizit sichtbar: `Low`, `Medium`, `High` und `AAA 1080p 60 fps`; der aktive Zustand und laufende Umschaltungen werden im Bottom-HUD angezeigt.
 - Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Profilfolge `low -> medium -> high -> aaa -> low` samt `canvas-webrtc`-Transport in allen Profilen bestanden.
 
+### 2.0.28 HUD-World-Fit und Cinematic-Pass vom 16.03.2026
+- Die HUD-Proportionen wurden auf die Spielwelt neu kalibriert: reduzierte Basisskalierung auf 68 Prozent plus adaptive Viewport-Fit-Skalierung fuer unterschiedliche Displaygroessen.
+- Linkes und rechtes Hauptpanel wurden weiter entschlackt (geringere Breiten/Padding), sodass mehr sichtbare Weltflaeche erhalten bleibt und die Overlay-Dominanz sinkt.
+- Die Bottom-Leiste wurde responsive verhaertet: flexibler Umbruch mit kompakter Zwei-Reihen-Tendenz bei niedriger Viewport-Hoehe statt horizontaler Ueberladung.
+- Die Einsatz-Timeline wurde fuer Dichte und Lesbarkeit ausbalanciert: dynamische Max-Hoehe nach Viewport sowie kompaktere Event-Cards (Text/Padding/Abstaende).
+- Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint/Test/Build gruen, Profilfolge `low -> medium -> high -> aaa -> low` und `canvas-webrtc` in allen Profilen bestaetigt.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
@@ -219,6 +226,7 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Render-FPS und Stream/View-FPS wurden fachlich getrennt und klarer benannt.
 - HUD-Funktionen wurden erweitert, inklusive Skalierung und separater Remote-Overlay-Logik.
 - Die HUD-Ergonomie wurde weiter verfeinert: 75-Prozent-Default, individuelle Panel-Minimierung und x2-Zoom fuer die operativen Unterpaneele sowie sichtbare Profilumschaltung direkt im Gameplay-HUD.
+- Die Verhaeltnislogik wurde zusaetzlich auf World-Fit erweitert: adaptive Viewport-Skalierung, kompaktere Panel-Geometrie und responsive Bottom-Leiste fuer konsistente Wirkung zwischen HUD und Spielraum.
 - Damit ist besser nachvollziehbar, ob ein Engpass im Renderer oder in der Uebertragung liegt.
 
 ### 2.4 Tests und Codequalitaet

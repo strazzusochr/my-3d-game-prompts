@@ -129,6 +129,10 @@
 - Gameplay-Panels jetzt einzeln steuerbar: Min-/x2-Buttons fuer linkes Statuspanel, Top-Badge, rechtes Hauptpanel, Interaktionspanel, Bottom-Leiste sowie die Unterbereiche NASA, Telemetrie, Missionslage und Timeline aktiv.
 - Stream-Profilsteuerung im HUD sichtbar und live verdrahtet: `Low`, `Medium`, `High` und `AAA 1080p 60 fps` schalten ueber die bestehende Profil-API; Statusanzeige und Ladezustand werden direkt im Bottom-HUD gezeigt.
 - Vollverifikation nach HUD-Block erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Profilfolge `low -> medium -> high -> aaa -> low` im Live-Proof erfolgreich.
+- HUD-World-Fit/Cinematic-Pass am 16.03.2026 umgesetzt: adaptive Viewport-Skalierung plus reduzierte Basis-Skalierung (68%), schlankere linke/rechte Panel-Proportionen und konsistente, kleinere Typografie.
+- Bottom-Leiste responsive verhaertet: Umbruch-Layout mit kompakter Zwei-Reihen-Tendenz bei geringerer Viewport-Hoehe statt Ueberladung am unteren Bildrand.
+- Einsatz-Timeline visuell verdichtet: dynamische Max-Hoehe nach Viewport sowie kompaktere Event-Cards (Abstaende, Schrift, Padding) fuer bessere Lesbarkeit bei gleichzeitig mehr Weltanteil.
+- Vollverifikation nach Cinematic-Pass erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 243/243.
 
 ## Naechster logischer Schritt
-- Kein offener Blocker im aktuellen HUD-/Streaming-Zyklus; naechster Ausbau kann wieder inhaltlich auf Spawn-HUD-Feinschliff oder Trend-/Missionspersistenz gehen.
+- Kein offener Blocker im aktuellen HUD-/Streaming-Zyklus; naechster Ausbau kann inhaltlich auf Spawn-HUD-Feinschliff oder Trend-/Missionspersistenz gehen.
