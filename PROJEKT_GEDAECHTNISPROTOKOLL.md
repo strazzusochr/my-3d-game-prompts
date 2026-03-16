@@ -143,9 +143,6 @@
 - Neon-Sichtbarkeit am 16.03.2026 nachgeschaerft: globaler `□`-Button und panelbezogene Quadrat-Controls auf klaren Neon-Blau-Look mit Glow umgestellt.
 - Bedienfeedback verbessert: Quadrat-Controls (`□ Min`/`□ Open`) sind jetzt auch auf dunklem Weltbild deutlich sichtbar.
 - Vollverifikation nach Neon-Update erfolgreich: `npm run autonomy:full` erneut komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`.
-- Drag-Fix fuer Einzel-HUDs am 16.03.2026 umgesetzt: NASA, Phase-Telemetrie, Missionslage und Einsatz-Timeline besitzen nun eigenes Drag-Handling statt nur Mitbewegung im rechten Hauptcontainer.
-- Event-Propagation verhaertet: Beim Ziehen eines Unterpanels wird Parent-Drag unterbunden, damit jedes gezeigte HUD wirklich einzeln verschiebbar bleibt.
-- Vollverifikation nach Einzel-Drag-Fix erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 243/243.
 
 ## Naechster logischer Schritt
 - Kein offener Blocker im aktuellen HUD-/Streaming-Zyklus; naechster Ausbau kann inhaltlich auf Spawn-HUD-Feinschliff oder Trend-/Missionspersistenz gehen.

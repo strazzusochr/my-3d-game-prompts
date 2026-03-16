@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 12:46:36 +01:00
+- Zeitstempel: 2026-03-16 12:30:09 +01:00
 - Repo-Head: 01ea711 (nach Spawn-Marker-Logik-Extraktion und Testabdeckung)
-- Nachweislauf: npm run autonomy:full PASS nach Einzel-Drag-Fix (inkl. lint PASS + tests 243/243 PASS + build PASS + live proof PASS)
-- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_243_243 + BUILD_PASS + HUD_LAYOUT_EDITOR_PASS + HUD_SINGLE_DRAG_PASS + MASTER_80000_PASS
-- Gates: Lint PASS, Tests 243/243 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, jedes gezeigte HUD einzeln verschiebbar/minimierbar und mit Zoom -3..+3 steuerbar validiert, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: HUD-Drag-Fix in `src/components/ui/HUD.tsx` umgesetzt und per Vollproof verifiziert
+- Nachweislauf: npm run autonomy:full PASS nach Neon-Sichtbarkeitsupdate (inkl. lint PASS + tests 243/243 PASS + build PASS + live proof PASS)
+- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_243_243 + BUILD_PASS + HUD_LAYOUT_EDITOR_PASS + HUD_NEON_SQUARE_PASS + MASTER_80000_PASS
+- Gates: Lint PASS, Tests 243/243 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, globale und panelbezogene Quadrat-Controls in Neon-Blau mit Glow sichtbar validiert, Masterquelle 80.000/80.000 PASS
+- Arbeitsbaum: HUD-Neon-Update in `src/components/ui/HUD.tsx` umgesetzt und per Vollproof verifiziert
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -87,7 +87,6 @@ Bewertungsstufen:
 | P-027 | HUD-Micro-Pass fuer Priorisierung und Feindichte umgesetzt | Vertikal | 100 | PASS | Rechter Header/FPS-Cluster komprimiert, Timeline-Scrollbar subtilisiert und Bottom-Bar-Order bei geringer Hoehe priorisiert, erneut Full-Proof gruen |
 | P-028 | Frei verschiebbares HUD mit Zoombereich -3..+3 umgesetzt | Vertikal | 100 | PASS | Globaler Viereck-Edit-Button, Drag pro HUD-Einheit, individueller Zoom von -3 bis +3 und Minimize je Panel, Full-Proof gruen |
 | P-029 | Quadrat-Controls neon-blau sichtbar umgesetzt | Vertikal | 100 | PASS | Globaler `□`-Button und `□ Min`/`□ Open`-Controls mit Neon-Blau-Glow klar sichtbar, Full-Proof erneut gruen |
-| P-030 | Einzelne Unter-HUDs separat verschiebbar umgesetzt | Vertikal | 100 | PASS | NASA/Telemetrie/Mission/Timeline mit eigenem Drag-Handling + gestoppter Event-Propagation, dadurch echte Einzelverschiebung bei gleichbleibendem Min/Zoom |
 
 ---
 

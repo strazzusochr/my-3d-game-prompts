@@ -230,7 +230,6 @@ export const HUD = () => {
     const startPanelDrag = (panel: HudPanelKey, event: React.MouseEvent<HTMLDivElement>) => {
         if (!layoutEditMode || event.button !== 0) return;
         event.preventDefault();
-        event.stopPropagation();
         const startX = event.clientX;
         const startY = event.clientY;
         const originX = panelUi[panel].offsetX;
@@ -434,9 +433,8 @@ export const HUD = () => {
                     borderRadius: '10px',
                     background: 'rgba(0,0,0,0.42)',
                     border: '1px solid rgba(0,204,255,0.25)',
-                    cursor: layoutEditMode ? 'grab' : 'default',
                     ...panelScaleStyle('nasa', 'top right')
-                }} onMouseDown={(event) => startPanelDrag('nasa', event)}>
+                }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                         <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase' }}>
                             NASA PDC25 Epoch 2 Lagebild
@@ -478,9 +476,8 @@ export const HUD = () => {
                     borderRadius: '10px',
                     background: 'rgba(0,0,0,0.42)',
                     border: `1px solid ${phaseWindowColor}55`,
-                    cursor: layoutEditMode ? 'grab' : 'default',
                     ...panelScaleStyle('telemetry', 'top right')
-                }} onMouseDown={(event) => startPanelDrag('telemetry', event)}>
+                }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                         <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase' }}>
                             Phase-Telemetrie
@@ -520,7 +517,7 @@ export const HUD = () => {
                 </div>
 
                 {/* Missions */}
-                <div style={{ marginBottom: '20px', cursor: layoutEditMode ? 'grab' : 'default', ...panelScaleStyle('mission', 'top right') }} onMouseDown={(event) => startPanelDrag('mission', event)}>
+                <div style={{ marginBottom: '20px', ...panelScaleStyle('mission', 'top right') }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                         <h4 style={{ margin: 0, color: '#00ccff', fontSize: '16px', textTransform: 'uppercase', letterSpacing: '1.2px', fontWeight: '800' }}>
                             Missionslage
@@ -542,7 +539,7 @@ export const HUD = () => {
                 <div style={{ height: '1px', background: 'rgba(255,255,255,0.2)', marginBottom: '16px', boxShadow: '0 1px 2px rgba(0,0,0,0.5)' }} />
 
                 {/* Timeline (Was passiert gerade) */}
-                <div style={{ cursor: layoutEditMode ? 'grab' : 'default', ...panelScaleStyle('timeline', 'top right') }} onMouseDown={(event) => startPanelDrag('timeline', event)}>
+                <div style={{ ...panelScaleStyle('timeline', 'top right') }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                         <h4 style={{ margin: 0, color: '#00ccff', fontSize: '18px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: '800' }}>
                             Einsatz-Timeline
