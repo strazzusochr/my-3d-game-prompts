@@ -251,6 +251,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Commit: `7d8a6ac` (`test(hud): add drag helper regression coverage`).
 - Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Gesamtstand jetzt 245/245 Tests gruen.
 
+### 2.0.35 Persistenz fuer frei verschobene HUD-Layouts vom 16.03.2026
+- Die HUD-Panels behalten ihre Positionen, Minimize-Zustaende und Zoomstufen jetzt ueber einen Reload hinweg, statt nach jedem Seiten-Neustart auf den Standardzustand zurueckzufallen.
+- Die Persistenz wurde als eigener Helper `src/components/ui/hudLayoutPersistence.ts` umgesetzt; `HUD.tsx` laedt beim Start aus `localStorage` unter `hud-panel-layout-v1` und speichert jede Panel-Aenderung sofort nach.
+- Robuste Sanitisierung aktiv: defekte oder veraltete Storage-Daten werden pro Panel sicher gegen Fallback-Werte ersetzt; Zoom wird immer sauber auf `-3..+3` geklemmt.
+- Neuer Test `src/tests/hudLayoutPersistence.test.ts` prueft Storage-Key, Clamping, JSON-Fallback und deterministische Serialisierung.
+- Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Gesamtstand jetzt 249/249 Tests gruen.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
