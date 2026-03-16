@@ -225,6 +225,12 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Minimize bleibt pro Panel aktiv und wurde in die neuen Controls integriert.
 - Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint/Test/Build gruen, Teststand 243/243.
 
+### 2.0.31 Neon-Blau Sichtbarkeit fuer Quadrat-Controls vom 16.03.2026
+- Auf Nutzerfeedback wurde die Sichtbarkeit der Quadrat-Buttons nachgeschaerft: globaler `□`-Edit-Button und panelbezogene Quadrat-Controls erhielten einen Neon-Blau-Style mit staerkerem Glow.
+- Die Label wurden fuer Erkennbarkeit im Spielbild vereinheitlicht (`□ Min` / `□ Open`).
+- Zielbild erreicht: Quadrat-Controls sind auch bei dunkler Umgebungswelt sofort auffindbar.
+- Validierung: `npm run autonomy:full` erneut erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; alle Gates gruen.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
