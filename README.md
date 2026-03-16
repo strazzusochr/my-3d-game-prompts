@@ -28,3 +28,11 @@ Used variables:
 - `PORT` (default `7860`)
 - `INTERNAL_PORT` (default `3099`)
 - `RENDER_BACKEND` (`hardware` recommended, fallback: `software`)
+
+## GO GO GO Validation Command
+
+Run the full autonomous proof pipeline in one command:
+
+- `npm run autonomy:full`
+
+This executes lint, tests, production build, and a live stream profile/health proof sequence (`low -> medium -> high -> aaa -> low`).
