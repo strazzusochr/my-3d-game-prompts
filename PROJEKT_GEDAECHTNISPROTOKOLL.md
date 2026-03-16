@@ -26,6 +26,8 @@
 - Vollnachweis nach Testausbau erfolgreich: `npm run autonomy:full` erneut komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 256/256.
 - HUD-Drag-Block am 16.03.2026 umgesetzt: Hauptpanels `left`, `top`, `right`, `interaction` und `bottom` sind jetzt frei verschiebbar; Positionen werden in LocalStorage persistiert und beim Reload wiederhergestellt.
 - Vollnachweis nach HUD-Drag erfolgreich: `npm run lint` gruen, `npm run autonomy:full` erneut komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand bleibt 256/256.
+- HUD-Reset-Block am 16.03.2026 umgesetzt: neuer `Reset`-Button setzt gespeicherte Positionen der dragbaren Hauptpanels auf Default zurueck (`hud-panel-positions-v1` bleibt konsistent).
+- Vollnachweis nach HUD-Reset erfolgreich: `npm run lint` gruen, `npm run autonomy:full` erneut komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand bleibt 256/256.
 - Persistente Nutzerpraeferenzen wurden um die neuen Ablaufregeln erweitert.
 - Aktueller Repository-Stand enthaelt bereits Test-, Lint- und Streaming-Anpassungen aus der vorigen Arbeitsphase.
 - Fuer den aktuellen Schritt wird ein professioneller Projektbericht erzeugt und der gegenwaertige Stand festgehalten.
@@ -244,4 +246,4 @@
 - Vollverifikation nach Replay-Delta-Anomalieindikator erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 253/253.
 
 ## Naechster logischer Schritt
-- Nach dem Hauptpanel-Drag ist der naechste sinnvolle HUD-Ausbau eine feinere Drag-/Persistenzebene fuer Teilsektionen oder ein expliziter Reset-Button fuer gespeicherte HUD-Positionen.
+- Nach dem integrierten Reset ist der naechste sinnvolle HUD-Ausbau eine feinere Drag-/Persistenzebene fuer Teilsektionen (z. B. NASA/Telemetrie/Mission/Timeline) innerhalb des rechten Hauptpanels.

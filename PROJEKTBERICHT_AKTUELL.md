@@ -160,6 +160,12 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Verifikation erfolgreich: `npm run lint` gruen, `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand unveraendert 256/256.
 - Zusatzschritt: Aktueller Build im integrierten Browser auf `http://127.0.0.1:7860/` geoeffnet.
 
+### 2.0.51 HUD-Positions-Reset fuer Drag-Layouts vom 16.03.2026
+- Der HUD-Drag-Block wurde um eine explizite Ruecksetzfunktion erweitert: neuer `Reset`-Button in der rechten HUD-Steuerleiste.
+- Der Button setzt alle gespeicherten Positionen der dragbaren Hauptpanels (`left`, `top`, `right`, `interaction`, `bottom`) auf robuste Default-Werte zurueck.
+- Persistenz bleibt konsistent: Reset schreibt den neuen Defaultstand direkt in den bestehenden LocalStorage-Key `hud-panel-positions-v1`.
+- Verifikation erfolgreich: `npm run lint` gruen, `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 256/256.
+
 ### 2.0.1 Viewer- und Lastnachweis vom 16.03.2026
 - Zwei weitere Viewer-Seiten wurden geoeffnet und der Health-Endpunkt achtmal im Abstand von rund 1,5 Sekunden abgefragt.
 - Der Stream benoetigte eine kurze Aufwaermphase: zuerst `viewerFps=0`, danach stabile Werte zwischen 22 und 24 FPS.
