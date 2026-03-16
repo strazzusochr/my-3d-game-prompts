@@ -49,6 +49,8 @@ interface RuntimeReplayQuality {
     deltaEventsPerCheckpoint: number;
     deltaDirection: 'up' | 'down' | 'flat';
     deltaHint: 'Replay-Eventlast steigt.' | 'Replay-Eventlast sinkt.' | 'Replay-Eventlast stabil.';
+    deltaVolatilityBand: 'calm' | 'mixed' | 'volatile';
+    deltaVolatilityHint: 'Delta-Verlauf stabil.' | 'Delta-Verlauf leicht wechselhaft.' | 'Delta-Verlauf oszilliert stark.';
     stability: 'stable' | 'watch' | 'critical';
     recentStabilityTrend: Array<'stable' | 'watch' | 'critical'>;
     riskLevel: 'low' | 'medium' | 'high';
@@ -243,6 +245,20 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
                 : qualityDeltaDirection === 'down'
                     ? 'Replay-Eventlast sinkt.'
                     : 'Replay-Eventlast stabil.';
+    const qualityDeltaVolatilityBand: 'calm' | 'mixed' | 'volatile' =
+        qualityObj.deltaVolatilityBand === 'calm' || qualityObj.deltaVolatilityBand === 'mixed' || qualityObj.deltaVolatilityBand === 'volatile'
+            ? qualityObj.deltaVolatilityBand
+            : 'calm';
+    const qualityDeltaVolatilityHint: 'Delta-Verlauf stabil.' | 'Delta-Verlauf leicht wechselhaft.' | 'Delta-Verlauf oszilliert stark.' =
+        qualityObj.deltaVolatilityHint === 'Delta-Verlauf stabil.' ||
+        qualityObj.deltaVolatilityHint === 'Delta-Verlauf leicht wechselhaft.' ||
+        qualityObj.deltaVolatilityHint === 'Delta-Verlauf oszilliert stark.'
+            ? qualityObj.deltaVolatilityHint
+            : qualityDeltaVolatilityBand === 'volatile'
+                ? 'Delta-Verlauf oszilliert stark.'
+                : qualityDeltaVolatilityBand === 'mixed'
+                    ? 'Delta-Verlauf leicht wechselhaft.'
+                    : 'Delta-Verlauf stabil.';
     const qualityRiskHint =
         qualityObj.riskHint === 'Replay-Risiko hoch: Rewind-Frequenz sofort senken.' ||
         qualityObj.riskHint === 'Rewind-Takt reduzieren und grobere Spruenge nutzen.'
@@ -309,6 +325,8 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
             deltaEventsPerCheckpoint: clamp(Math.round(qualityDeltaEventsRaw), -999, 999),
             deltaDirection: qualityDeltaDirection,
             deltaHint: qualityDeltaHint,
+            deltaVolatilityBand: qualityDeltaVolatilityBand,
+            deltaVolatilityHint: qualityDeltaVolatilityHint,
             stability: qualityStability,
             recentStabilityTrend: qualityTrend,
             riskLevel: qualityRiskLevel,

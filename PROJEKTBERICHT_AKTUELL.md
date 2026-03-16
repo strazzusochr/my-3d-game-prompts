@@ -74,6 +74,14 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Testnachweis erweitert: `runtimePersistence.test.ts` und `gameStore.test.ts` validieren Deltafelder in Snapshot und Store inkl. Bounds/Sanitisierung.
 - Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 253 von 253 gruen, Build gruen.
 
+### 2.0.40 Replay-Delta-Volatilitaetsampel vom 16.03.2026
+- Die Replay-Auswertung wurde um eine Volatilitaetsampel erweitert: `deltaVolatilityBand` (`calm`/`mixed`/`volatile`) und `deltaVolatilityHint` klassifizieren das kurzfristige Schwankungsverhalten der Event-Last.
+- Berechnung per Richtungsumkehr-Erkennung aus den letzten 3 Event-Counts und Oszillationsamplitude (`|d1|+|d2|`); `volatile` ab Flip + Score >= 4, `mixed` ab Score >= 3, sonst `calm`.
+- `runtimePersistence` persistiert Band/Hinweis in `replayState.quality` und sanitisiert robust (bei ungueltigem Band Ableitung aus gespeichertem Band-Wert, Fallback `calm`).
+- HUD-Operations-Panel zeigt neue Zeilen `Volatilitaet` (Ampelfarben: volatile=#ff7777, mixed=#ffcc66, calm=#99ffcc) und `Volatilitaets-Hinweis`.
+- Testnachweis erweitert: `runtimePersistence.test.ts` und `gameStore.test.ts` validieren Volatilitaetsfelder in Snapshot und Store inkl. Sanitisierung.
+- Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 253 von 253 gruen, Build gruen.
+
 ### 2.0.1 Viewer- und Lastnachweis vom 16.03.2026
 - Zwei weitere Viewer-Seiten wurden geoeffnet und der Health-Endpunkt achtmal im Abstand von rund 1,5 Sekunden abgefragt.
 - Der Stream benoetigte eine kurze Aufwaermphase: zuerst `viewerFps=0`, danach stabile Werte zwischen 22 und 24 FPS.

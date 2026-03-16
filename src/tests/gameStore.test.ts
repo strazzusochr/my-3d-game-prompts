@@ -68,6 +68,8 @@ const resetStore = () => {
       replayQualityDeltaEventsPerCheckpoint: 0,
       replayQualityDeltaDirection: 'flat',
       replayQualityDeltaHint: 'Replay-Eventlast stabil.',
+      replayQualityDeltaVolatilityBand: 'calm',
+      replayQualityDeltaVolatilityHint: 'Delta-Verlauf stabil.',
       replayQualityStability: 'stable',
       replayQualityRecentTrend: [],
       replayRiskLevel: 'low',
@@ -608,6 +610,8 @@ describe('gameStore core flow', () => {
     expect(Math.abs(state.gameState.replayQualityDeltaEventsPerCheckpoint)).toBeLessThanOrEqual(999);
     expect(['up', 'down', 'flat']).toContain(state.gameState.replayQualityDeltaDirection);
     expect(state.gameState.replayQualityDeltaHint.length).toBeGreaterThan(0);
+    expect(['calm', 'mixed', 'volatile']).toContain(state.gameState.replayQualityDeltaVolatilityBand);
+    expect(state.gameState.replayQualityDeltaVolatilityHint.length).toBeGreaterThan(0);
     expect(['stable', 'watch', 'critical']).toContain(state.gameState.replayQualityStability);
     expect(state.gameState.replayQualityRecentTrend.length).toBeGreaterThan(0);
     expect(['stable', 'watch', 'critical']).toContain(state.gameState.replayQualityRecentTrend[0]);
@@ -637,6 +641,8 @@ describe('gameStore core flow', () => {
           deltaEventsPerCheckpoint: number;
           deltaDirection: 'up' | 'down' | 'flat';
           deltaHint: string;
+          deltaVolatilityBand: 'calm' | 'mixed' | 'volatile';
+          deltaVolatilityHint: string;
           stability: 'stable' | 'watch' | 'critical';
           recentStabilityTrend: Array<'stable' | 'watch' | 'critical'>;
           riskLevel: 'low' | 'medium' | 'high';
@@ -661,6 +667,8 @@ describe('gameStore core flow', () => {
     expect(Math.abs(snapshot.replayState.quality.deltaEventsPerCheckpoint)).toBeLessThanOrEqual(999);
     expect(['up', 'down', 'flat']).toContain(snapshot.replayState.quality.deltaDirection);
     expect(snapshot.replayState.quality.deltaHint.length).toBeGreaterThan(0);
+    expect(['calm', 'mixed', 'volatile']).toContain(snapshot.replayState.quality.deltaVolatilityBand);
+    expect(snapshot.replayState.quality.deltaVolatilityHint.length).toBeGreaterThan(0);
     expect(snapshot.replayState.quality.recentStabilityTrend.length).toBeGreaterThan(0);
     expect(['low', 'medium', 'high']).toContain(snapshot.replayState.quality.riskLevel);
     expect(snapshot.replayState.quality.riskHint.length).toBeGreaterThan(0);

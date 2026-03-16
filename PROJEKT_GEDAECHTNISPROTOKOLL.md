@@ -193,5 +193,12 @@
 - Testabdeckung erweitert: `runtimePersistence.test.ts` und `gameStore.test.ts` pruefen Delta-Felder im Store und Snapshot inklusive Sanitisierung.
 - Vollverifikation nach Replay-Qualitaets-Deltaindikator erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 253/253.
 
+- Replay-Delta-Volatilitaetsampel am 16.03.2026 umgesetzt: Store fuehrt jetzt `replayQualityDeltaVolatilityBand` (`calm`/`mixed`/`volatile`) und `replayQualityDeltaVolatilityHint` als Messung der kurzfristigen Schwankungscharakteristik des Event-Deltas.
+- Berechnung basiert auf letzten 3 Event-Counts: Richtungsumkehr-Erkennung (`hasDirectionFlip`) und Oszillationsamplitude bestimmen volatile/mixed/calm-Einstufung.
+- Snapshot erweitert: `runtimePersistence` persistiert und sanitisiert Volatilitaets-Band/Hinweis robust (inkl. Ableitungsfall bei ungueltigen Inputs aus Band).
+- HUD-Operationsansicht erweitert: neue Volatilitaets-Kennzahlen (`Volatilitaet`, `Volatilitaets-Hinweis`) mit Ampelfarben (`volatile`=#ff7777, `mixed`=#ffcc66, `calm`=#99ffcc).
+- Testabdeckung erweitert: `runtimePersistence.test.ts` und `gameStore.test.ts` pruefen Volatilitaets-Felder im Store und Snapshot inklusive Sanitisierung.
+- Vollverifikation nach Replay-Delta-Volatilitaetsampel erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 253/253.
+
 ## Naechster logischer Schritt
-- Nach Deltaindikator folgt als naechster Ausbaupunkt eine Replay-Delta-Volatilitaetsampel (kurzfristig oszillierend vs. stabil) mit Persistenz und HUD-Badge.
+- Nach Volatilitaetsampel folgt als naechster Ausbaupunkt eine Replay-Delta-Trendhistorie (kurze persistente Zeitreihe der letzten N Delta-Werte) mit Sparkline-Visualisierung im HUD.

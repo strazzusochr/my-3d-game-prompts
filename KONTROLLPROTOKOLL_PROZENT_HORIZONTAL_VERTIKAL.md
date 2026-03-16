@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 16:52:00 +01:00
-- Repo-Head: lokal (nach Replay-Qualitaets-Deltaindikator, vor neuem Commit)
-- Nachweislauf: npm run autonomy:full PASS nach Replay-Qualitaets-Deltaindikator (inkl. lint PASS + tests 253/253 PASS + build PASS + live proof PASS)
-- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_253_253 + BUILD_PASS + REPLAY_QUALITY_DELTA_PASS + MASTER_80000_PASS
-- Gates: Lint PASS, Tests 253/253 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, Replay-Qualitaets-Deltaindikator inkl. Snapshot-Sanitisierung verifiziert, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: Replay-Qualitaets-Deltaindikator (Delta, Richtung, Hinweis) in Store/HUD/Persistence/Test erweitert und per Vollproof verifiziert
+- Zeitstempel: 2026-03-16 17:06:28 +01:00
+- Repo-Head: lokal (nach Replay-Delta-Volatilitaetsampel, vor neuem Commit)
+- Nachweislauf: npm run autonomy:full PASS nach Replay-Delta-Volatilitaetsampel (inkl. lint PASS + tests 253/253 PASS + build PASS + live proof PASS)
+- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_253_253 + BUILD_PASS + REPLAY_DELTA_VOLATILITY_PASS + MASTER_80000_PASS
+- Gates: Lint PASS, Tests 253/253 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, Replay-Delta-Volatilitaetsampel inkl. Snapshot-Sanitisierung verifiziert, Masterquelle 80.000/80.000 PASS
+- Arbeitsbaum: Replay-Delta-Volatilitaetsampel (calm/mixed/volatile) in Store/HUD/Persistence/Test erweitert und per Vollproof verifiziert
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -97,6 +97,7 @@ Bewertungsstufen:
 | P-037 | Replay-Recovery-Indikator (seit letztem HIGH) umgesetzt | Vertikal | 100 | PASS | riskLastHighAnchorTime/riskRecoveryMinutes im Store + Snapshot-Sanitisierung + HUD-Anzeige + Tests; Full-Proof gruen |
 | P-038 | Replay-Cooldown-Schwellenampel umgesetzt | Vertikal | 100 | PASS | recoveryBand/recoveryHint im Store + Snapshot-Sanitisierung + HUD-Badge/Hinweis + Tests; Full-Proof gruen |
 | P-039 | Replay-Qualitaets-Deltaindikator umgesetzt | Vertikal | 100 | PASS | deltaEventsPerCheckpoint/deltaDirection/deltaHint im Store + Snapshot-Sanitisierung + HUD-Deltaanzeige/Pfeil + Tests; Full-Proof gruen |
+| P-040 | Replay-Delta-Volatilitaetsampel umgesetzt | Vertikal | 100 | PASS | deltaVolatilityBand/deltaVolatilityHint (calm/mixed/volatile) im Store + Snapshot-Sanitisierung + HUD-Volatilitaetsanzeige + Tests; Full-Proof gruen |
 
 ---
 

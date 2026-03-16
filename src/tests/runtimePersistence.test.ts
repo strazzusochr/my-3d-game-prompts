@@ -58,6 +58,8 @@ const baseSnapshot: RuntimeSnapshot = {
             deltaEventsPerCheckpoint: 3,
             deltaDirection: 'up',
             deltaHint: 'Replay-Eventlast steigt.',
+            deltaVolatilityBand: 'calm',
+            deltaVolatilityHint: 'Delta-Verlauf stabil.',
             stability: 'watch',
             recentStabilityTrend: ['watch', 'stable'],
             riskLevel: 'medium',
@@ -92,6 +94,8 @@ describe('runtimePersistence', () => {
         expect(loaded?.replayState.quality.deltaEventsPerCheckpoint).toBe(3);
         expect(loaded?.replayState.quality.deltaDirection).toBe('up');
         expect(loaded?.replayState.quality.deltaHint).toBe('Replay-Eventlast steigt.');
+        expect(loaded?.replayState.quality.deltaVolatilityBand).toBe('calm');
+        expect(loaded?.replayState.quality.deltaVolatilityHint).toBe('Delta-Verlauf stabil.');
         expect(loaded?.replayState.quality.stability).toBe('watch');
         expect(loaded?.replayState.quality.recentStabilityTrend).toEqual(['watch', 'stable']);
         expect(loaded?.replayState.quality.riskLevel).toBe('medium');
@@ -139,6 +143,8 @@ describe('runtimePersistence', () => {
                         deltaEventsPerCheckpoint: 1200,
                         deltaDirection: 'invalid',
                         deltaHint: 'invalid',
+                        deltaVolatilityBand: 'invalid',
+                        deltaVolatilityHint: 'invalid',
                         stability: 'broken',
                         recentStabilityTrend: ['critical', 'unknown', 'watch', 'stable'],
                         riskLevel: 'broken',
@@ -176,6 +182,8 @@ describe('runtimePersistence', () => {
         expect(loaded?.replayState.quality.deltaEventsPerCheckpoint).toBe(999);
         expect(loaded?.replayState.quality.deltaDirection).toBe('up');
         expect(loaded?.replayState.quality.deltaHint).toBe('Replay-Eventlast steigt.');
+        expect(loaded?.replayState.quality.deltaVolatilityBand).toBe('calm');
+        expect(loaded?.replayState.quality.deltaVolatilityHint).toBe('Delta-Verlauf stabil.');
         expect(loaded?.replayState.quality.stability).toBe('stable');
         expect(loaded?.replayState.quality.recentStabilityTrend).toEqual(['critical', 'watch', 'stable']);
         expect(loaded?.replayState.quality.riskLevel).toBe('low');
