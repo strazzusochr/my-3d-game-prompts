@@ -19,6 +19,8 @@ interface SpawnPoint {
     emphasis: number;
 }
 
+type SpawnUrgency = 'watch' | 'ready' | 'imminent';
+
 type PhaseBand = 'NIGHT' | 'MORNING' | 'MIDDAY' | 'EVENING' | 'LATE';
 
 const getPhaseBandForMinutes = (minutes: number): PhaseBand => {
@@ -35,6 +37,12 @@ const PHASE_THEME: Record<PhaseBand, { timeColor: string; glassOpacity: number; 
     MIDDAY: { timeColor: '#ffd38b', glassOpacity: 0.16, cardBackdrop: '#070b12' },
     EVENING: { timeColor: '#ffb36b', glassOpacity: 0.21, cardBackdrop: '#0a0612' },
     LATE: { timeColor: '#bba8ff', glassOpacity: 0.23, cardBackdrop: '#080513' },
+};
+
+const getSpawnUrgency = (minutesUntilSpawn: number): SpawnUrgency => {
+    if (minutesUntilSpawn <= 6) return 'imminent';
+    if (minutesUntilSpawn <= 8) return 'ready';
+    return 'watch';
 };
 
 const SHORT_NAMES: Record<string, string> = {
@@ -146,6 +154,14 @@ export const SpawnMarkers = () => {
         <group>
             {visibleMarkers.map((m, idx) => (
                 <group key={m.id} position={[m.position[0], 0, m.position[2]]}>
+                    {(() => {
+                        const urgency = getSpawnUrgency(m.minutesUntilSpawn);
+                        const urgencyColor = urgency === 'imminent' ? '#ff684a' : urgency === 'ready' ? '#ffd66b' : '#7dd6ff';
+                        const urgencyLabel = urgency === 'imminent' ? 'IMMINENT' : urgency === 'ready' ? 'READY' : 'WATCH';
+                        const urgencyPulse = urgency === 'imminent' ? 1.35 : urgency === 'ready' ? 1.18 : 1.02;
+
+                        return (
+                            <>
                     <mesh
                         rotation={[-Math.PI / 2, 0, 0]}
                         position={[0, 0.23 + idx * 0.01, 0]}
@@ -154,7 +170,7 @@ export const SpawnMarkers = () => {
                         <meshBasicMaterial
                             color={m.color}
                             transparent
-                            opacity={0.08 + m.emphasis * 0.08}
+                            opacity={0.06 + m.emphasis * 0.06 * urgencyPulse}
                             depthWrite={false}
                             polygonOffset={true}
                             polygonOffsetFactor={-1}
@@ -170,7 +186,7 @@ export const SpawnMarkers = () => {
                         <meshBasicMaterial
                             color={m.color}
                             transparent
-                            opacity={0.36 + m.emphasis * 0.2}
+                            opacity={0.28 + m.emphasis * 0.18 * urgencyPulse}
                             depthWrite={false}
                             polygonOffset={true}
                             polygonOffsetFactor={-1}
@@ -209,6 +225,18 @@ export const SpawnMarkers = () => {
                                 outlineColor="#000"
                             >
                                 {`PHASE ${phaseBand}`}
+                            </Text>
+
+                            <Text
+                                position={[0, (phaseBadgeY - 0.48 * cardScale), 0.03]}
+                                fontSize={0.29 * baseFont}
+                                color={urgencyColor}
+                                anchorX="center"
+                                anchorY="middle"
+                                outlineWidth={0.02}
+                                outlineColor="#000"
+                            >
+                                {urgencyLabel}
                             </Text>
 
                             <Text
@@ -268,7 +296,7 @@ export const SpawnMarkers = () => {
                             <Text
                                 position={[0, countdownY, 0.03]}
                                 fontSize={0.6 * baseFont}
-                                color="#ffffff"
+                                color={urgency === 'imminent' ? '#ffd5cc' : '#ffffff'}
                                 anchorX="center"
                                 anchorY="middle"
                                 outlineWidth={0.04}
@@ -278,6 +306,9 @@ export const SpawnMarkers = () => {
                             </Text>
                         </group>
                     </Billboard>
+                            </>
+                        );
+                    })()}
                 </group>
             ))}
         </group>

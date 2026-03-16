@@ -177,6 +177,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Damit bleibt die Karte bei Lastspitzen lesbar und entscheidungsfaehig, ohne die zeitliche Spawn-Vorschau oder Datenintegritaet zu verlieren.
 - Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 239 von 239 bestanden, Lint und Build gruen.
 
+### 2.0.24 Spawn-Marker-Dringlichkeitsstufen vom 16.03.2026
+- Die Spawn-Karten wurden um countdown-basierte Dringlichkeitsstufen erweitert: `WATCH`, `READY` und `IMMINENT`.
+- Die Einstufung nutzt die verbleibenden Minuten bis Spawn innerhalb des bestehenden T-10 bis T-5-Fensters.
+- Unmittelbar bevorstehende Spawns erhalten eine staerkere visuelle Hervorhebung (Ring-/Glow-Emphasis und Countdown-Farbakzent), damit operative Prioritaeten schneller erfassbar sind.
+- Damit entsteht neben Dichtepriorisierung und Phasenkalibrierung nun eine dritte Lesbarkeitsebene: semantische Dringlichkeit.
+- Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 239 von 239 bestanden, Lint und Build gruen.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
