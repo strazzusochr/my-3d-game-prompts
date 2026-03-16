@@ -87,7 +87,11 @@
 - Runtime-Wirkung erweitert: Fallback-Wellen erhoehen Drucklagen (Verletzte/Sachschaden) und bilden damit unterschiedliche Endlagen je nach Missionsdisziplin.
 - Operations-HUD erweitert: positive und negative Missionszweige sind als aktive Badges unterscheidbar sichtbar.
 - Vollverifikation nach Alternativpfad-Block erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 233/233.
+- Gewichtete Pfadregeln am 16.03.2026 umgesetzt: `operationsInsights` liefert nun `missionPathWeightPercent` aus Trendverlauf, Panikquote, Hook-Auslastung, Missionsfortschritt und Rollenungleichgewicht.
+- Runtime-Skalierung aktiviert: positive und negative Missionszweige nutzen dynamische Spawn-Skalierung statt fester Mengen; Triggerstaerke reagiert damit auf Lagegewichtung.
+- Korrelationszeile erweitert: Operations-Insight zeigt nun explizit das Pfadgewicht in Prozent.
+- Vollverifikation nach Gewichtungs-Block erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 234/234.
 
 ## Naechster logischer Schritt
 - Trend-Korrelationen ausweiten: Verlaufslinien mit Missionsentscheidungspfaden verknuepfen und als konkrete Trigger fuer weitere Folge-Events nutzen.
-- Gewichtete Pfadregeln einfuehren: Triggerstaerke je nach Zeitfenster, Panikquote und Rollenbalance dynamisch skalieren.
+- Gewichtung je Tagesfenster differenzieren: Schwellen und Skalierungsfaktoren fuer MORNING/MIDDAY/EVENING/LATE getrennt justieren.

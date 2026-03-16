@@ -286,6 +286,9 @@ const spawnDynamicWave = (
     return [...npcs, ...createNpcs(type, effectiveCount, position, radius, mood, behavior)];
 };
 
+const scaleWaveCount = (baseCount: number, scale: number, minCount: number = 1) =>
+    Math.max(minCount, Math.round(baseCount * scale));
+
 const applyDynamicRoleResponses = (
     npcs: NPCData[],
     dayStats: DayStats,
@@ -352,6 +355,36 @@ const applyDynamicRoleResponses = (
             .filter((key) => firedSet.has(key)).length,
     });
 
+    const latestTrend = insightHistory.at(-1);
+    const aggressorPressure = latestTrend ? latestTrend.aggressors - latestTrend.security : 0;
+    const supportReserve = latestTrend ? latestTrend.support : 0;
+
+    let positiveWaveScale = 1;
+    if (insight.missionPathWeightPercent >= 120) {
+        positiveWaveScale = 1.35;
+    } else if (insight.missionPathWeightPercent >= 110) {
+        positiveWaveScale = 1.2;
+    } else if (insight.missionPathWeightPercent <= 85) {
+        positiveWaveScale = 0.85;
+    }
+
+    let fallbackWaveScale = 1;
+    if (insight.missionPathWeightPercent <= 85) {
+        fallbackWaveScale = 1.35;
+    } else if (insight.missionPathWeightPercent <= 95) {
+        fallbackWaveScale = 1.15;
+    } else if (insight.missionPathWeightPercent >= 120) {
+        fallbackWaveScale = 0.8;
+    }
+
+    if (aggressorPressure >= 5) {
+        fallbackWaveScale += 0.2;
+    }
+
+    if (supportReserve >= 10) {
+        fallbackWaveScale = Math.max(0.75, fallbackWaveScale - 0.1);
+    }
+
     if (
         insight.priority !== 'low' &&
         currentMinutes >= 17 * 60 &&
@@ -383,7 +416,15 @@ const applyDynamicRoleResponses = (
         currentMinutes >= 12 * 60 &&
         !firedSet.has('dyn-mission-epoch-media')
     ) {
-        const spawned = spawnDynamicWave(nextNpcs, NPCType.JOURNALIST, 3, [-4, 0, 14], 6, NPCMood.TENSE, NPCBehavior.GATHER);
+        const spawned = spawnDynamicWave(
+            nextNpcs,
+            NPCType.JOURNALIST,
+            scaleWaveCount(3, positiveWaveScale, 2),
+            [-4, 0, 14],
+            6,
+            NPCMood.TENSE,
+            NPCBehavior.GATHER,
+        );
         if (spawned !== nextNpcs) {
             nextNpcs = spawned;
             nextDayStats = applyDayStatsDelta(nextDayStats, { damage: -350 });
@@ -397,7 +438,15 @@ const applyDynamicRoleResponses = (
         currentMinutes >= 14 * 60 &&
         !firedSet.has('dyn-mission-epoch-press-corridor')
     ) {
-        const spawned = spawnDynamicWave(nextNpcs, NPCType.POLICE, 2, [-6, 0, 18], 6, NPCMood.TENSE, NPCBehavior.SHIELD_WALL);
+        const spawned = spawnDynamicWave(
+            nextNpcs,
+            NPCType.POLICE,
+            scaleWaveCount(2, positiveWaveScale, 1),
+            [-6, 0, 18],
+            6,
+            NPCMood.TENSE,
+            NPCBehavior.SHIELD_WALL,
+        );
         if (spawned !== nextNpcs) {
             nextNpcs = spawned;
             nextDayStats = applyDayStatsDelta(nextDayStats, { damage: -300 });
@@ -410,7 +459,15 @@ const applyDynamicRoleResponses = (
         currentMinutes >= 15 * 60 &&
         !firedSet.has('dyn-mission-epoch-misinformation')
     ) {
-        const spawned = spawnDynamicWave(nextNpcs, NPCType.DEMONSTRATOR, 3, [-10, 0, 20], 7, NPCMood.ANGRY, NPCBehavior.CHANT);
+        const spawned = spawnDynamicWave(
+            nextNpcs,
+            NPCType.DEMONSTRATOR,
+            scaleWaveCount(3, fallbackWaveScale, 2),
+            [-10, 0, 20],
+            7,
+            NPCMood.ANGRY,
+            NPCBehavior.CHANT,
+        );
         if (spawned !== nextNpcs) {
             nextNpcs = spawned;
             nextDayStats = applyDayStatsDelta(nextDayStats, { injured: 1, damage: 900 });
@@ -423,7 +480,15 @@ const applyDynamicRoleResponses = (
         currentMinutes >= 18 * 60 &&
         !firedSet.has('dyn-mission-hazard-shield')
     ) {
-        const spawned = spawnDynamicWave(nextNpcs, NPCType.POLICE, 4, [0, 0, 36], 10, NPCMood.TENSE, NPCBehavior.SHIELD_WALL);
+        const spawned = spawnDynamicWave(
+            nextNpcs,
+            NPCType.POLICE,
+            scaleWaveCount(4, positiveWaveScale, 3),
+            [0, 0, 36],
+            10,
+            NPCMood.TENSE,
+            NPCBehavior.SHIELD_WALL,
+        );
         if (spawned !== nextNpcs) {
             nextNpcs = spawned;
             nextDayStats = applyDayStatsDelta(nextDayStats, { injured: -1, damage: -550 });
@@ -437,7 +502,15 @@ const applyDynamicRoleResponses = (
         currentMinutes >= 19 * 60 + 30 &&
         !firedSet.has('dyn-mission-hazard-firebreak')
     ) {
-        const spawned = spawnDynamicWave(nextNpcs, NPCType.FIREFIGHTER, 3, [18, 0, 30], 9, NPCMood.TENSE, NPCBehavior.CLEANUP);
+        const spawned = spawnDynamicWave(
+            nextNpcs,
+            NPCType.FIREFIGHTER,
+            scaleWaveCount(3, positiveWaveScale, 2),
+            [18, 0, 30],
+            9,
+            NPCMood.TENSE,
+            NPCBehavior.CLEANUP,
+        );
         if (spawned !== nextNpcs) {
             nextNpcs = spawned;
             nextDayStats = applyDayStatsDelta(nextDayStats, { injured: -1, damage: -600 });
@@ -450,7 +523,15 @@ const applyDynamicRoleResponses = (
         currentMinutes >= 20 * 60 &&
         !firedSet.has('dyn-mission-hazard-surge')
     ) {
-        const spawned = spawnDynamicWave(nextNpcs, NPCType.RIOTER, 4, [12, 0, 34], 9, NPCMood.RIOTING, NPCBehavior.THROW);
+        const spawned = spawnDynamicWave(
+            nextNpcs,
+            NPCType.RIOTER,
+            scaleWaveCount(4, fallbackWaveScale, 3),
+            [12, 0, 34],
+            9,
+            NPCMood.RIOTING,
+            NPCBehavior.THROW,
+        );
         if (spawned !== nextNpcs) {
             nextNpcs = spawned;
             nextDayStats = applyDayStatsDelta(nextDayStats, { injured: 2, damage: 1800 });
@@ -482,7 +563,15 @@ const applyDynamicRoleResponses = (
         currentMinutes >= 22 * 60 &&
         !firedSet.has('dyn-mission-fullchain-recovery')
     ) {
-        const spawned = spawnDynamicWave(nextNpcs, NPCType.MEDIC, 2, [26, 0, 18], 8, NPCMood.TENSE, NPCBehavior.CLEANUP);
+        const spawned = spawnDynamicWave(
+            nextNpcs,
+            NPCType.MEDIC,
+            scaleWaveCount(2, positiveWaveScale, 1),
+            [26, 0, 18],
+            8,
+            NPCMood.TENSE,
+            NPCBehavior.CLEANUP,
+        );
         if (spawned !== nextNpcs) {
             nextNpcs = spawned.map((npc) => {
                 if (
@@ -503,7 +592,15 @@ const applyDynamicRoleResponses = (
         currentMinutes >= 22 * 60 + 30 &&
         !firedSet.has('dyn-mission-fragmented-command')
     ) {
-        const spawned = spawnDynamicWave(nextNpcs, NPCType.EXTREMIST, 2, [24, 0, 52], 6, NPCMood.RIOTING, NPCBehavior.COMBAT);
+        const spawned = spawnDynamicWave(
+            nextNpcs,
+            NPCType.EXTREMIST,
+            scaleWaveCount(2, fallbackWaveScale, 1),
+            [24, 0, 52],
+            6,
+            NPCMood.RIOTING,
+            NPCBehavior.COMBAT,
+        );
         if (spawned !== nextNpcs) {
             nextNpcs = spawned;
             nextDayStats = applyDayStatsDelta(nextDayStats, { injured: 2, damage: 1400 });

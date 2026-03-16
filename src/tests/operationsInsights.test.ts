@@ -30,6 +30,7 @@ describe('operations insights', () => {
     expect(insight.priority).toBe('critical');
     expect(insight.recommendation).toContain('Kritisch');
     expect(insight.confidencePercent).toBeGreaterThanOrEqual(60);
+    expect(insight.missionPathWeightPercent).toBeLessThan(100);
   });
 
   it('returns medium priority when mission progress and support are weak', () => {
@@ -49,6 +50,8 @@ describe('operations insights', () => {
     expect(insight.priority).toBe('medium');
     expect(insight.recommendation).toContain('Mittel');
     expect(insight.correlationLine).toContain('Hook-Auslastung');
+    expect(insight.correlationLine).toContain('Pfadgewicht');
+    expect(insight.missionPathWeightPercent).toBeLessThanOrEqual(100);
   });
 
   it('returns low priority for stable trends', () => {
@@ -67,5 +70,24 @@ describe('operations insights', () => {
 
     expect(insight.priority).toBe('low');
     expect(insight.recommendation).toContain('stabil');
+    expect(insight.missionPathWeightPercent).toBeGreaterThanOrEqual(95);
+  });
+
+  it('raises mission path weight for high completion and hook utilization', () => {
+    const insight = getOperationsInsight({
+      trendHistory: baseTrend([
+        { security: 13, aggressors: 7, support: 6, panicRatioPercent: 12 },
+        { security: 14, aggressors: 6, support: 7, panicRatioPercent: 10 },
+      ]),
+      dayStats: { killed: 0, arrested: 3, injured: 2, damage: 1800 },
+      missionCompletionPercent: 92,
+      panicRatioPercent: 10,
+      activeHooks: 4,
+      maxHooks: 4,
+      activeDynamicResponses: 4,
+    });
+
+    expect(insight.priority).toBe('low');
+    expect(insight.missionPathWeightPercent).toBeGreaterThan(110);
   });
 });
