@@ -12,6 +12,10 @@ interface SpawnPoint {
     title: string;
     details: string[];
     minutesUntilSpawn: number;
+    cardOffsetX: number;
+    cardOffsetZ: number;
+    cardLiftY: number;
+    emphasis: number;
 }
 
 const SHORT_NAMES: Record<string, string> = {
@@ -53,13 +57,23 @@ export const SpawnMarkers = () => {
                 return;
             }
 
-            const key = `${event.time}:${Math.round(event.position[0])}:${Math.round(event.position[2])}`;
+            const roundedX = Math.round(event.position[0]);
+            const roundedZ = Math.round(event.position[2]);
+            const key = `${event.time}:${roundedX}:${roundedZ}`;
             const shortName = SHORT_NAMES[event.npcType] || event.npcType;
             const detailLine = `${event.count}x ${shortName}`;
+            const hash = Math.abs((roundedX * 31 + roundedZ * 17 + eventMinutes * 13) % 9);
+            const lane = hash % 3;
+            const row = Math.floor(hash / 3);
+            const cardOffsetX = (lane - 1) * 2.1;
+            const cardOffsetZ = (row - 1) * 1.4;
+            const cardLiftY = row * 0.28;
+            const emphasis = (10 - minutesUntilSpawn) / 5;
 
             if (grouped.has(key)) {
                 const existing = grouped.get(key)!;
                 existing.details.push(detailLine);
+                existing.emphasis = Math.max(existing.emphasis, emphasis);
             } else {
                 grouped.set(key, {
                     position: event.position,
@@ -70,6 +84,10 @@ export const SpawnMarkers = () => {
                     title: detailLine,
                     details: [detailLine],
                     minutesUntilSpawn,
+                    cardOffsetX,
+                    cardOffsetZ,
+                    cardLiftY,
+                    emphasis,
                 });
             }
         });
@@ -83,13 +101,13 @@ export const SpawnMarkers = () => {
                 <group key={m.id} position={[m.position[0], 0, m.position[2]]}>
                     <mesh
                         rotation={[-Math.PI / 2, 0, 0]}
-                        position={[0, 0.25 + idx * 0.01, 0]}
+                        position={[0, 0.23 + idx * 0.01, 0]}
                     >
-                        <ringGeometry args={[m.radius - 0.3, m.radius, 48]} />
+                        <circleGeometry args={[m.radius + 0.6, 56]} />
                         <meshBasicMaterial
                             color={m.color}
                             transparent
-                            opacity={0.42}
+                            opacity={0.08 + m.emphasis * 0.08}
                             depthWrite={false}
                             polygonOffset={true}
                             polygonOffsetFactor={-1}
@@ -97,7 +115,33 @@ export const SpawnMarkers = () => {
                         />
                     </mesh>
 
-                    <Billboard position={[0, 4.4, 0]} follow={true} lockX={false} lockY={false} lockZ={false}>
+                    <mesh
+                        rotation={[-Math.PI / 2, 0, 0]}
+                        position={[0, 0.25 + idx * 0.01, 0]}
+                    >
+                        <ringGeometry args={[m.radius - 0.3, m.radius, 48]} />
+                        <meshBasicMaterial
+                            color={m.color}
+                            transparent
+                            opacity={0.36 + m.emphasis * 0.2}
+                            depthWrite={false}
+                            polygonOffset={true}
+                            polygonOffsetFactor={-1}
+                            polygonOffsetUnits={-1}
+                        />
+                    </mesh>
+
+                    <mesh position={[m.cardOffsetX, 2.2 + m.cardLiftY, m.cardOffsetZ]}>
+                        <cylinderGeometry args={[0.07, 0.07, 3.4, 12]} />
+                        <meshBasicMaterial color={m.color} transparent opacity={0.5} />
+                    </mesh>
+
+                    <mesh position={[m.cardOffsetX, 0.52, m.cardOffsetZ]}>
+                        <cylinderGeometry args={[0.34, 0.22, 0.16, 16]} />
+                        <meshBasicMaterial color={m.color} transparent opacity={0.72} />
+                    </mesh>
+
+                    <Billboard position={[m.cardOffsetX, 4.4 + m.cardLiftY, m.cardOffsetZ]} follow={true} lockX={false} lockY={false} lockZ={false}>
                         <group>
                             <mesh position={[0, 0, -0.03]}>
                                 <planeGeometry args={[6.2, 8.2]} />
@@ -105,7 +149,7 @@ export const SpawnMarkers = () => {
                             </mesh>
                             <mesh>
                                 <planeGeometry args={[6.5, 8.5]} />
-                                <meshBasicMaterial color={m.color} transparent opacity={0.2} />
+                                <meshBasicMaterial color={m.color} transparent opacity={0.15 + m.emphasis * 0.22} />
                             </mesh>
 
                             <Text
@@ -145,7 +189,7 @@ export const SpawnMarkers = () => {
                                 maxWidth={5.7}
                                 textAlign="center"
                             >
-                                {m.details.slice(0, 4).join('\n')}
+                                {m.details.slice(0, 3).join('\n')}
                             </Text>
 
                             <Text
