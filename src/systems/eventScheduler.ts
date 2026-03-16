@@ -20,6 +20,12 @@
 
 import { NPCType, NPCMood, NPCBehavior } from '../types/enums';
 
+declare global {
+  interface Window {
+    __EVENT_TIMELINE__?: typeof EVENT_TIMELINE;
+  }
+}
+
 export type EventAction = 'SPAWN' | 'DESPAWN' | 'MOVE' | 'MOOD_CHANGE' | 'BEHAVIOR_CHANGE';
 
 export interface GameEvent {
@@ -581,6 +587,10 @@ export const EVENT_TIMELINE: GameEvent[] = [
 
   // 06:00 — NEUER TAG: "Cycle Repeats" (handled by resetDayCycle)
 ];
+
+if (typeof window !== 'undefined') {
+  window.__EVENT_TIMELINE__ = EVENT_TIMELINE;
+}
 
 /**
  * ESKALATIONS-TIMELINE — exakt aus dem Master Plan
