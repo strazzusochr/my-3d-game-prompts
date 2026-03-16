@@ -253,6 +253,8 @@
 - Remote-Sync verifiziert: `github/main` und `origin/main` zeigen auf denselben Commit `0c2727a957d28728922c2c3fa32458b7020b9d2e`.
 - YAML-/TS-Diagnose-Nachfix am 16.03.2026 abgeschlossen: Workflow-Header in `.github/workflows/security-ci.yml` auf kanonisches `on:` normalisiert; TS7016 in `src/tests/portCheckSecurity.test.ts` gezielt durch dokumentierte `@ts-expect-error`-Importstelle fuer das bewusst direkt getestete Runtime-`mjs` aufgeloest.
 - Nachweis nach Nachfix erfolgreich: Editor-Diagnosen fuer `.github/workflows/security-ci.yml` und `src/tests/portCheckSecurity.test.ts` jeweils `No errors found`; gezielter Testlauf `npm exec vitest run src/tests/portCheckSecurity.test.ts` 3/3 gruen.
+- YAML-Kompatibilitaetspass am 16.03.2026 verstaerkt: Workflow-Trigger in `.github/workflows/security-ci.yml` auf gequotetes `'on'` sowie kompakte Branch-Syntax (`[main]`) umgestellt, um Parser-Varianten in Editor-Umgebungen robuster abzufangen.
+- Direktnachweis nach Kompatibilitaetspass erfolgreich: erneute Diagnosepruefung fuer `.github/workflows/security-ci.yml` ergibt `No errors found`; Dateibytes ohne BOM/Steuerzeichenabweichung bestaetigt.
 
 ## Naechster logischer Schritt
 - Nach dem integrierten Reset ist der naechste sinnvolle HUD-Ausbau eine feinere Drag-/Persistenzebene fuer Teilsektionen (z. B. NASA/Telemetrie/Mission/Timeline) innerhalb des rechten Hauptpanels.
