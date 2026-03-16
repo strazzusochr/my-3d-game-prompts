@@ -76,7 +76,10 @@
 - Rewind-/Replay bleibt konsistent: korrelationsbasierte Folgeevents werden bei Rueckwaertsspruengen erneut korrekt rekonstruiert und in `firedEventKeys` abgebildet.
 - HUD-Badges erweitert: Operations-Panel zeigt nun auch die neuen Korrelations-Trigger als aktive Live-Events.
 - Folgeevent-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 224/224 gruen, `npm run build` gruen, Browser-/Socket-Livecheck bestaetigt (Socket `eEIHFHDerj45M_TpAAAF`).
+- Missionsbranch-Block am 16.03.2026 ausgebaut: Store verknuepft Missionsfortschritt jetzt mit drei direkten Runtime-Folgeevents (`dyn-mission-epoch-media`, `dyn-mission-hazard-shield`, `dyn-mission-fullchain-deescalation`) inklusive deeskalierendem NPC-Umschaltpfad in der Spaetphase.
+- Operations-HUD erweitert: aktive Missionsbranches werden als eigene Badges im Operations-Panel sichtbar und zusammen mit den dynamischen Rollenreaktionen angezeigt.
+- Vollverifikation nach Missionsbranch-Block erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`, inkl. Profilfolge `low -> medium -> high -> aaa -> low`; Teststand jetzt 227/227.
 
 ## Naechster logischer Schritt
-- Entscheidungsbasierte Folge-Events: Spieleraktionen sollen zugeschnittene Kettenevents ausloesen (z.B. nach erfolgreicher Epoch-Verifikation wird ein spezifischer Journalist-Mob aktiviert).
-- Trend-Korrelationen ausweiten: Verlaufslinien mit Missionsentscheidungspfaden verknuepfen und als konkrete Trigger fuer Folge-Events nutzen.
+- Entscheidungsbasierte Kettenevents vertiefen: Missionsbranches sollen zweite und dritte Folgewellen mit zeitversetzten Reaktionen ausloesen.
+- Trend-Korrelationen ausweiten: Verlaufslinien mit Missionsentscheidungspfaden verknuepfen und als konkrete Trigger fuer weitere Folge-Events nutzen.
