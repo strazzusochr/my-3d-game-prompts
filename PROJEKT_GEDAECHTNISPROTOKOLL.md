@@ -108,7 +108,10 @@
 - Sichtfenster aktiv: Marker erscheinen nur von T-10 bis T-5 Minuten vor dem jeweiligen Spawn und werden ausserhalb dieses Fensters automatisch ausgeblendet.
 - Fotostil umgesetzt: Marker als aufgeraeumte Neon-Karten (Billboard + Ring) direkt am Spawn-Ort mit Uhrzeit, Einheitenzeilen und Countdown.
 - Vollverifikation nach Spawn-Marker-Block erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand unveraendert 239/239.
+- Spawn-Marker-Feintuning am 16.03.2026 umgesetzt: Karten erhalten jetzt positionsgebundene Offset-Lanes zur Reduktion von Ueberlappung bei benachbarten Spawn-Orten.
+- Lesbarkeit erweitert: Standsaeule + Standfuss ergaenzt, Ring-Emphasis nach Restzeit abgestuft und Detailzeilen auf maximal drei komprimiert.
+- Vollverifikation nach Spawn-Feintuning erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 239/239.
 
 ## Naechster logischer Schritt
-- Spawn-HUD-Feintuning nach Livevergleich: Kartenabstaende, Glow-Intensitaet und Informationsdichte je Profil (`low/medium/high/aaa`) kalibrieren.
+- Spawn-HUD-Liveabgleich finalisieren: Farbpalette/Glow gegen Referenzbild per Screenshot-Vergleich pro Tagesphase kalibrieren.
 - Trend-/Missionsentscheidungen um Persistenzfenster erweitern: mehrere aufeinanderfolgende volatile Checkpoints als Haltedauer-Bedingung statt Einzelimpuls.

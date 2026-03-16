@@ -156,6 +156,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Dummy-/Null-Spawn-Ereignisse werden nicht mehr als Marker visualisiert.
 - Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 239 von 239 bestanden, Lint und Build gruen.
 
+### 2.0.21 Spawn-Marker-Feintuning fuer Live-Lesbarkeit vom 16.03.2026
+- Zur Entzerrung bei nahen Spawn-Punkten wurden deterministische Offset-Lanes eingefuehrt, damit Karten nicht mehr deckungsgleich uebereinanderliegen.
+- Die Marker besitzen nun eine deutlichere physische Verankerung (Standsaeule und Standfuss), was dem Referenzstil mit aufgestellten Einsatztafeln naeher kommt.
+- Die visuelle Gewichtung wurde nach Restzeit abgestuft (Ring-/Glow-Emphasis), wodurch unmittelbar bevorstehende Spawns priorisiert auffallen.
+- Informationsdichte auf den Karten wurde komprimiert (maximal drei Detailzeilen), um Textmatsch in dichten Spawn-Phasen zu vermeiden.
+- Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 239 von 239 bestanden, Lint und Build gruen.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
