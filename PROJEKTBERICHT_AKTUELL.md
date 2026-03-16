@@ -107,6 +107,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Das Operations-Overlay zeigt diese Missionsbranches nun als eigene Live-Badges neben den korrelationsgetriebenen Triggern.
 - Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 227 von 227 bestanden, Lint und Build ebenfalls gruen.
 
+### 2.0.14 Zweite Missionswellen vom 16.03.2026
+- Die Missionsbranches wurden um zeitversetzte zweite Wellen erweitert, damit Entscheidungen nicht als Einzeltrigger enden.
+- Neu aktivierte Folgeevents: `dyn-mission-epoch-press-corridor`, `dyn-mission-hazard-firebreak` und `dyn-mission-fullchain-recovery`.
+- Diese zweite Ebene verbindet zusaetzliche Support-/Security-Reaktionen mit weiterer DayStats-Entlastung in spaeteren Zeitfenstern und staerkt damit den Verlaufseffekt ueber den Tag.
+- Das Operations-Overlay zeigt nun auch diese zweite Wellenstufe als aktive Missions-Badges.
+- Validierung: `npm run autonomy:full` erneut erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 230 von 230 bestanden, Lint und Build gruen.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.

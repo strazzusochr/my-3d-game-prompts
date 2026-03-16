@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 09:12:40 +01:00
-- Repo-Head: c183928 (lokale Mission-Branch-Erweiterung vor Commit)
-- Nachweislauf: npm run autonomy:full PASS (inkl. lint PASS + tests 227/227 PASS + build PASS + live proof PASS)
-- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_227_227 + BUILD_PASS + LIVE_SOCKET_PASS + MASTER_80000_PASS
-- Gates: Lint PASS, Tests 227/227 PASS, Build PASS, Browser-/Socket-Livecheck PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: geaendert fuer missionsgetriebene Runtime-Branch-Events + Operations-Badges + neue Store-Tests
+- Zeitstempel: 2026-03-16 09:26:03 +01:00
+- Repo-Head: 4a122f1 (vor zweiter Missionswellen-Erweiterung)
+- Nachweislauf: npm run autonomy:full PASS (inkl. lint PASS + tests 230/230 PASS + build PASS + live proof PASS)
+- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_230_230 + BUILD_PASS + LIVE_SOCKET_PASS + MASTER_80000_PASS
+- Gates: Lint PASS, Tests 230/230 PASS, Build PASS, Browser-/Socket-Livecheck PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, Masterquelle 80.000/80.000 PASS
+- Arbeitsbaum: geaendert fuer zeitversetzte Missions-Folgewellen + HUD-Badges + erweiterte Store-Tests
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -46,7 +46,7 @@ Bewertungsstufen:
 | S-001 | Browser-Erreichbarkeit Stream | 100 | 100 | 100 | PASS | URL erreichbar |
 | S-002 | Workspace-Fehlercheck | 100 | 100 | 100 | PASS | No errors found |
 | S-003 | Lint-Gate | 100 | 100 | 100 | PASS | eslint ohne Fehler |
-| S-004 | Test-Gate | 100 | 100 | 100 | PASS | 224/224 Tests bestanden (9 Dateien, comprehensive.test.ts 161 Tests) |
+| S-004 | Test-Gate | 100 | 100 | 100 | PASS | 230/230 Tests bestanden (9 Dateien, comprehensive.test.ts 161 Tests) |
 | S-005 | Build-Gate | 100 | 100 | 100 | PASS | vite build erfolgreich |
 | S-006 | Live-Proof Profilfolge | 100 | 100 | 100 | PASS | low->medium->high->aaa->low |
 | S-007 | Health-/Transport-Nachweis | 100 | 100 | 100 | PASS | canvas-webrtc aktiv |
@@ -70,6 +70,7 @@ Bewertungsstufen:
 | P-010 | Vollabdeckung aller 700+ Checks | Horizontal | 100 | PASS | 161 Tests in comprehensive.test.ts, 168 gesamt; 700+ expect()-Assertions in Loops |
 | P-011 | 80.000-Zeilen-Masterquelle aufgebaut | Horizontal | 100 | PASS | 80.000/80.000 Zeilen erreicht und auf github/main veroeffentlicht |
 | P-012 | Missionsverzweigungen als Runtime-Folgeevents aktiviert | Vertikal | 100 | PASS | dyn-mission-epoch-media + dyn-mission-hazard-shield + dyn-mission-fullchain-deescalation mit Tests |
+| P-013 | Zeitversetzte Missions-Folgewellen aktiviert | Vertikal | 100 | PASS | dyn-mission-epoch-press-corridor + dyn-mission-hazard-firebreak + dyn-mission-fullchain-recovery mit Tests |
 
 ---
 
@@ -112,11 +113,11 @@ Die nachfolgende Deep-Gap-Matrix beschreibt darueber hinausgehende Ausbauziele d
 | Gamepad-System | VOLLSTAENDIG | 100 | — | Erledigt: 16-Button-Mapping + Vibration + Store-Integration |
 | Audio-Engine (Teil 33) | VOLLSTAENDIG | 100 | — | Erledigt: Kategorien + Ducking + 3 neue Sounds + SFX-Trigger |
 | NPC-KI/Behavior | Rollen-Automatik + Korrelations-Folgeevents + missionsgetriebene Branch-Reaktionen aktiv | 92 | Gegenseitige Fraktionsreaktionen und adaptive Schwellwerte fehlen noch | Eskalations-Gegenlogik und adaptive Triggerkurven integrieren |
-| Mission/24h-Szenario | Aftermath-Nacht-Kette + Korrelationsfolgeevents + Missionsbranching aktiv | 90 | Verzweigungspfade wirken noch nicht auf nachgelagerte Timeline-Events mehrerer Wellen | Spielerentscheidungen auf weitere Kettenevents und Lageantworten ausdehnen |
-| UI/HUD-Komplettheit | Operations-Korrelation + Folgeevent-Badges + Trendlinien + Missionsbranch-Badges sichtbar | 96 | Langzeit-Korrelationen mit Missionsentscheidungen fehlen noch | Trend-Korrelationen mit Missionspfaden anzeigen |
-| Quality-Gates 700+ | VOLLSTAENDIG | 100 | — | Erledigt: 224/224 Tests gruen, comprehensive.test.ts deckt 700+ Assertions ab |
+| Mission/24h-Szenario | Aftermath-Nacht-Kette + Korrelationsfolgeevents + zeitversetztes Missionsbranching aktiv | 93 | Missionspfade steuern noch nicht mehrere alternative Ergebnisbaeume | Spielerentscheidungen auf alternative Kettenevents und Lageantworten ausdehnen |
+| UI/HUD-Komplettheit | Operations-Korrelation + Folgeevent-Badges + Trendlinien + erweiterte Missionsbranch-Badges sichtbar | 97 | Langzeit-Korrelationen mit Missionsentscheidungen fehlen noch | Trend-Korrelationen mit Missionspfaden anzeigen |
+| Quality-Gates 700+ | VOLLSTAENDIG | 100 | — | Erledigt: 230/230 Tests gruen, comprehensive.test.ts deckt 700+ Assertions ab |
 
-Realistische Gesamt-Reife (Deep, ausserhalb Pflichtumfang): 93%
+Realistische Gesamt-Reife (Deep, ausserhalb Pflichtumfang): 94%
 
 Interpretation:
 Der technische Kern ist fuer den verifizierten Pflichtumfang vollstaendig abgeschlossen.

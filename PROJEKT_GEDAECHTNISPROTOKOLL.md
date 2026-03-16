@@ -79,7 +79,11 @@
 - Missionsbranch-Block am 16.03.2026 ausgebaut: Store verknuepft Missionsfortschritt jetzt mit drei direkten Runtime-Folgeevents (`dyn-mission-epoch-media`, `dyn-mission-hazard-shield`, `dyn-mission-fullchain-deescalation`) inklusive deeskalierendem NPC-Umschaltpfad in der Spaetphase.
 - Operations-HUD erweitert: aktive Missionsbranches werden als eigene Badges im Operations-Panel sichtbar und zusammen mit den dynamischen Rollenreaktionen angezeigt.
 - Vollverifikation nach Missionsbranch-Block erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`, inkl. Profilfolge `low -> medium -> high -> aaa -> low`; Teststand jetzt 227/227.
+- Zeitversetzte Missions-Folgewellen am 16.03.2026 erweitert: Store triggert nun zusaetzliche zweite Wellen (`dyn-mission-epoch-press-corridor`, `dyn-mission-hazard-firebreak`, `dyn-mission-fullchain-recovery`) auf Basis der bereits aktiven Branches.
+- Runtime-Wirkung verstaerkt: zweite Wellen koppeln weitere Support-/Security-Spawns mit zusätzlicher Deeskalation und DayStats-Entlastung in spaeteren Zeitfenstern.
+- Operations-HUD erneut erweitert: neue Missionswellen werden als eigene aktive Badges dargestellt.
+- Vollverifikation nach Folgewellen-Block erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 230/230.
 
 ## Naechster logischer Schritt
-- Entscheidungsbasierte Kettenevents vertiefen: Missionsbranches sollen zweite und dritte Folgewellen mit zeitversetzten Reaktionen ausloesen.
+- Alternative Ergebnisbaeume ausbauen: Missionsentscheidungen sollen mehrere unterschiedliche Folgewellen-Pfade aktivieren statt nur einen linearen Strang.
 - Trend-Korrelationen ausweiten: Verlaufslinien mit Missionsentscheidungspfaden verknuepfen und als konkrete Trigger fuer weitere Folge-Events nutzen.

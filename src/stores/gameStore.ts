@@ -334,7 +334,18 @@ const applyDynamicRoleResponses = (
         panicRatioPercent: getPanicRatioPercent(nextNpcs),
         activeHooks: getActiveHooks(currentMinutes, missionProgress),
         maxHooks: 4,
-        activeDynamicResponses: ['dyn-evening-reinforcement', 'dyn-late-triage', 'dyn-high-medical-relief', 'dyn-critical-lockdown']
+        activeDynamicResponses: [
+            'dyn-evening-reinforcement',
+            'dyn-late-triage',
+            'dyn-high-medical-relief',
+            'dyn-critical-lockdown',
+            'dyn-mission-epoch-media',
+            'dyn-mission-epoch-press-corridor',
+            'dyn-mission-hazard-shield',
+            'dyn-mission-hazard-firebreak',
+            'dyn-mission-fullchain-deescalation',
+            'dyn-mission-fullchain-recovery',
+        ]
             .filter((key) => firedSet.has(key)).length,
     });
 
@@ -378,6 +389,20 @@ const applyDynamicRoleResponses = (
     }
 
     if (
+        missionProgress.epochBriefingVerified &&
+        firedSet.has('dyn-mission-epoch-media') &&
+        currentMinutes >= 14 * 60 &&
+        !firedSet.has('dyn-mission-epoch-press-corridor')
+    ) {
+        const spawned = spawnDynamicWave(nextNpcs, NPCType.POLICE, 2, [-6, 0, 18], 6, NPCMood.TENSE, NPCBehavior.SHIELD_WALL);
+        if (spawned !== nextNpcs) {
+            nextNpcs = spawned;
+            nextDayStats = applyDayStatsDelta(nextDayStats, { damage: -300 });
+            firedSet.add('dyn-mission-epoch-press-corridor');
+        }
+    }
+
+    if (
         missionProgress.hazardMapPrepared &&
         currentMinutes >= 18 * 60 &&
         !firedSet.has('dyn-mission-hazard-shield')
@@ -387,6 +412,20 @@ const applyDynamicRoleResponses = (
             nextNpcs = spawned;
             nextDayStats = applyDayStatsDelta(nextDayStats, { injured: -1, damage: -550 });
             firedSet.add('dyn-mission-hazard-shield');
+        }
+    }
+
+    if (
+        missionProgress.hazardMapPrepared &&
+        firedSet.has('dyn-mission-hazard-shield') &&
+        currentMinutes >= 19 * 60 + 30 &&
+        !firedSet.has('dyn-mission-hazard-firebreak')
+    ) {
+        const spawned = spawnDynamicWave(nextNpcs, NPCType.FIREFIGHTER, 3, [18, 0, 30], 9, NPCMood.TENSE, NPCBehavior.CLEANUP);
+        if (spawned !== nextNpcs) {
+            nextNpcs = spawned;
+            nextDayStats = applyDayStatsDelta(nextDayStats, { injured: -1, damage: -600 });
+            firedSet.add('dyn-mission-hazard-firebreak');
         }
     }
 
@@ -406,6 +445,28 @@ const applyDynamicRoleResponses = (
         });
         nextDayStats = applyDayStatsDelta(nextDayStats, { injured: -2, damage: -1700 });
         firedSet.add('dyn-mission-fullchain-deescalation');
+    }
+
+    if (
+        missionProgress.prioritizedZoneIds.length >= 3 &&
+        firedSet.has('dyn-mission-fullchain-deescalation') &&
+        currentMinutes >= 22 * 60 &&
+        !firedSet.has('dyn-mission-fullchain-recovery')
+    ) {
+        const spawned = spawnDynamicWave(nextNpcs, NPCType.MEDIC, 2, [26, 0, 18], 8, NPCMood.TENSE, NPCBehavior.CLEANUP);
+        if (spawned !== nextNpcs) {
+            nextNpcs = spawned.map((npc) => {
+                if (
+                    npc.type === NPCType.RIOTER &&
+                    (npc.behavior === NPCBehavior.COMBAT || npc.behavior === NPCBehavior.THROW)
+                ) {
+                    return applyNpcState(npc, NPCMood.PANICKED, NPCBehavior.RETREAT);
+                }
+                return npc;
+            });
+            nextDayStats = applyDayStatsDelta(nextDayStats, { injured: -1, damage: -1000 });
+            firedSet.add('dyn-mission-fullchain-recovery');
+        }
     }
 
     return { npcs: nextNpcs, dayStats: nextDayStats, firedSet };
