@@ -136,6 +136,10 @@
 - HUD-Micro-Pass am 16.03.2026 abgeschlossen: rechter Header/FPS-Cluster weiter komprimiert und Timeline-Scrollbar bewusst subtil gesetzt (`scrollbarWidth: thin`, reduzierte Farbintensitaet).
 - Bottom-Bar-Priorisierung bei flacher Hoehe aktiviert: zentrale Gameplay-Steuerung (`Min/x2`, Zeitlauf/Pause, Uhr/Speed, Eskalation/NPC) wird im kompakten Layout vor nachrangigen Bloecken einsortiert.
 - Vollverifikation nach Micro-Pass erfolgreich: `npm run autonomy:full` erneut komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Profilfolge `low -> medium -> high -> aaa -> low` stabil.
+- HUD-Layout-Editor am 16.03.2026 umgesetzt: globaler Viereck-Button (`▢`) schaltet einen Edit-Modus fuer freies Verschieben jeder HUD-Einheit im Spiel.
+- Jede HUD-Einheit besitzt jetzt individuelle Zoomstufen von `-3` bis `+3` (statt binarem x2), inklusive sichtbarer `Z`-Stufe in den Panel-Controls; Minimize bleibt je Panel aktiv.
+- Drag-Verhalten integriert: Panels koennen im Edit-Modus per Maus gezogen werden (inkl. Hauptpaneele sowie NASA/Telemetrie/Mission/Timeline/Bottom/Interaction).
+- Vollverifikation nach Layout-Editor erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Tests weiterhin 243/243.
 
 ## Naechster logischer Schritt
 - Kein offener Blocker im aktuellen HUD-/Streaming-Zyklus; naechster Ausbau kann inhaltlich auf Spawn-HUD-Feinschliff oder Trend-/Missionspersistenz gehen.

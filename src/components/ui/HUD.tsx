@@ -39,18 +39,18 @@ type HudPanelKey =
     | 'mission'
     | 'timeline';
 
-type PanelUiState = Record<HudPanelKey, { minimized: boolean; zoom2: boolean }>;
+type PanelUiState = Record<HudPanelKey, { minimized: boolean; zoomLevel: number; offsetX: number; offsetY: number }>;
 
 const makeDefaultPanelState = (): PanelUiState => ({
-    left: { minimized: false, zoom2: false },
-    top: { minimized: false, zoom2: false },
-    right: { minimized: false, zoom2: false },
-    bottom: { minimized: false, zoom2: false },
-    interaction: { minimized: false, zoom2: false },
-    nasa: { minimized: false, zoom2: false },
-    telemetry: { minimized: false, zoom2: false },
-    mission: { minimized: false, zoom2: false },
-    timeline: { minimized: false, zoom2: false },
+    left: { minimized: false, zoomLevel: 0, offsetX: 0, offsetY: 0 },
+    top: { minimized: false, zoomLevel: 0, offsetX: 0, offsetY: 0 },
+    right: { minimized: false, zoomLevel: 0, offsetX: 0, offsetY: 0 },
+    bottom: { minimized: false, zoomLevel: 0, offsetX: 0, offsetY: 0 },
+    interaction: { minimized: false, zoomLevel: 0, offsetX: 0, offsetY: 0 },
+    nasa: { minimized: false, zoomLevel: 0, offsetX: 0, offsetY: 0 },
+    telemetry: { minimized: false, zoomLevel: 0, offsetX: 0, offsetY: 0 },
+    mission: { minimized: false, zoomLevel: 0, offsetX: 0, offsetY: 0 },
+    timeline: { minimized: false, zoomLevel: 0, offsetX: 0, offsetY: 0 },
 });
 
 export const HUD = () => {
@@ -84,6 +84,7 @@ export const HUD = () => {
     });
     const [viewportHudFit, setViewportHudFit] = useState(1);
     const [panelUi, setPanelUi] = useState<PanelUiState>(() => makeDefaultPanelState());
+    const [layoutEditMode, setLayoutEditMode] = useState(false);
     const [viewportHeight, setViewportHeight] = useState(1080);
     const [streamProfileState, setStreamProfileState] = useState<{ active: 'low' | 'medium' | 'high' | 'aaa' | 'unknown'; status: string }>({
         active: 'unknown',
@@ -216,15 +217,46 @@ export const HUD = () => {
         }));
     };
 
-    const togglePanelZoom2 = (panel: HudPanelKey) => {
+    const adjustPanelZoom = (panel: HudPanelKey, delta: number) => {
         setPanelUi((prev) => ({
             ...prev,
-            [panel]: { ...prev[panel], zoom2: !prev[panel].zoom2 },
+            [panel]: {
+                ...prev[panel],
+                zoomLevel: Math.max(-3, Math.min(3, prev[panel].zoomLevel + delta)),
+            },
         }));
     };
 
+    const startPanelDrag = (panel: HudPanelKey, event: React.MouseEvent<HTMLDivElement>) => {
+        if (!layoutEditMode || event.button !== 0) return;
+        event.preventDefault();
+        const startX = event.clientX;
+        const startY = event.clientY;
+        const originX = panelUi[panel].offsetX;
+        const originY = panelUi[panel].offsetY;
+
+        const onMove = (moveEvent: MouseEvent) => {
+            const dx = moveEvent.clientX - startX;
+            const dy = moveEvent.clientY - startY;
+            setPanelUi((prev) => ({
+                ...prev,
+                [panel]: { ...prev[panel], offsetX: originX + dx, offsetY: originY + dy },
+            }));
+        };
+
+        const onUp = () => {
+            window.removeEventListener('mousemove', onMove);
+            window.removeEventListener('mouseup', onUp);
+        };
+
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onUp);
+    };
+
+    const getPanelScale = (panel: HudPanelKey) => Math.max(0.35, 1 + panelUi[panel].zoomLevel * 0.22);
+
     const panelScaleStyle = (panel: HudPanelKey, origin: string): React.CSSProperties => ({
-        transform: panelUi[panel].zoom2 ? 'scale(2)' : 'scale(1)',
+        transform: `translate(${panelUi[panel].offsetX}px, ${panelUi[panel].offsetY}px) scale(${getPanelScale(panel)})`,
         transformOrigin: origin,
     });
 
@@ -233,6 +265,16 @@ export const HUD = () => {
     const timelineMaxHeight = Math.max(160, Math.min(360, Math.round((viewportHeight * 0.34) / effectiveHudScale)));
     const compactBottomLayout = viewportHeight < 920;
     const bottomOrderStyle = (order: number): React.CSSProperties => (compactBottomLayout ? { order } : {});
+    const renderPanelControls = (panel: HudPanelKey, compact = false) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <button onClick={() => togglePanelMinimize(panel)} style={{ ...btnStyle, minWidth: compact ? '38px' : '42px', padding: compact ? '2px 5px' : '3px 6px', fontSize: compact ? '9px' : '10px' }}>
+                {panelUi[panel].minimized ? 'Open' : 'Min'}
+            </button>
+            <button onClick={() => adjustPanelZoom(panel, -1)} style={{ ...btnStyle, minWidth: compact ? '26px' : '28px', padding: compact ? '2px 4px' : '2px 5px', fontSize: compact ? '10px' : '11px' }} title="Zoom verkleinern">-</button>
+            <span style={{ color: '#9edfff', fontSize: compact ? '9px' : '10px', minWidth: compact ? '20px' : '24px', textAlign: 'center' }}>{`Z${panelUi[panel].zoomLevel}`}</span>
+            <button onClick={() => adjustPanelZoom(panel, 1)} style={{ ...btnStyle, minWidth: compact ? '26px' : '28px', padding: compact ? '2px 4px' : '2px 5px', fontSize: compact ? '10px' : '11px' }} title="Zoom vergroessern">+</button>
+        </div>
+    );
 
     const switchStreamProfile = async (profile: 'low' | 'medium' | 'high' | 'aaa') => {
         try {
@@ -263,14 +305,29 @@ export const HUD = () => {
                     transformOrigin: 'top left'
                 }}
             >
+            <div style={{ position: 'absolute', top: '16px', right: '16px', pointerEvents: 'auto', zIndex: 50 }}>
+                <button
+                    onClick={() => setLayoutEditMode((prev) => !prev)}
+                    style={{
+                        ...btnStyle,
+                        minWidth: '42px',
+                        fontSize: '13px',
+                        color: layoutEditMode ? '#ffcc00' : '#9edfff',
+                        borderColor: layoutEditMode ? 'rgba(255,204,0,0.55)' : 'rgba(255,255,255,0.14)',
+                    }}
+                    title="HUD-Layout bearbeiten (ziehen + pro Panel Zoom -3 bis +3)"
+                >
+                    ▢
+                </button>
+            </div>
             {/* Left Panel */}
-            <div style={{ pointerEvents: 'auto', position: 'absolute', top: '24px', left: '24px', width: '292px', padding: '16px', background: 'rgba(10,10,10,0.82)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', boxShadow: '0 8px 24px rgba(0,0,0,0.45)', ...panelScaleStyle('left', 'top left') }}>
+            <div
+                onMouseDown={(event) => startPanelDrag('left', event)}
+                style={{ pointerEvents: 'auto', position: 'absolute', top: '24px', left: '24px', width: '292px', padding: '16px', background: 'rgba(10,10,10,0.82)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', boxShadow: '0 8px 24px rgba(0,0,0,0.45)', cursor: layoutEditMode ? 'grab' : 'default', ...panelScaleStyle('left', 'top left') }}
+            >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                     <div style={{ color: '#9edfff', fontSize: '11px', letterSpacing: '0.8px', textTransform: 'uppercase' }}>Status-HUD</div>
-                    <div style={{ display: 'flex', gap: '4px' }}>
-                        <button onClick={() => togglePanelMinimize('left')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }}>Min</button>
-                        <button onClick={() => togglePanelZoom2('left')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }}>x2</button>
-                    </div>
+                    {renderPanelControls('left')}
                 </div>
                 {!panelUi.left.minimized && (
                     <>
@@ -287,11 +344,11 @@ export const HUD = () => {
             </div>
 
             {/* Top Center Badge + Phase Label */}
-            <div style={{ position: 'absolute', top: '24px', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', ...panelScaleStyle('top', 'top center') }}>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '6px', pointerEvents: 'auto' }}>
-                    <button onClick={() => togglePanelMinimize('top')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }}>Min</button>
-                    <button onClick={() => togglePanelZoom2('top')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }}>x2</button>
-                </div>
+            <div
+                onMouseDown={(event) => startPanelDrag('top', event)}
+                style={{ position: 'absolute', top: '24px', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', cursor: layoutEditMode ? 'grab' : 'default', ...panelScaleStyle('top', 'top center') }}
+            >
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '6px', pointerEvents: 'auto' }}>{renderPanelControls('top')}</div>
                 {!panelUi.top.minimized && (
                 <>
                 <div style={{ padding: '8px 24px', background: 'rgba(10,10,10,0.9)', border: '2px solid #00ccff', borderRadius: '20px', boxShadow: '0 0 20px rgba(0,204,255,0.3)', marginBottom: '8px' }}>
@@ -327,9 +384,10 @@ export const HUD = () => {
                 border: 'none', 
                 color: '#fff', 
                 pointerEvents: 'auto',
+                cursor: layoutEditMode ? 'grab' : 'default',
                 textShadow: '0 1px 3px rgba(0,0,0,0.85), 0 0 8px rgba(0,0,0,0.55)',
                 ...panelScaleStyle('right', 'top right')
-            }}>
+            }} onMouseDown={(event) => startPanelDrag('right', event)}>
                 {/* Header with FPS */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                     <h3 style={{ margin: 0, color: '#00ccff', fontSize: '16px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800' }}>Streifen-Protokoll</h3>
@@ -348,8 +406,7 @@ export const HUD = () => {
                             RENDER {fps} FPS
                         </div>
                         <div style={{ display: 'flex', gap: '4px', pointerEvents: 'auto' }}>
-                            <button onClick={() => togglePanelMinimize('right')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }} title="Panel minimieren">Min</button>
-                            <button onClick={() => togglePanelZoom2('right')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }} title="Panel x2">x2</button>
+                            {renderPanelControls('right')}
                             <button onClick={decreaseHudScale} style={{ ...btnStyle, minWidth: '34px', padding: '4px 8px', fontSize: '14px' }} title="HUD kleiner">-</button>
                             <button onClick={resetHudScale} style={{ ...btnStyle, minWidth: '56px', padding: '4px 8px', fontSize: '12px' }} title="HUD zurücksetzen">{Math.round(effectiveHudScale * 100)}%</button>
                             <button onClick={increaseHudScale} style={{ ...btnStyle, minWidth: '34px', padding: '4px 8px', fontSize: '14px' }} title="HUD größer">+</button>
@@ -372,10 +429,7 @@ export const HUD = () => {
                         <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase' }}>
                             NASA PDC25 Epoch 2 Lagebild
                         </div>
-                        <div style={{ display: 'flex', gap: '4px' }}>
-                            <button onClick={() => togglePanelMinimize('nasa')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>Min</button>
-                            <button onClick={() => togglePanelZoom2('nasa')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>x2</button>
-                        </div>
+                        {renderPanelControls('nasa', true)}
                     </div>
                     {!panelUi.nasa.minimized && (
                     <>
@@ -418,10 +472,7 @@ export const HUD = () => {
                         <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase' }}>
                             Phase-Telemetrie
                         </div>
-                        <div style={{ display: 'flex', gap: '4px' }}>
-                            <button onClick={() => togglePanelMinimize('telemetry')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>Min</button>
-                            <button onClick={() => togglePanelZoom2('telemetry')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>x2</button>
-                        </div>
+                        {renderPanelControls('telemetry', true)}
                     </div>
                     {!panelUi.telemetry.minimized && (
                     <>
@@ -461,10 +512,7 @@ export const HUD = () => {
                         <h4 style={{ margin: 0, color: '#00ccff', fontSize: '16px', textTransform: 'uppercase', letterSpacing: '1.2px', fontWeight: '800' }}>
                             Missionslage
                         </h4>
-                        <div style={{ display: 'flex', gap: '4px' }}>
-                            <button onClick={() => togglePanelMinimize('mission')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>Min</button>
-                            <button onClick={() => togglePanelZoom2('mission')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>x2</button>
-                        </div>
+                        {renderPanelControls('mission', true)}
                     </div>
                     {!panelUi.mission.minimized && (
                     <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '13px', lineHeight: '1.6' }}>
@@ -486,10 +534,7 @@ export const HUD = () => {
                         <h4 style={{ margin: 0, color: '#00ccff', fontSize: '18px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: '800' }}>
                             Einsatz-Timeline
                         </h4>
-                        <div style={{ display: 'flex', gap: '4px' }}>
-                            <button onClick={() => togglePanelMinimize('timeline')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>Min</button>
-                            <button onClick={() => togglePanelZoom2('timeline')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>x2</button>
-                        </div>
+                        {renderPanelControls('timeline', true)}
                     </div>
                     {!panelUi.timeline.minimized && (
                     <div 
@@ -590,13 +635,11 @@ export const HUD = () => {
                     background: activeInteraction ? 'rgba(6,16,24,0.88)' : 'rgba(10,10,10,0.82)',
                     border: `1px solid ${activeInteraction ? 'rgba(0,204,255,0.35)' : 'rgba(255,255,255,0.12)'}`,
                     boxShadow: activeInteraction ? '0 0 24px rgba(0,204,255,0.18)' : '0 10px 30px rgba(0,0,0,0.35)',
-                    pointerEvents: 'none',
+                    pointerEvents: layoutEditMode ? 'auto' : 'none',
+                    cursor: layoutEditMode ? 'grab' : 'default',
                     ...panelScaleStyle('interaction', 'bottom center')
-                }}>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px', marginBottom: '6px', pointerEvents: 'auto' }}>
-                        <button onClick={() => togglePanelMinimize('interaction')} style={{ ...btnStyle, minWidth: '46px', padding: '3px 6px', fontSize: '10px' }}>Min</button>
-                        <button onClick={() => togglePanelZoom2('interaction')} style={{ ...btnStyle, minWidth: '46px', padding: '3px 6px', fontSize: '10px' }}>x2</button>
-                    </div>
+                }} onMouseDown={(event) => startPanelDrag('interaction', event)}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px', marginBottom: '6px', pointerEvents: 'auto' }}>{renderPanelControls('interaction')}</div>
                     {!panelUi.interaction.minimized && (
                     <>
                     {activeInteraction && (
@@ -628,11 +671,11 @@ export const HUD = () => {
             )}
 
             <div style={{ 
-                pointerEvents: 'none', // click through leiste
+                pointerEvents: layoutEditMode ? 'auto' : 'none', // click through leiste
                 position: 'absolute', 
                 bottom: compactBottomLayout ? '22px' : '40px', 
                 left: '50%', 
-                transform: 'translateX(-50%)', 
+                transform: `translateX(-50%) translate(${panelUi.bottom.offsetX}px, ${panelUi.bottom.offsetY}px) scale(${getPanelScale('bottom')})`, 
                 padding: '0', 
                 background: 'transparent', 
                 display: 'flex',
@@ -644,23 +687,10 @@ export const HUD = () => {
                 rowGap: compactBottomLayout ? '6px' : '8px',
                 width: compactBottomLayout ? 'min(1160px, calc(100vw - 36px))' : 'min(1700px, calc(100vw - 48px))',
                 transformOrigin: 'center bottom',
-                scale: panelUi.bottom.zoom2 ? 2 : 1,
-            }}>
+                cursor: layoutEditMode ? 'grab' : 'default',
+            }} onMouseDown={(event) => startPanelDrag('bottom', event)}>
                 <div style={{ display: 'flex', gap: '6px', pointerEvents: 'auto', background: 'rgba(10,10,10,0.62)', border: '2px solid rgba(255,255,255,0.09)', borderRadius: '10px', padding: '5px 7px', ...bottomOrderStyle(1) }}>
-                    <button
-                        onClick={() => togglePanelMinimize('bottom')}
-                        style={{ ...btnStyle, minWidth: '52px', padding: '4px 8px', fontSize: '11px', color: panelUi.bottom.minimized ? '#ffcc00' : '#9edfff' }}
-                        title={panelUi.bottom.minimized ? 'Bottom-HUD einblenden' : 'Bottom-HUD minimieren'}
-                    >
-                        {panelUi.bottom.minimized ? 'OPEN' : 'MIN'}
-                    </button>
-                    <button
-                        onClick={() => togglePanelZoom2('bottom')}
-                        style={{ ...btnStyle, minWidth: '52px', padding: '4px 8px', fontSize: '11px', color: panelUi.bottom.zoom2 ? '#ffcc00' : '#9edfff' }}
-                        title={panelUi.bottom.zoom2 ? 'Bottom-HUD auf 1x setzen' : 'Bottom-HUD auf 2x zoomen'}
-                    >
-                        {panelUi.bottom.zoom2 ? '1x' : '2x'}
-                    </button>
+                    {renderPanelControls('bottom')}
                 </div>
 
                 {!panelUi.bottom.minimized && (

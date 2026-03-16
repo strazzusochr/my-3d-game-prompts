@@ -218,6 +218,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Die Bottom-Leiste priorisiert bei niedriger Viewport-Hoehe nun die Kernsteuerung (Zeit/Pause/Speed/Eskalation) vor den nachrangigen Bloecken (Stats/Audio/Profile).
 - Validierung: `npm run autonomy:full` erneut erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Tests weiterhin 243/243 gruen.
 
+### 2.0.30 Frei verschiebbares HUD-Layout mit Zoombereich -3 bis +3 vom 16.03.2026
+- Es wurde ein globaler HUD-Edit-Trigger als Viereck-Button (`▢`) integriert, der den Layout-Bearbeitungsmodus zur Laufzeit ein- und ausschaltet.
+- Im Edit-Modus koennen einzelne HUD-Bereiche per Maus frei verschoben werden; umgesetzt fuer Hauptpaneele sowie die Unterpaneele NASA, Telemetrie, Missionslage, Timeline sowie Bottom- und Interaction-Panel.
+- Die bisherige x2-Logik wurde auf echte Zoomstufen je Panel erweitert: `-3` bis `+3` mit sichtbarem `Z`-Index in den Controls.
+- Minimize bleibt pro Panel aktiv und wurde in die neuen Controls integriert.
+- Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint/Test/Build gruen, Teststand 243/243.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
