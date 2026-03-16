@@ -153,6 +153,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Verifikation erfolgreich: `npm run autonomy:full` erneut komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 256/256, Lint und Build gruen.
 - Ergebnis: Die Port-Sicherheitslogik ist jetzt nicht nur implementiert, sondern auch automatisiert regressionsgesichert.
 
+### 2.0.50 HUD-Hauptpanels jetzt frei verschiebbar vom 16.03.2026
+- `src/components/ui/HUD.tsx` um einen expliziten Drag-Layer fuer die Hauptpanels `left`, `top`, `right`, `interaction` und `bottom` erweitert.
+- Die Positionen werden lokal persistent unter `hud-panel-positions-v1` gespeichert und beim Reload robust innerhalb des sichtbaren HUD-Raums wiederhergestellt.
+- Bestehende Bedienung bleibt erhalten: Min, x2, HUD-Skalierung und Stream-Profilbuttons wurden nicht entfernt, sondern mit dem neuen Bewegungsmodell kombiniert.
+- Verifikation erfolgreich: `npm run lint` gruen, `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand unveraendert 256/256.
+- Zusatzschritt: Aktueller Build im integrierten Browser auf `http://127.0.0.1:7860/` geoeffnet.
+
 ### 2.0.1 Viewer- und Lastnachweis vom 16.03.2026
 - Zwei weitere Viewer-Seiten wurden geoeffnet und der Health-Endpunkt achtmal im Abstand von rund 1,5 Sekunden abgefragt.
 - Der Stream benoetigte eine kurze Aufwaermphase: zuerst `viewerFps=0`, danach stabile Werte zwischen 22 und 24 FPS.

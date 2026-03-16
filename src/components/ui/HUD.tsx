@@ -40,7 +40,86 @@ type HudPanelKey =
     | 'mission'
     | 'timeline';
 
+type DraggablePanelKey = 'left' | 'top' | 'right' | 'interaction' | 'bottom';
+
+type PanelPosition = { x: number; y: number };
+type PanelPositions = Record<DraggablePanelKey, PanelPosition>;
+
 type PanelUiState = Record<HudPanelKey, { minimized: boolean; zoom2: boolean }>;
+
+const HUD_PANEL_POSITIONS_KEY = 'hud-panel-positions-v1';
+
+const PANEL_ESTIMATED_BOUNDS: Record<DraggablePanelKey, { width: number; height: number }> = {
+    left: { width: 320, height: 360 },
+    top: { width: 380, height: 150 },
+    right: { width: 320, height: 760 },
+    interaction: { width: 760, height: 220 },
+    bottom: { width: 1320, height: 170 },
+};
+
+const getHudContentBounds = (viewportWidth: number, viewportHeight: number, scale: number) => ({
+    width: Math.max(1280, Math.round(viewportWidth / Math.max(scale, 0.5))),
+    height: Math.max(720, Math.round(viewportHeight / Math.max(scale, 0.5))),
+});
+
+const clampPosition = (panel: DraggablePanelKey, position: PanelPosition, contentWidth: number, contentHeight: number): PanelPosition => {
+    const bounds = PANEL_ESTIMATED_BOUNDS[panel];
+    return {
+        x: Math.min(Math.max(0, Math.round(position.x)), Math.max(0, contentWidth - bounds.width)),
+        y: Math.min(Math.max(0, Math.round(position.y)), Math.max(0, contentHeight - bounds.height)),
+    };
+};
+
+const makeDefaultPanelPositions = (contentWidth: number, contentHeight: number): PanelPositions => ({
+    left: { x: 24, y: 24 },
+    top: { x: Math.max(24, Math.round((contentWidth - PANEL_ESTIMATED_BOUNDS.top.width) / 2)), y: 24 },
+    right: { x: Math.max(24, contentWidth - PANEL_ESTIMATED_BOUNDS.right.width - 20), y: 20 },
+    interaction: {
+        x: Math.max(24, Math.round((contentWidth - PANEL_ESTIMATED_BOUNDS.interaction.width) / 2)),
+        y: Math.max(24, contentHeight - PANEL_ESTIMATED_BOUNDS.interaction.height - 38),
+    },
+    bottom: {
+        x: Math.max(18, Math.round((contentWidth - PANEL_ESTIMATED_BOUNDS.bottom.width) / 2)),
+        y: Math.max(24, contentHeight - PANEL_ESTIMATED_BOUNDS.bottom.height - 26),
+    },
+});
+
+const sanitizePanelPositions = (input: unknown, contentWidth: number, contentHeight: number): PanelPositions => {
+    const defaults = makeDefaultPanelPositions(contentWidth, contentHeight);
+    if (!input || typeof input !== 'object') return defaults;
+
+    const candidate = input as Partial<Record<DraggablePanelKey, Partial<PanelPosition>>>;
+    return {
+        left: clampPosition('left', {
+            x: Number.isFinite(candidate.left?.x) ? Number(candidate.left?.x) : defaults.left.x,
+            y: Number.isFinite(candidate.left?.y) ? Number(candidate.left?.y) : defaults.left.y,
+        }, contentWidth, contentHeight),
+        top: clampPosition('top', {
+            x: Number.isFinite(candidate.top?.x) ? Number(candidate.top?.x) : defaults.top.x,
+            y: Number.isFinite(candidate.top?.y) ? Number(candidate.top?.y) : defaults.top.y,
+        }, contentWidth, contentHeight),
+        right: clampPosition('right', {
+            x: Number.isFinite(candidate.right?.x) ? Number(candidate.right?.x) : defaults.right.x,
+            y: Number.isFinite(candidate.right?.y) ? Number(candidate.right?.y) : defaults.right.y,
+        }, contentWidth, contentHeight),
+        interaction: clampPosition('interaction', {
+            x: Number.isFinite(candidate.interaction?.x) ? Number(candidate.interaction?.x) : defaults.interaction.x,
+            y: Number.isFinite(candidate.interaction?.y) ? Number(candidate.interaction?.y) : defaults.interaction.y,
+        }, contentWidth, contentHeight),
+        bottom: clampPosition('bottom', {
+            x: Number.isFinite(candidate.bottom?.x) ? Number(candidate.bottom?.x) : defaults.bottom.x,
+            y: Number.isFinite(candidate.bottom?.y) ? Number(candidate.bottom?.y) : defaults.bottom.y,
+        }, contentWidth, contentHeight),
+    };
+};
+
+const clampPanelPositions = (positions: PanelPositions, contentWidth: number, contentHeight: number): PanelPositions => ({
+    left: clampPosition('left', positions.left, contentWidth, contentHeight),
+    top: clampPosition('top', positions.top, contentWidth, contentHeight),
+    right: clampPosition('right', positions.right, contentWidth, contentHeight),
+    interaction: clampPosition('interaction', positions.interaction, contentWidth, contentHeight),
+    bottom: clampPosition('bottom', positions.bottom, contentWidth, contentHeight),
+});
 
 const makeDefaultPanelState = (): PanelUiState => ({
     left: { minimized: false, zoom2: false },
@@ -119,12 +198,25 @@ export const HUD = () => {
     });
     const [viewportHudFit, setViewportHudFit] = useState(1);
     const [panelUi, setPanelUi] = useState<PanelUiState>(() => makeDefaultPanelState());
+    const [viewportWidth, setViewportWidth] = useState(() => (typeof window === 'undefined' ? 1920 : window.innerWidth));
     const [viewportHeight, setViewportHeight] = useState(1080);
+    const [panelPositions, setPanelPositions] = useState<PanelPositions>(() => {
+        if (typeof window === 'undefined') return makeDefaultPanelPositions(1920, 1080);
+        const bounds = getHudContentBounds(window.innerWidth, window.innerHeight, hudScale);
+        const stored = window.localStorage.getItem(HUD_PANEL_POSITIONS_KEY);
+        if (!stored) return makeDefaultPanelPositions(bounds.width, bounds.height);
+        try {
+            return sanitizePanelPositions(JSON.parse(stored), bounds.width, bounds.height);
+        } catch {
+            return makeDefaultPanelPositions(bounds.width, bounds.height);
+        }
+    });
     const [streamProfileState, setStreamProfileState] = useState<{ active: 'low' | 'medium' | 'high' | 'aaa' | 'unknown'; status: string }>({
         active: 'unknown',
         status: 'Profilsteuerung bereit',
     });
     const [streamProfileLoading, setStreamProfileLoading] = useState<'low' | 'medium' | 'high' | 'aaa' | null>(null);
+    const dragStateRef = useRef<{ panel: DraggablePanelKey; startX: number; startY: number; origin: PanelPosition } | null>(null);
 
     // FPS Counter
     const [fps, setFps] = useState(60);
@@ -254,6 +346,7 @@ export const HUD = () => {
             const heightFit = window.innerHeight / 1080;
             const fit = Math.min(widthFit, heightFit);
             setViewportHudFit(Math.min(1, Math.max(0.8, fit)));
+            setViewportWidth(window.innerWidth);
             setViewportHeight(window.innerHeight);
         };
         applyFit();
@@ -286,9 +379,83 @@ export const HUD = () => {
 
     const streamProfile = streamProfileState.active;
     const effectiveHudScale = Number((hudScale * viewportHudFit).toFixed(3));
+    const hudContentBounds = getHudContentBounds(viewportWidth, viewportHeight, effectiveHudScale);
     const timelineMaxHeight = Math.max(160, Math.min(360, Math.round((viewportHeight * 0.34) / effectiveHudScale)));
     const compactBottomLayout = viewportHeight < 920;
     const bottomOrderStyle = (order: number): React.CSSProperties => (compactBottomLayout ? { order } : {});
+
+    useEffect(() => {
+        setPanelPositions((prev) => {
+            const next = clampPanelPositions(prev, hudContentBounds.width, hudContentBounds.height);
+            const unchanged = (['left', 'top', 'right', 'interaction', 'bottom'] as const).every((panel) => (
+                prev[panel].x === next[panel].x && prev[panel].y === next[panel].y
+            ));
+            return unchanged ? prev : next;
+        });
+    }, [hudContentBounds.width, hudContentBounds.height]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        window.localStorage.setItem(HUD_PANEL_POSITIONS_KEY, JSON.stringify(panelPositions));
+    }, [panelPositions]);
+
+    useEffect(() => {
+        const handlePointerMove = (event: PointerEvent) => {
+            const dragState = dragStateRef.current;
+            if (!dragState) return;
+            const nextPosition = clampPosition(
+                dragState.panel,
+                {
+                    x: dragState.origin.x + (event.clientX - dragState.startX) / effectiveHudScale,
+                    y: dragState.origin.y + (event.clientY - dragState.startY) / effectiveHudScale,
+                },
+                hudContentBounds.width,
+                hudContentBounds.height,
+            );
+            setPanelPositions((prev) => {
+                const current = prev[dragState.panel];
+                if (current.x === nextPosition.x && current.y === nextPosition.y) return prev;
+                return { ...prev, [dragState.panel]: nextPosition };
+            });
+        };
+
+        const handlePointerUp = () => {
+            dragStateRef.current = null;
+        };
+
+        window.addEventListener('pointermove', handlePointerMove);
+        window.addEventListener('pointerup', handlePointerUp);
+        return () => {
+            window.removeEventListener('pointermove', handlePointerMove);
+            window.removeEventListener('pointerup', handlePointerUp);
+        };
+    }, [effectiveHudScale, hudContentBounds.width, hudContentBounds.height]);
+
+    const beginPanelDrag = (panel: DraggablePanelKey) => (event: React.PointerEvent<HTMLDivElement>) => {
+        if (event.pointerType === 'mouse' && event.button !== 0) return;
+        event.preventDefault();
+        dragStateRef.current = {
+            panel,
+            startX: event.clientX,
+            startY: event.clientY,
+            origin: panelPositions[panel],
+        };
+    };
+
+    const dragHandleStyle: React.CSSProperties = {
+        padding: '3px 8px',
+        borderRadius: '999px',
+        border: '1px solid rgba(0,204,255,0.22)',
+        background: 'rgba(0,0,0,0.3)',
+        color: '#7dd8ff',
+        fontSize: '10px',
+        fontWeight: 800,
+        letterSpacing: '0.6px',
+        textTransform: 'uppercase',
+        cursor: 'grab',
+        userSelect: 'none',
+        pointerEvents: 'auto',
+    };
 
     const switchStreamProfile = async (profile: 'low' | 'medium' | 'high' | 'aaa') => {
         try {
@@ -320,9 +487,12 @@ export const HUD = () => {
                 }}
             >
             {/* Left Panel */}
-            <div style={{ pointerEvents: 'auto', position: 'absolute', top: '24px', left: '24px', width: '292px', padding: '16px', background: 'rgba(10,10,10,0.82)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', boxShadow: '0 8px 24px rgba(0,0,0,0.45)', ...panelScaleStyle('left', 'top left') }}>
+            <div style={{ pointerEvents: 'auto', position: 'absolute', top: `${panelPositions.left.y}px`, left: `${panelPositions.left.x}px`, width: '292px', padding: '16px', background: 'rgba(10,10,10,0.82)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', boxShadow: '0 8px 24px rgba(0,0,0,0.45)', ...panelScaleStyle('left', 'top left') }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                    <div style={{ color: '#9edfff', fontSize: '11px', letterSpacing: '0.8px', textTransform: 'uppercase' }}>Status-HUD</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <div onPointerDown={beginPanelDrag('left')} style={dragHandleStyle}>Move</div>
+                        <div style={{ color: '#9edfff', fontSize: '11px', letterSpacing: '0.8px', textTransform: 'uppercase' }}>Status-HUD</div>
+                    </div>
                     <div style={{ display: 'flex', gap: '4px' }}>
                         <button onClick={() => togglePanelMinimize('left')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }}>Min</button>
                         <button onClick={() => togglePanelZoom2('left')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }}>x2</button>
@@ -343,8 +513,9 @@ export const HUD = () => {
             </div>
 
             {/* Top Center Badge + Phase Label */}
-            <div style={{ position: 'absolute', top: '24px', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', ...panelScaleStyle('top', 'top center') }}>
+            <div style={{ position: 'absolute', top: `${panelPositions.top.y}px`, left: `${panelPositions.top.x}px`, textAlign: 'center', ...panelScaleStyle('top', 'top center') }}>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '6px', pointerEvents: 'auto' }}>
+                    <div onPointerDown={beginPanelDrag('top')} style={dragHandleStyle}>Move</div>
                     <button onClick={() => togglePanelMinimize('top')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }}>Min</button>
                     <button onClick={() => togglePanelZoom2('top')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }}>x2</button>
                 </div>
@@ -378,7 +549,7 @@ export const HUD = () => {
 
             {/* Combined Right Panel (Missions + FPS + Current Event) */}
             <div style={{ 
-                position: 'absolute', top: '20px', right: '20px', width: '296px', padding: '12px', 
+                position: 'absolute', top: `${panelPositions.right.y}px`, left: `${panelPositions.right.x}px`, width: '296px', padding: '12px', 
                 background: 'transparent', // Auf User-Wunsch: "mach den schwarzen rand wieder durchsichtig"
                 border: 'none', 
                 color: '#fff', 
@@ -388,7 +559,10 @@ export const HUD = () => {
             }}>
                 {/* Header with FPS */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <h3 style={{ margin: 0, color: '#00ccff', fontSize: '16px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800' }}>Streifen-Protokoll</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <div onPointerDown={beginPanelDrag('right')} style={dragHandleStyle}>Move</div>
+                        <h3 style={{ margin: 0, color: '#00ccff', fontSize: '16px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '800' }}>Streifen-Protokoll</h3>
+                    </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <div style={{ 
                             padding: '3px 7px',
@@ -637,9 +811,8 @@ export const HUD = () => {
             {(activeInteraction || interactionState.lastMessage) && (
                 <div style={{
                     position: 'absolute',
-                    left: '50%',
-                    bottom: '38px',
-                    transform: 'translateX(-50%)',
+                    left: `${panelPositions.interaction.x}px`,
+                    top: `${panelPositions.interaction.y}px`,
                     width: 'min(720px, calc(100% - 48px))',
                     padding: '14px 18px',
                     borderRadius: '16px',
@@ -650,6 +823,7 @@ export const HUD = () => {
                     ...panelScaleStyle('interaction', 'bottom center')
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px', marginBottom: '6px', pointerEvents: 'auto' }}>
+                        <div onPointerDown={beginPanelDrag('interaction')} style={dragHandleStyle}>Move</div>
                         <button onClick={() => togglePanelMinimize('interaction')} style={{ ...btnStyle, minWidth: '46px', padding: '3px 6px', fontSize: '10px' }}>Min</button>
                         <button onClick={() => togglePanelZoom2('interaction')} style={{ ...btnStyle, minWidth: '46px', padding: '3px 6px', fontSize: '10px' }}>x2</button>
                     </div>
@@ -686,9 +860,8 @@ export const HUD = () => {
             <div style={{ 
                 pointerEvents: 'none', // click through leiste
                 position: 'absolute', 
-                bottom: compactBottomLayout ? '22px' : '40px', 
-                left: '50%', 
-                transform: 'translateX(-50%)', 
+                top: `${panelPositions.bottom.y}px`, 
+                left: `${panelPositions.bottom.x}px`, 
                 padding: '0', 
                 background: 'transparent', 
                 display: 'flex',
@@ -700,9 +873,10 @@ export const HUD = () => {
                 rowGap: compactBottomLayout ? '6px' : '8px',
                 width: compactBottomLayout ? 'min(1160px, calc(100vw - 36px))' : 'min(1700px, calc(100vw - 48px))',
                 transformOrigin: 'center bottom',
-                scale: panelUi.bottom.zoom2 ? 2 : 1,
+                transform: `scale(${panelUi.bottom.zoom2 ? 2 : 1})`,
             }}>
                 <div style={{ display: 'flex', gap: '6px', pointerEvents: 'auto', background: 'rgba(10,10,10,0.62)', border: '2px solid rgba(255,255,255,0.09)', borderRadius: '10px', padding: '5px 7px', ...bottomOrderStyle(1) }}>
+                    <div onPointerDown={beginPanelDrag('bottom')} style={dragHandleStyle}>Move</div>
                     <button
                         onClick={() => togglePanelMinimize('bottom')}
                         style={{ ...btnStyle, minWidth: '52px', padding: '4px 8px', fontSize: '11px', color: panelUi.bottom.minimized ? '#ffcc00' : '#9edfff' }}

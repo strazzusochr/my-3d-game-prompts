@@ -24,6 +24,8 @@
 - Vollstaendiger Re-Nachweis fuer P-45 erfolgreich: `npm run security:memory-validate` gruen, `npm run port:check` gruen, `npm run autonomy:proof` gruen, `npm run autonomy:full` gruen (inkl. 253/253 Tests).
 - Port-Resolver-Regressionstest am 16.03.2026 ergaenzt: neue Suite `src/tests/portCheckSecurity.test.ts` prueft blockierten Wunschport mit eindeutiger Fallback-Aufloesung, Env-Mapping und Invalid-Port-Fehlerpfad.
 - Vollnachweis nach Testausbau erfolgreich: `npm run autonomy:full` erneut komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 256/256.
+- HUD-Drag-Block am 16.03.2026 umgesetzt: Hauptpanels `left`, `top`, `right`, `interaction` und `bottom` sind jetzt frei verschiebbar; Positionen werden in LocalStorage persistiert und beim Reload wiederhergestellt.
+- Vollnachweis nach HUD-Drag erfolgreich: `npm run lint` gruen, `npm run autonomy:full` erneut komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand bleibt 256/256.
 - Persistente Nutzerpraeferenzen wurden um die neuen Ablaufregeln erweitert.
 - Aktueller Repository-Stand enthaelt bereits Test-, Lint- und Streaming-Anpassungen aus der vorigen Arbeitsphase.
 - Fuer den aktuellen Schritt wird ein professioneller Projektbericht erzeugt und der gegenwaertige Stand festgehalten.
@@ -242,4 +244,4 @@
 - Vollverifikation nach Replay-Delta-Anomalieindikator erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 253/253.
 
 ## Naechster logischer Schritt
-- Nach abgesicherter Port-Sicherheitslogik folgt als naechster Ausbaupunkt ein Replay-Delta-Konsistenzindikator (Stabilitaet ueber mehrere Checkpoints) mit kompakter Verlaufsampel.
+- Nach dem Hauptpanel-Drag ist der naechste sinnvolle HUD-Ausbau eine feinere Drag-/Persistenzebene fuer Teilsektionen oder ein expliziter Reset-Button fuer gespeicherte HUD-Positionen.

@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 19:24:25 +01:00
+- Zeitstempel: 2026-03-16 19:37:53 +01:00
 - Repo-Head: main synchron auf lokal + origin/main + github/main (Head per `git rev-parse --short HEAD` pruefbar)
 - Nachweislauf: Post-Commit/Post-Push-Vollnachweis erfolgreich (git clean-check + autonomy:full)
-- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_256_256 + BUILD_PASS + P45_DEEP_RECHECK_FROM_START_PASS + LINE_1_107_RECHECK_PASS + PORT_RESOLVER_TESTS_PASS + CLEAN_WORKTREE_PASS + PUSH_ORIGIN_PASS + PUSH_GITHUB_PASS + MASTER_80000_PASS
+- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_256_256 + BUILD_PASS + P45_DEEP_RECHECK_FROM_START_PASS + LINE_1_107_RECHECK_PASS + PORT_RESOLVER_TESTS_PASS + HUD_PANEL_DRAG_PERSIST_PASS + CLEAN_WORKTREE_PASS + PUSH_ORIGIN_PASS + PUSH_GITHUB_PASS + MASTER_80000_PASS
 - Gates: Clean-Status PASS (`git status --short` leer), Lint PASS, Tests 256/256 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport aktiv, Push nach `origin/main` und `github/main` PASS, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: Kontroll-/Security-Stand committet und auf beide Remotes synchronisiert; Port-Resolver-Securitytests als neuer regressionssicherer Gate-Baustein integriert
+- Arbeitsbaum: Haupt-HUD-Panels jetzt verschiebbar und per LocalStorage persistiert; bestehende Min/x2- und Profilsteuerung unveraendert weiter aktiv
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -106,6 +106,7 @@ Bewertungsstufen:
 | P-046 | Port-Resolver als Runtime-Quelle in Stream/Autonomy verdrahtet | Vertikal | 100 | PASS | `port-check` als Modul exportiert, sicherer Stream-Wrapper aktiv, `autonomy:full` nutzt aufgeloeste Ports fuer BASE_URL/Health; Vollproof erneut gruen |
 | P-047 | Port-Resolver in standalone `autonomy:proof` aktiviert | Vertikal | 100 | PASS | `autonomy:proof` setzt aufgeloeste Ports fuer BASE_URL/Health, Standalone-Proof und anschliessender Vollproof gruen |
 | P-048 | Port-Resolver Security-Tests regressionssicher erweitert | Vertikal | 100 | PASS | Neue Vitest-Suite `src/tests/portCheckSecurity.test.ts` verifiziert Fallback-Eindeutigkeit bei blockiertem Wunschport, Env-Mapping und Invalid-Port-Fehlerpfad; Vollproof danach 256/256 gruen |
+| P-049 | HUD-Hauptpanels verschiebbar und persistent gemacht | Vertikal | 100 | PASS | `src/components/ui/HUD.tsx` um Drag-and-Drop fuer left/top/right/interaction/bottom erweitert; Positionen werden unter `hud-panel-positions-v1` gespeichert und nach Reload wiederhergestellt; Vollproof danach 256/256 gruen |
 
 ---
 
