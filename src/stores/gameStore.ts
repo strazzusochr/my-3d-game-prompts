@@ -397,6 +397,14 @@ const applyDynamicRoleResponses = (
         fallbackWaveScale = Math.max(0.75, fallbackWaveScale - 0.1);
     }
 
+    if (insight.trendMomentumScore <= -8) {
+        positiveWaveScale += 0.08;
+        fallbackWaveScale = Math.max(0.7, fallbackWaveScale - 0.08);
+    } else if (insight.trendMomentumScore >= 8) {
+        fallbackWaveScale += 0.1;
+        positiveWaveScale = Math.max(0.75, positiveWaveScale - 0.06);
+    }
+
     positiveWaveScale *= phaseScaleProfile.positive;
     fallbackWaveScale *= phaseScaleProfile.fallback;
 
@@ -404,7 +412,7 @@ const applyDynamicRoleResponses = (
         currentMinutes >= 20 * 60 + 30 &&
         getMissionCompletionPercent(missionProgress) >= 80 &&
         insight.missionPathWeightPercent >= phaseScaleProfile.syncThreshold &&
-        (insight.trendSignal === 'stabilizing' || insight.trendSignal === 'flat') &&
+        (insight.trendSignal === 'stabilizing' || (insight.trendSignal === 'flat' && insight.trendMomentumScore <= 2)) &&
         !firedSet.has('dyn-trend-synchronization')
     ) {
         const policeWave = spawnDynamicWave(
@@ -437,6 +445,7 @@ const applyDynamicRoleResponses = (
         getMissionCompletionPercent(missionProgress) < 60 &&
         insight.missionPathWeightPercent <= phaseScaleProfile.fractureThreshold &&
         insight.trendSignal !== 'stabilizing' &&
+        insight.trendMomentumScore >= -1 &&
         !firedSet.has('dyn-trend-fracture-wave')
     ) {
         const spawned = spawnDynamicWave(
