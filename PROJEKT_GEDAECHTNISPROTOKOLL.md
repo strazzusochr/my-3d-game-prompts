@@ -72,6 +72,10 @@
 - Korrelations-Engine-Block am 16.03.2026 eingebaut: neues Systemmodul `operationsInsights.ts` korreliert Rollenverlauf, Panikquote, DayStats, Hook-Auslastung und Missionsfortschritt zu einer priorisierten Einsatzempfehlung.
 - Operations-Tab erweitert: Empfehlungstext ist nun datengetrieben, inkl. Korrelationszeile, Prioritaetsstufe (`LOW/MEDIUM/HIGH/CRITICAL`) und Confidence-Wert.
 - Korrelations-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 222/222 gruen (inkl. neuer `operationsInsights.test.ts`), `npm run build` gruen, Browser-/Socket-Livecheck bestaetigt (Socket `3Zi--HMxKGEl8XN1AAAB`).
+- Folgeevent-Korrelation am 16.03.2026 aktiviert: Store erzeugt nun bei korrelierter `HIGH`-/`CRITICAL`-Lage automatische Laufzeit-Reaktionen (`dyn-high-medical-relief`, `dyn-critical-lockdown`) statt nur Empfehlungstext.
+- Rewind-/Replay bleibt konsistent: korrelationsbasierte Folgeevents werden bei Rueckwaertsspruengen erneut korrekt rekonstruiert und in `firedEventKeys` abgebildet.
+- HUD-Badges erweitert: Operations-Panel zeigt nun auch die neuen Korrelations-Trigger als aktive Live-Events.
+- Folgeevent-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 224/224 gruen, `npm run build` gruen, Browser-/Socket-Livecheck bestaetigt (Socket `eEIHFHDerj45M_TpAAAF`).
 
 ## Naechster logischer Schritt
 - Entscheidungsbasierte Folge-Events: Spieleraktionen sollen zugeschnittene Kettenevents ausloesen (z.B. nach erfolgreicher Epoch-Verifikation wird ein spezifischer Journalist-Mob aktiviert).

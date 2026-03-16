@@ -359,3 +359,17 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - `npm run lint`: erfolgreich.
 - `npm run build`: erfolgreich, 642 Module.
 - Livecheck: lokaler Full-Stack gestartet, Browserseite geoeffnet, Socket `3Zi--HMxKGEl8XN1AAAB` verbunden; Prozess sauber beendet.
+
+### 8.28 Korrelationsgetriebene Runtime-Folgeevents vom 16.03.2026
+- `src/stores/gameStore.ts` bindet die Korrelations-Engine nun direkt in die dynamischen Laufzeitreaktionen ein.
+- Neue Folgeevents wurden implementiert: `dyn-high-medical-relief` (zusaetzliche Medics in erhöhter Lage) und `dyn-critical-lockdown` (SEK-Lockdown in kritischer Lage).
+- Die Folgeevents wirken direkt auf NPC-Verteilung und DayStats (Verletzte/Sachschaden-Entlastung) und werden in `firedEventKeys` persistiert.
+- Rewind-/Replay-Pfade wurden mit dem neuen Korrelationspfad abgestimmt, damit die Triggerzustände konsistent reproduziert werden.
+- `HUD.tsx` zeigt die neuen Folgeevent-Trigger als Badges im Operations-Panel.
+
+### 8.29 Folgeevent-Nachweis
+- `src/tests/gameStore.test.ts` um 2 weitere Tests erweitert: HIGH-medical-relief Trigger und CRITICAL-lockdown Trigger.
+- `npx vitest run`: erfolgreich, 224 von 224 Tests bestanden.
+- `npm run lint`: erfolgreich.
+- `npm run build`: erfolgreich, 642 Module.
+- Livecheck: lokaler Full-Stack gestartet, Browserseite geoeffnet, Socket `eEIHFHDerj45M_TpAAAF` verbunden; Prozess sauber beendet.
