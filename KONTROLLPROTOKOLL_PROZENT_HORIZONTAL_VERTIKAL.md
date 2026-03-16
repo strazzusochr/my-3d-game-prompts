@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 10:52:24 +01:00
-- Repo-Head: f6fd3ef (vor Spawn-Marker-Dringlichkeitsstufen)
-- Nachweislauf: npm run autonomy:full PASS (inkl. lint PASS + tests 239/239 PASS + build PASS + live proof PASS)
-- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_239_239 + BUILD_PASS + LIVE_SOCKET_PASS + MASTER_80000_PASS
-- Gates: Lint PASS, Tests 239/239 PASS, Build PASS, Browser-/Socket-Livecheck PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: geaendert fuer SpawnMarker-Dringlichkeitsstufen (WATCH/READY/IMMINENT + visuelle Countdown-Emphasis)
+- Zeitstempel: 2026-03-16 10:59:08 +01:00
+- Repo-Head: 4f07fb0 (vor Spawn-Marker-Logik-Extraktion und Testabdeckung)
+- Nachweislauf: npm run autonomy:full PASS (inkl. lint PASS + tests 243/243 PASS + build PASS + live proof PASS)
+- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_243_243 + BUILD_PASS + LIVE_SOCKET_PASS + MASTER_80000_PASS
+- Gates: Lint PASS, Tests 243/243 PASS, Build PASS, Browser-/Socket-Livecheck PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, Masterquelle 80.000/80.000 PASS
+- Arbeitsbaum: geaendert fuer SpawnMarker-Logikmodul + neue Testsuite fuer Zeitfenster/Priorisierung/Dringlichkeit
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -46,7 +46,7 @@ Bewertungsstufen:
 | S-001 | Browser-Erreichbarkeit Stream | 100 | 100 | 100 | PASS | URL erreichbar |
 | S-002 | Workspace-Fehlercheck | 100 | 100 | 100 | PASS | No errors found |
 | S-003 | Lint-Gate | 100 | 100 | 100 | PASS | eslint ohne Fehler |
-| S-004 | Test-Gate | 100 | 100 | 100 | PASS | 239/239 Tests bestanden (9 Dateien, comprehensive.test.ts 161 Tests) |
+| S-004 | Test-Gate | 100 | 100 | 100 | PASS | 243/243 Tests bestanden (10 Dateien, comprehensive.test.ts 161 Tests) |
 | S-005 | Build-Gate | 100 | 100 | 100 | PASS | vite build erfolgreich |
 | S-006 | Live-Proof Profilfolge | 100 | 100 | 100 | PASS | low->medium->high->aaa->low |
 | S-007 | Health-/Transport-Nachweis | 100 | 100 | 100 | PASS | canvas-webrtc aktiv |
@@ -81,6 +81,7 @@ Bewertungsstufen:
 | P-021 | SpawnMarker-Phasenkalibrierung umgesetzt | Vertikal | 100 | PASS | Tagesphasen-Theme (NIGHT/MORNING/MIDDAY/EVENING/LATE) + adaptive Kartengroesse/Detailtiefe je Marker-Dichte |
 | P-022 | SpawnMarker-Dichtepriorisierung umgesetzt | Vertikal | 100 | PASS | Bei hoher Last nur priorisierte Top-8 Marker sichtbar, Rest als Sammelhinweis ausgeblendet |
 | P-023 | SpawnMarker-Dringlichkeitsstufen umgesetzt | Vertikal | 100 | PASS | Countdown-nahe Marker werden als WATCH/READY/IMMINENT eingestuft und visuell priorisiert |
+| P-024 | SpawnMarker-Logik regressionssicher getestet | Vertikal | 100 | PASS | Logik in separates Modul extrahiert, neue Tests fuer Zeitfenster/Grouping/Priorisierung/Dringlichkeit |
 
 ---
 
@@ -125,7 +126,7 @@ Die nachfolgende Deep-Gap-Matrix beschreibt darueber hinausgehende Ausbauziele d
 | NPC-KI/Behavior | Rollen-Automatik + Korrelations-Folgeevents + trendkorrelierte Branch-Reaktionen aktiv | 93 | Gegenseitige Fraktionsreaktionen und adaptive Schwellwerte fehlen noch | Eskalations-Gegenlogik und adaptive Triggerkurven integrieren |
 | Mission/24h-Szenario | Aftermath-Nacht-Kette + Korrelationsfolgeevents + gewichtete, trend-, fenster- und mehrpunktgekoppelte Missions-Ergebnisbaeume aktiv | 100 | — | Erledigt: Mehrpunkt-Momentum/Turbulenz als Triggerbasis integriert |
 | UI/HUD-Komplettheit | Operations-Korrelation + Folgeevent-Badges + Trendlinien + gewichtete und trendkorrelierte Branches sichtbar; Spawn-Neonmarker inkl. Feintuning, Phasenkalibrierung, Dichtepriorisierung und Dringlichkeitsstufen aktiv | 100 | — | Erledigt: Spawn-Ort-Visualisierung zeitgesteuert (T-10..T-5), entzerrt, je Tagesphase kalibriert, bei Last priorisiert und countdown-sensitiv hervorgehoben |
-| Quality-Gates 700+ | VOLLSTAENDIG | 100 | — | Erledigt: 239/239 Tests gruen, comprehensive.test.ts deckt 700+ Assertions ab |
+| Quality-Gates 700+ | VOLLSTAENDIG | 100 | — | Erledigt: 243/243 Tests gruen, comprehensive.test.ts deckt 700+ Assertions ab |
 
 Realistische Gesamt-Reife (Deep, ausserhalb Pflichtumfang): 100%
 

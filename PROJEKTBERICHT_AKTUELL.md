@@ -184,6 +184,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Damit entsteht neben Dichtepriorisierung und Phasenkalibrierung nun eine dritte Lesbarkeitsebene: semantische Dringlichkeit.
 - Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 239 von 239 bestanden, Lint und Build gruen.
 
+### 2.0.25 Spawn-Marker-Logik extrahiert und getestet vom 16.03.2026
+- Die Entscheidungslogik der Spawn-Marker wurde aus der Renderkomponente in ein eigenes Systemmodul ausgelagert: `src/systems/spawnMarkerLogic.ts`.
+- Abgedeckt sind dort jetzt zentral: Sichtfenster (T-10 bis T-5), Grouping je Zeit/Position, Top-8-Priorisierung bei Last, Phasenband-Ermittlung und Dringlichkeitsklassifikation.
+- Dadurch ist die 3D-Komponente schlanker und die Kernlogik unabhängig testbar.
+- Neue Testsuite `src/tests/spawnMarkerLogic.test.ts` verifiziert die Regeln inklusive Grenzwerte und Priorisierungsverhalten.
+- Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 243 von 243 bestanden, Lint und Build gruen.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
