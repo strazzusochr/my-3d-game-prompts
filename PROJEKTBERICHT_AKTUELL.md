@@ -73,6 +73,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Abschlussmarker des Gesamtlaufs: `AUTONOMY_FULL_OK`.
 - Ergebnis: GO-GO-GO ist nun reproduzierbar, selbstheilend und ohne manuellen Vorlauf nutzbar.
 
+### 2.0.9 Pflichtlauf-Wiederholung vom 16.03.2026
+- Ein weiterer vollstaendiger GO-GO-GO-Lauf wurde ohne Vorabserver erneut gestartet.
+- Der Runner startete den Stream wieder selbststaendig, fuehrte danach `lint`, `test`, `build` und den Profil-Proof in Serie aus.
+- Tests blieben stabil bei 7 von 7, Build war erfolgreich, Proof endete erneut mit `AUTONOMY_PROOF_OK`.
+- Abschluss des Gesamtlaufs erneut erfolgreich mit `AUTONOMY_FULL_OK`.
+- Ergebnis: Der Ablauf ist nicht nur einmalig, sondern in unmittelbarer Wiederholung robust reproduzierbar.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
