@@ -59,6 +59,8 @@ type ReplayQualityDeltaMomentumBand = 'easing' | 'steady' | 'accelerating';
 type ReplayQualityDeltaMomentumHint = 'Trendbeschleunigung gering.' | 'Trendbeschleunigung moderat.' | 'Trendbeschleunigung hoch.';
 type ReplayQualityDeltaDriftBand = 'aligned' | 'offset' | 'diverging';
 type ReplayQualityDeltaDriftHint = 'Delta-Basis stabil.' | 'Delta-Basis leicht versetzt.' | 'Delta-Basis driftet stark.';
+type ReplayQualityDeltaAnomalyBand = 'normal' | 'watch' | 'spike';
+type ReplayQualityDeltaAnomalyHint = 'Keine auffaellige Delta-Anomalie.' | 'Delta-Ausreisser beobachten.' | 'Delta-Ausreisser sofort pruefen.';
 const MAX_DELTA_HISTORY_POINTS = 6;
 type ReplayRiskLevel = 'low' | 'medium' | 'high';
 type ReplayRiskHint =
@@ -90,6 +92,10 @@ interface ReplayQualityState {
     deltaDriftDirection: ReplayQualityDeltaDirection;
     deltaDriftBand: ReplayQualityDeltaDriftBand;
     deltaDriftHint: ReplayQualityDeltaDriftHint;
+    deltaAnomalyScore: number;
+    deltaAnomalyDirection: ReplayQualityDeltaDirection;
+    deltaAnomalyBand: ReplayQualityDeltaAnomalyBand;
+    deltaAnomalyHint: ReplayQualityDeltaAnomalyHint;
     stability: ReplayQualityStability;
     recentStabilityTrend: ReplayQualityStability[];
     riskLevel: ReplayRiskLevel;
@@ -138,6 +144,10 @@ interface GameStore {
         replayQualityDeltaDriftDirection: ReplayQualityDeltaDirection;
         replayQualityDeltaDriftBand: ReplayQualityDeltaDriftBand;
         replayQualityDeltaDriftHint: ReplayQualityDeltaDriftHint;
+        replayQualityDeltaAnomalyScore: number;
+        replayQualityDeltaAnomalyDirection: ReplayQualityDeltaDirection;
+        replayQualityDeltaAnomalyBand: ReplayQualityDeltaAnomalyBand;
+        replayQualityDeltaAnomalyHint: ReplayQualityDeltaAnomalyHint;
         replayQualityStability: ReplayQualityStability;
         replayQualityRecentTrend: ReplayQualityStability[];
         replayRiskLevel: ReplayRiskLevel;
@@ -235,6 +245,10 @@ const persistedReplayState = persistedRuntimeSnapshot?.replayState ?? {
         deltaDriftDirection: 'flat' as ReplayQualityDeltaDirection,
         deltaDriftBand: 'aligned' as ReplayQualityDeltaDriftBand,
         deltaDriftHint: 'Delta-Basis stabil.' as ReplayQualityDeltaDriftHint,
+        deltaAnomalyScore: 0,
+        deltaAnomalyDirection: 'flat' as ReplayQualityDeltaDirection,
+        deltaAnomalyBand: 'normal' as ReplayQualityDeltaAnomalyBand,
+        deltaAnomalyHint: 'Keine auffaellige Delta-Anomalie.' as ReplayQualityDeltaAnomalyHint,
         stability: 'stable' as ReplayQualityStability,
         recentStabilityTrend: [] as ReplayQualityStability[],
         riskLevel: 'low' as ReplayRiskLevel,
@@ -381,6 +395,24 @@ const getReplayQualityState = (
         : deltaDriftBand === 'offset'
             ? 'Delta-Basis leicht versetzt.'
             : 'Delta-Basis stabil.';
+    const anomalyReferenceWindow = deltaHistory.slice(1, 6);
+    const anomalyReferenceAvg = anomalyReferenceWindow.length > 0
+        ? Math.round(anomalyReferenceWindow.reduce((sum, value) => sum + value, 0) / anomalyReferenceWindow.length)
+        : 0;
+    const deltaAnomalyScore = clamp(deltaEventsPerCheckpoint - anomalyReferenceAvg, -999, 999);
+    const deltaAnomalyDirection: ReplayQualityDeltaDirection =
+        deltaAnomalyScore > 0 ? 'up' : deltaAnomalyScore < 0 ? 'down' : 'flat';
+    const deltaAnomalyAbs = Math.abs(deltaAnomalyScore);
+    const deltaAnomalyBand: ReplayQualityDeltaAnomalyBand = deltaAnomalyAbs >= 10
+        ? 'spike'
+        : deltaAnomalyAbs >= 5
+            ? 'watch'
+            : 'normal';
+    const deltaAnomalyHint: ReplayQualityDeltaAnomalyHint = deltaAnomalyBand === 'spike'
+        ? 'Delta-Ausreisser sofort pruefen.'
+        : deltaAnomalyBand === 'watch'
+            ? 'Delta-Ausreisser beobachten.'
+            : 'Keine auffaellige Delta-Anomalie.';
     const stability: ReplayQualityStability =
         rebuildCount >= 4 || avgRebuildEvents >= 20
             ? 'critical'
@@ -438,6 +470,10 @@ const getReplayQualityState = (
         deltaDriftDirection,
         deltaDriftBand,
         deltaDriftHint,
+        deltaAnomalyScore,
+        deltaAnomalyDirection,
+        deltaAnomalyBand,
+        deltaAnomalyHint,
         stability,
         recentStabilityTrend: pushReplayQualityTrend(previousTrend, stability),
         riskLevel,
@@ -485,6 +521,10 @@ const buildRuntimeSnapshot = (state: GameStore): RuntimeSnapshot => ({
             deltaDriftDirection: state.gameState.replayQualityDeltaDriftDirection,
             deltaDriftBand: state.gameState.replayQualityDeltaDriftBand,
             deltaDriftHint: state.gameState.replayQualityDeltaDriftHint,
+            deltaAnomalyScore: state.gameState.replayQualityDeltaAnomalyScore,
+            deltaAnomalyDirection: state.gameState.replayQualityDeltaAnomalyDirection,
+            deltaAnomalyBand: state.gameState.replayQualityDeltaAnomalyBand,
+            deltaAnomalyHint: state.gameState.replayQualityDeltaAnomalyHint,
             stability: state.gameState.replayQualityStability,
             recentStabilityTrend: state.gameState.replayQualityRecentTrend,
             riskLevel: state.gameState.replayRiskLevel,
@@ -1346,6 +1386,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         replayQualityDeltaDriftDirection: persistedReplayState.quality.deltaDriftDirection,
         replayQualityDeltaDriftBand: persistedReplayState.quality.deltaDriftBand,
         replayQualityDeltaDriftHint: persistedReplayState.quality.deltaDriftHint,
+        replayQualityDeltaAnomalyScore: persistedReplayState.quality.deltaAnomalyScore,
+        replayQualityDeltaAnomalyDirection: persistedReplayState.quality.deltaAnomalyDirection,
+        replayQualityDeltaAnomalyBand: persistedReplayState.quality.deltaAnomalyBand,
+        replayQualityDeltaAnomalyHint: persistedReplayState.quality.deltaAnomalyHint,
         replayQualityStability: persistedReplayState.quality.stability,
         replayQualityRecentTrend: persistedReplayState.quality.recentStabilityTrend,
         replayRiskLevel: persistedReplayState.quality.riskLevel,
@@ -1410,6 +1454,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityDeltaDriftDirection: 'flat',
                 replayQualityDeltaDriftBand: 'aligned',
                 replayQualityDeltaDriftHint: 'Delta-Basis stabil.',
+                replayQualityDeltaAnomalyScore: 0,
+                replayQualityDeltaAnomalyDirection: 'flat',
+                replayQualityDeltaAnomalyBand: 'normal',
+                replayQualityDeltaAnomalyHint: 'Keine auffaellige Delta-Anomalie.',
                 replayQualityStability: 'stable',
                 replayQualityRecentTrend: [],
                 replayRiskLevel: 'low',
@@ -1551,6 +1599,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     replayQualityDeltaDriftDirection: replayQuality.deltaDriftDirection,
                     replayQualityDeltaDriftBand: replayQuality.deltaDriftBand,
                     replayQualityDeltaDriftHint: replayQuality.deltaDriftHint,
+                    replayQualityDeltaAnomalyScore: replayQuality.deltaAnomalyScore,
+                    replayQualityDeltaAnomalyDirection: replayQuality.deltaAnomalyDirection,
+                    replayQualityDeltaAnomalyBand: replayQuality.deltaAnomalyBand,
+                    replayQualityDeltaAnomalyHint: replayQuality.deltaAnomalyHint,
                     replayQualityStability: replayQuality.stability,
                     replayQualityRecentTrend: replayQuality.recentStabilityTrend,
                     replayRiskLevel: replayQuality.riskLevel,
@@ -1646,6 +1698,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityDeltaDriftDirection: replayQuality.deltaDriftDirection,
                 replayQualityDeltaDriftBand: replayQuality.deltaDriftBand,
                 replayQualityDeltaDriftHint: replayQuality.deltaDriftHint,
+                replayQualityDeltaAnomalyScore: replayQuality.deltaAnomalyScore,
+                replayQualityDeltaAnomalyDirection: replayQuality.deltaAnomalyDirection,
+                replayQualityDeltaAnomalyBand: replayQuality.deltaAnomalyBand,
+                replayQualityDeltaAnomalyHint: replayQuality.deltaAnomalyHint,
                 replayQualityStability: replayQuality.stability,
                 replayQualityRecentTrend: replayQuality.recentStabilityTrend,
                 replayRiskLevel: replayQuality.riskLevel,
@@ -1743,6 +1799,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityDeltaDriftDirection: replayQuality.deltaDriftDirection,
                 replayQualityDeltaDriftBand: replayQuality.deltaDriftBand,
                 replayQualityDeltaDriftHint: replayQuality.deltaDriftHint,
+                replayQualityDeltaAnomalyScore: replayQuality.deltaAnomalyScore,
+                replayQualityDeltaAnomalyDirection: replayQuality.deltaAnomalyDirection,
+                replayQualityDeltaAnomalyBand: replayQuality.deltaAnomalyBand,
+                replayQualityDeltaAnomalyHint: replayQuality.deltaAnomalyHint,
                 replayQualityStability: replayQuality.stability,
                 replayQualityRecentTrend: replayQuality.recentStabilityTrend,
                 replayRiskLevel: replayQuality.riskLevel,
@@ -1803,6 +1863,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityDeltaDriftDirection: 'flat',
                 replayQualityDeltaDriftBand: 'aligned',
                 replayQualityDeltaDriftHint: 'Delta-Basis stabil.',
+                replayQualityDeltaAnomalyScore: 0,
+                replayQualityDeltaAnomalyDirection: 'flat',
+                replayQualityDeltaAnomalyBand: 'normal',
+                replayQualityDeltaAnomalyHint: 'Keine auffaellige Delta-Anomalie.',
                 replayQualityStability: 'stable',
                 replayQualityRecentTrend: [],
                 replayRiskLevel: 'low',

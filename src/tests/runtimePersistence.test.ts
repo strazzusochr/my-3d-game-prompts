@@ -69,6 +69,10 @@ const baseSnapshot: RuntimeSnapshot = {
             deltaDriftDirection: 'up',
             deltaDriftBand: 'aligned',
             deltaDriftHint: 'Delta-Basis stabil.',
+            deltaAnomalyScore: 3,
+            deltaAnomalyDirection: 'up',
+            deltaAnomalyBand: 'normal',
+            deltaAnomalyHint: 'Keine auffaellige Delta-Anomalie.',
             stability: 'watch',
             recentStabilityTrend: ['watch', 'stable'],
             riskLevel: 'medium',
@@ -114,6 +118,10 @@ describe('runtimePersistence', () => {
         expect(loaded?.replayState.quality.deltaDriftDirection).toBe('up');
         expect(loaded?.replayState.quality.deltaDriftBand).toBe('aligned');
         expect(loaded?.replayState.quality.deltaDriftHint).toBe('Delta-Basis stabil.');
+        expect(loaded?.replayState.quality.deltaAnomalyScore).toBe(3);
+        expect(loaded?.replayState.quality.deltaAnomalyDirection).toBe('up');
+        expect(loaded?.replayState.quality.deltaAnomalyBand).toBe('normal');
+        expect(loaded?.replayState.quality.deltaAnomalyHint).toBe('Keine auffaellige Delta-Anomalie.');
         expect(loaded?.replayState.quality.stability).toBe('watch');
         expect(loaded?.replayState.quality.recentStabilityTrend).toEqual(['watch', 'stable']);
         expect(loaded?.replayState.quality.riskLevel).toBe('medium');
@@ -172,6 +180,10 @@ describe('runtimePersistence', () => {
                         deltaDriftDirection: 'invalid',
                         deltaDriftBand: 'invalid',
                         deltaDriftHint: 'invalid',
+                        deltaAnomalyScore: 1200,
+                        deltaAnomalyDirection: 'invalid',
+                        deltaAnomalyBand: 'invalid',
+                        deltaAnomalyHint: 'invalid',
                         stability: 'broken',
                         recentStabilityTrend: ['critical', 'unknown', 'watch', 'stable'],
                         riskLevel: 'broken',
@@ -220,6 +232,10 @@ describe('runtimePersistence', () => {
         expect(loaded?.replayState.quality.deltaDriftDirection).toBe('up');
         expect(loaded?.replayState.quality.deltaDriftBand).toBe('diverging');
         expect(loaded?.replayState.quality.deltaDriftHint).toBe('Delta-Basis driftet stark.');
+        expect(loaded?.replayState.quality.deltaAnomalyScore).toBe(999);
+        expect(loaded?.replayState.quality.deltaAnomalyDirection).toBe('up');
+        expect(loaded?.replayState.quality.deltaAnomalyBand).toBe('spike');
+        expect(loaded?.replayState.quality.deltaAnomalyHint).toBe('Delta-Ausreisser sofort pruefen.');
         expect(loaded?.replayState.quality.stability).toBe('stable');
         expect(loaded?.replayState.quality.recentStabilityTrend).toEqual(['critical', 'watch', 'stable']);
         expect(loaded?.replayState.quality.riskLevel).toBe('low');

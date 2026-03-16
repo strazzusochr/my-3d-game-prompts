@@ -221,5 +221,12 @@
 - Testabdeckung erweitert: `runtimePersistence.test.ts` verifiziert Drift-Roundtrip und Sanitisierung, `gameStore.test.ts` prueft Drift-Felder in Store und Snapshot.
 - Vollverifikation nach Replay-Delta-Driftindikator erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 253/253.
 
+- Replay-Delta-Anomalieindikator am 16.03.2026 umgesetzt: Store fuehrt jetzt `replayQualityDeltaAnomalyScore`, `replayQualityDeltaAnomalyDirection`, `replayQualityDeltaAnomalyBand` und `replayQualityDeltaAnomalyHint` als Ausreissererkennung auf Basis der Delta-Historie.
+- Berechnung erweitert: Der aktuelle Delta-Wert wird gegen die restliche Historienbasis verglichen, als Abweichung auf -999..999 begrenzt und in `normal`/`watch`/`spike` klassifiziert.
+- Snapshot erweitert: `runtimePersistence` persistiert und sanitisiert Anomalie-Felder robust (Score Clamp, Richtungs-/Band-/Hinweisableitung bei ungueltigen Eingaben).
+- HUD-Operationsansicht erweitert: neue Zeilen `Delta-Anomalie`, `Anomalie-Band` und `Anomalie-Hinweis` liefern einen Sofort-Hinweis fuer kurzfristige Lastausreisser.
+- Testabdeckung erweitert: `runtimePersistence.test.ts` verifiziert Anomalie-Roundtrip und Sanitisierung, `gameStore.test.ts` prueft Anomalie-Felder in Store und Snapshot.
+- Vollverifikation nach Replay-Delta-Anomalieindikator erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 253/253.
+
 ## Naechster logischer Schritt
-- Nach Delta-Driftindikator folgt als naechster Ausbaupunkt ein Replay-Delta-Anomalieindikator (Ausreissererkennung mit Sofort-Hinweis) fuer kurzfristige Lastspruenge.
+- Nach Delta-Anomalieindikator folgt als naechster Ausbaupunkt ein Replay-Delta-Konsistenzindikator (Stabilitaet ueber mehrere Checkpoints) mit kompakter Verlaufsampel.

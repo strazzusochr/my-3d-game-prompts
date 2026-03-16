@@ -83,6 +83,10 @@ export const HUD = () => {
     const replayQualityDeltaDriftDirection = useGameStore(state => state.gameState.replayQualityDeltaDriftDirection);
     const replayQualityDeltaDriftBand = useGameStore(state => state.gameState.replayQualityDeltaDriftBand);
     const replayQualityDeltaDriftHint = useGameStore(state => state.gameState.replayQualityDeltaDriftHint);
+    const replayQualityDeltaAnomalyScore = useGameStore(state => state.gameState.replayQualityDeltaAnomalyScore);
+    const replayQualityDeltaAnomalyDirection = useGameStore(state => state.gameState.replayQualityDeltaAnomalyDirection);
+    const replayQualityDeltaAnomalyBand = useGameStore(state => state.gameState.replayQualityDeltaAnomalyBand);
+    const replayQualityDeltaAnomalyHint = useGameStore(state => state.gameState.replayQualityDeltaAnomalyHint);
     const replayQualityStability = useGameStore(state => state.gameState.replayQualityStability);
     const replayQualityRecentTrend = useGameStore(state => state.gameState.replayQualityRecentTrend);
     const replayRiskLevel = useGameStore(state => state.gameState.replayRiskLevel);
@@ -1060,6 +1064,9 @@ export const HUD = () => {
                                         <span style={{ color: '#9edfff' }}>Delta-Drift</span><span style={{ color: replayQualityDeltaDriftDirection === 'up' ? '#ff7777' : replayQualityDeltaDriftDirection === 'down' ? '#99ffcc' : '#c6d9ff', fontWeight: 700 }}>{replayQualityDeltaDriftScore > 0 ? `+${replayQualityDeltaDriftScore}` : replayQualityDeltaDriftScore} ({replayQualityDeltaDriftDirection === 'up' ? 'UP ↑' : replayQualityDeltaDriftDirection === 'down' ? 'DOWN ↓' : 'FLAT →'})</span>
                                         <span style={{ color: '#9edfff' }}>Drift-Band</span><span style={{ color: replayQualityDeltaDriftBand === 'diverging' ? '#ff7777' : replayQualityDeltaDriftBand === 'offset' ? '#ffcc66' : '#99ffcc', fontWeight: 700 }}>{replayQualityDeltaDriftBand.toUpperCase()}</span>
                                         <span style={{ color: '#9edfff' }}>Drift-Hinweis</span><span style={{ color: replayQualityDeltaDriftBand === 'diverging' ? '#ff7777' : replayQualityDeltaDriftBand === 'offset' ? '#ffcc66' : '#99ffcc', fontWeight: 700 }}>{replayQualityDeltaDriftHint}</span>
+                                        <span style={{ color: '#9edfff' }}>Delta-Anomalie</span><span style={{ color: replayQualityDeltaAnomalyDirection === 'up' ? '#ff7777' : replayQualityDeltaAnomalyDirection === 'down' ? '#99ffcc' : '#c6d9ff', fontWeight: 700 }}>{replayQualityDeltaAnomalyScore > 0 ? `+${replayQualityDeltaAnomalyScore}` : replayQualityDeltaAnomalyScore} ({replayQualityDeltaAnomalyDirection === 'up' ? 'UP ↑' : replayQualityDeltaAnomalyDirection === 'down' ? 'DOWN ↓' : 'FLAT →'})</span>
+                                        <span style={{ color: '#9edfff' }}>Anomalie-Band</span><span style={{ color: replayQualityDeltaAnomalyBand === 'spike' ? '#ff7777' : replayQualityDeltaAnomalyBand === 'watch' ? '#ffcc66' : '#99ffcc', fontWeight: 700 }}>{replayQualityDeltaAnomalyBand.toUpperCase()}</span>
+                                        <span style={{ color: '#9edfff' }}>Anomalie-Hinweis</span><span style={{ color: replayQualityDeltaAnomalyBand === 'spike' ? '#ff7777' : replayQualityDeltaAnomalyBand === 'watch' ? '#ffcc66' : '#99ffcc', fontWeight: 700 }}>{replayQualityDeltaAnomalyHint}</span>
                                         <span style={{ color: '#9edfff' }}>Risiko-Hinweis</span><span style={{ color: replayRiskLevel === 'high' ? '#ff7777' : replayRiskLevel === 'medium' ? '#ffcc66' : '#99ffcc', fontWeight: 700 }}>{replayRiskHint}</span>
                                         <span style={{ color: '#9edfff' }}>Recovery seit HIGH</span><span style={{ color: replayRiskRecoveryMinutes === null ? '#67808d' : '#99ffcc', fontWeight: 700 }}>{replayRiskRecoveryMinutes === null ? 'n/a' : `${replayRiskRecoveryMinutes}m`}</span>
                                         <span style={{ color: '#9edfff' }}>Letzter HIGH-Anker</span><span style={{ color: replayRiskLastHighAnchorTime ? '#c6d9ff' : '#67808d', fontWeight: 700 }}>{replayRiskLastHighAnchorTime ?? 'n/a'}</span>

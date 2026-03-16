@@ -60,6 +60,10 @@ interface RuntimeReplayQuality {
     deltaDriftDirection: 'up' | 'down' | 'flat';
     deltaDriftBand: 'aligned' | 'offset' | 'diverging';
     deltaDriftHint: 'Delta-Basis stabil.' | 'Delta-Basis leicht versetzt.' | 'Delta-Basis driftet stark.';
+    deltaAnomalyScore: number;
+    deltaAnomalyDirection: 'up' | 'down' | 'flat';
+    deltaAnomalyBand: 'normal' | 'watch' | 'spike';
+    deltaAnomalyHint: 'Keine auffaellige Delta-Anomalie.' | 'Delta-Ausreisser beobachten.' | 'Delta-Ausreisser sofort pruefen.';
     stability: 'stable' | 'watch' | 'critical';
     recentStabilityTrend: Array<'stable' | 'watch' | 'critical'>;
     riskLevel: 'low' | 'medium' | 'high';
@@ -394,6 +398,40 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
                 : qualityDeltaDriftBand === 'offset'
                     ? 'Delta-Basis leicht versetzt.'
                     : 'Delta-Basis stabil.';
+    const qualityDeltaAnomalyScoreRaw =
+        typeof qualityObj.deltaAnomalyScore === 'number' && Number.isFinite(qualityObj.deltaAnomalyScore)
+            ? qualityObj.deltaAnomalyScore
+            : qualityDeltaHistory.length >= 2
+                ? qualityDeltaHistory[0] - Math.round(qualityDeltaHistory.slice(1).reduce((sum, value) => sum + value, 0) / Math.max(1, qualityDeltaHistory.length - 1))
+                : qualityDeltaHistory[0] ?? 0;
+    const qualityDeltaAnomalyScore = clamp(Math.round(qualityDeltaAnomalyScoreRaw), -999, 999);
+    const qualityDeltaAnomalyDirection =
+        qualityObj.deltaAnomalyDirection === 'up' || qualityObj.deltaAnomalyDirection === 'down' || qualityObj.deltaAnomalyDirection === 'flat'
+            ? qualityObj.deltaAnomalyDirection
+            : qualityDeltaAnomalyScore > 0
+                ? 'up'
+                : qualityDeltaAnomalyScore < 0
+                    ? 'down'
+                    : 'flat';
+    const qualityDeltaAnomalyAbs = Math.abs(qualityDeltaAnomalyScore);
+    const qualityDeltaAnomalyBand: 'normal' | 'watch' | 'spike' =
+        qualityObj.deltaAnomalyBand === 'normal' || qualityObj.deltaAnomalyBand === 'watch' || qualityObj.deltaAnomalyBand === 'spike'
+            ? qualityObj.deltaAnomalyBand
+            : qualityDeltaAnomalyAbs >= 10
+                ? 'spike'
+                : qualityDeltaAnomalyAbs >= 5
+                    ? 'watch'
+                    : 'normal';
+    const qualityDeltaAnomalyHint: 'Keine auffaellige Delta-Anomalie.' | 'Delta-Ausreisser beobachten.' | 'Delta-Ausreisser sofort pruefen.' =
+        qualityObj.deltaAnomalyHint === 'Keine auffaellige Delta-Anomalie.' ||
+        qualityObj.deltaAnomalyHint === 'Delta-Ausreisser beobachten.' ||
+        qualityObj.deltaAnomalyHint === 'Delta-Ausreisser sofort pruefen.'
+            ? qualityObj.deltaAnomalyHint
+            : qualityDeltaAnomalyBand === 'spike'
+                ? 'Delta-Ausreisser sofort pruefen.'
+                : qualityDeltaAnomalyBand === 'watch'
+                    ? 'Delta-Ausreisser beobachten.'
+                    : 'Keine auffaellige Delta-Anomalie.';
 
     return {
         mode,
@@ -419,6 +457,10 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
             deltaDriftDirection: qualityDeltaDriftDirection,
             deltaDriftBand: qualityDeltaDriftBand,
             deltaDriftHint: qualityDeltaDriftHint,
+            deltaAnomalyScore: qualityDeltaAnomalyScore,
+            deltaAnomalyDirection: qualityDeltaAnomalyDirection,
+            deltaAnomalyBand: qualityDeltaAnomalyBand,
+            deltaAnomalyHint: qualityDeltaAnomalyHint,
             stability: qualityStability,
             recentStabilityTrend: qualityTrend,
             riskLevel: qualityRiskLevel,

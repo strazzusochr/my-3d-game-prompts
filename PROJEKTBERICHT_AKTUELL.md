@@ -108,6 +108,15 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Testnachweis erweitert: `runtimePersistence.test.ts` und `gameStore.test.ts` validieren Drift-Felder in Store und Snapshot inklusive Sanitisierung.
 - Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 253 von 253 gruen, Build gruen.
 
+### 2.0.44 Replay-Delta-Anomalieindikator vom 16.03.2026
+- Die Replay-Auswertung wurde um einen Anomalieindikator erweitert: `deltaAnomalyScore`, `deltaAnomalyDirection`, `deltaAnomalyBand` und `deltaAnomalyHint` markieren kurzfristige Delta-Ausreisser.
+- Berechnung basiert auf der Delta-Historie: aktueller Delta-Wert gegen den restlichen Historienmittelwert, Differenz als Score auf `-999..999` begrenzt.
+- Die Warnlogik nutzt `normal`/`watch`/`spike`; Richtung wird als `up`/`down`/`flat` aus dem Anomalie-Score abgeleitet.
+- `runtimePersistence` persistiert Anomalie-Felder unter `replayState.quality` und sanitisiert robust (Score Clamp, Richtungs-/Band-/Hinweisableitung bei ungueltigen Inputs).
+- Das HUD-Operations-Panel zeigt neue Zeilen `Delta-Anomalie`, `Anomalie-Band` und `Anomalie-Hinweis` fuer unmittelbare Ausreisserwarnung.
+- Testnachweis erweitert: `runtimePersistence.test.ts` und `gameStore.test.ts` validieren Anomalie-Felder in Store und Snapshot inklusive Sanitisierung.
+- Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 253 von 253 gruen, Build gruen.
+
 ### 2.0.1 Viewer- und Lastnachweis vom 16.03.2026
 - Zwei weitere Viewer-Seiten wurden geoeffnet und der Health-Endpunkt achtmal im Abstand von rund 1,5 Sekunden abgefragt.
 - Der Stream benoetigte eine kurze Aufwaermphase: zuerst `viewerFps=0`, danach stabile Werte zwischen 22 und 24 FPS.
