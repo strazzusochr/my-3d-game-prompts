@@ -121,6 +121,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Das Operations-Overlay bildet diese positiven und negativen Branches als getrennte aktive Badges ab.
 - Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 233 von 233 bestanden, Lint und Build gruen.
 
+### 2.0.16 Gewichtete Pfadregeln vom 16.03.2026
+- Die Korrelations-Engine wurde um `missionPathWeightPercent` erweitert.
+- Das Pfadgewicht wird aus Rollen-Trenddelta, Panikquote, Hook-Auslastung, Missionsfortschritt, aktiven Reaktionen und Rollenungleichgewicht abgeleitet.
+- Die Runtime nutzt dieses Gewicht jetzt direkt zur Skalierung von positiven und negativen Missionszweigen (dynamische Triggerstaerke statt fixer Spawnmengen).
+- Die Korrelationszeile im Operations-Insight zeigt das berechnete Pfadgewicht explizit an.
+- Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 234 von 234 bestanden, Lint und Build gruen.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.

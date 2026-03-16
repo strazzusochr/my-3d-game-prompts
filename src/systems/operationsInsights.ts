@@ -22,6 +22,7 @@ export interface OperationsInsight {
     recommendation: string;
     correlationLine: string;
     confidencePercent: number;
+    missionPathWeightPercent: number;
 }
 
 const trendWord = (delta: number) => {
@@ -39,14 +40,27 @@ export const getOperationsInsight = (input: OperationsInsightInput): OperationsI
     const deltaSecurity = first && last ? last.security - first.security : 0;
     const deltaSupport = first && last ? last.support - first.support : 0;
     const deltaPanic = first && last ? last.panicRatioPercent - first.panicRatioPercent : 0;
+    const latestAggressors = last?.aggressors ?? 0;
+    const latestSecurity = last?.security ?? 0;
 
     const hookUtilization = input.maxHooks > 0 ? Math.round((input.activeHooks / input.maxHooks) * 100) : 0;
+
+    const missionPathWeightRaw =
+        100 +
+        Math.round((input.missionCompletionPercent - 50) * 0.35) +
+        Math.round((hookUtilization - 50) * 0.2) +
+        Math.round((input.activeDynamicResponses - 2) * 4) -
+        Math.round((input.panicRatioPercent - 30) * 0.3) -
+        Math.max(0, (latestAggressors - latestSecurity) * 3);
+
+    const missionPathWeightPercent = Math.max(60, Math.min(140, missionPathWeightRaw));
 
     const correlationLine =
         `Aggression ${trendWord(deltaAggressors)} (${deltaAggressors >= 0 ? '+' : ''}${deltaAggressors}), ` +
         `Sicherheit ${trendWord(deltaSecurity)} (${deltaSecurity >= 0 ? '+' : ''}${deltaSecurity}), ` +
         `Panik ${deltaPanic >= 0 ? '+' : ''}${deltaPanic}pp, ` +
-        `Hook-Auslastung ${hookUtilization}%.`;
+        `Hook-Auslastung ${hookUtilization}%, ` +
+        `Pfadgewicht ${missionPathWeightPercent}%.`;
 
     let priority: OperationsInsight['priority'] = 'low';
     let recommendation = 'Lage stabil: Sektorbeobachtung halten und Missionskette kontrolliert fortsetzen.';
@@ -67,7 +81,8 @@ export const getOperationsInsight = (input: OperationsInsightInput): OperationsI
         Math.min(25, view.length * 5) +
         Math.min(15, Math.abs(deltaAggressors) + Math.abs(deltaPanic)) +
         (input.activeDynamicResponses > 0 ? 8 : 0) +
-        (input.missionCompletionPercent >= 60 ? 7 : 0);
+        (input.missionCompletionPercent >= 60 ? 7 : 0) +
+        Math.round(Math.abs(missionPathWeightPercent - 100) * 0.08);
 
     const confidencePercent = Math.max(0, Math.min(99, Math.round(confidenceRaw)));
 
@@ -76,5 +91,6 @@ export const getOperationsInsight = (input: OperationsInsightInput): OperationsI
         recommendation,
         correlationLine,
         confidencePercent,
+        missionPathWeightPercent,
     };
 };
