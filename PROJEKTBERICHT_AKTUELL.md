@@ -65,6 +65,14 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Der Nachlauf war erfolgreich und lieferte beide Abschlussmarker: `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`.
 - Ergebnis: Der GO-GO-GO-Standardlauf ist nun auch gegen den vorherigen Spawn-Fehler abgesichert.
 
+### 2.0.8 Selbstheilender Proof-Lauf vom 16.03.2026
+- Der Proof wurde gegen kurzzeitige Netzwerkfenster gehaertet (Retry bei Fetch-Fehlern sowie retryfaehige Statuslagen waehrend Profilwechseln).
+- Danach wurde `autonomy:full` im Zustand ohne erreichbaren Stream gestartet.
+- Der Runner startete den Stream automatisch, erkannte Health-Bereitschaft, durchlief `lint`, `test`, `build` und den Profil-Proof erfolgreich.
+- Profilfolge blieb korrekt: `low -> medium -> high -> aaa -> low` mit Abschlussmarker `AUTONOMY_PROOF_OK`.
+- Abschlussmarker des Gesamtlaufs: `AUTONOMY_FULL_OK`.
+- Ergebnis: GO-GO-GO ist nun reproduzierbar, selbstheilend und ohne manuellen Vorlauf nutzbar.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
