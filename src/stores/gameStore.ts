@@ -3,6 +3,7 @@ import { NPCType, EmotionalState, NPCMood, NPCBehavior } from '../types/enums';
 import { workerManager } from '../managers/WorkerManager';
 import { EVENT_TIMELINE, TENSION_TIMELINE, PHASE_DESCRIPTIONS, NPC_COLORS, MAX_ACTIVE_NPCS, timeToMinutes } from '../systems/eventScheduler';
 import { INITIAL_MISSION_PROGRESS, type InteractionZoneId, applyInteractionOutcome } from '../systems/interactionZones';
+import { applyMissionPhaseHooks } from '../systems/missionPhaseHooks';
 import { io } from 'socket.io-client';
 
 declare global {
@@ -313,6 +314,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     currentPhaseLabel = p.label;
                 }
             }
+
+            npcs = applyMissionPhaseHooks(npcs, currentMinutes, state.interactionState.missionProgress);
 
             // Sync worker AFTER computing final NPC list
             workerManager.syncNpcs(npcs);
