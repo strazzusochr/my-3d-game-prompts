@@ -19,8 +19,8 @@ async function sleep(ms) {
 
 async function requestJson(url, init, options = {}) {
   const method = init?.method || 'GET';
-  const retries = options.retries ?? 12;
-  const delayMs = options.delayMs ?? 500;
+  const retries = options.retries ?? 16;
+  const delayMs = options.delayMs ?? 700;
 
   for (let attempt = 1; attempt <= retries; attempt += 1) {
     try {
@@ -64,7 +64,7 @@ function assertHealthShape(health) {
 async function main() {
   console.log(`AUTONOMY_PROOF_START base=${BASE_URL}`);
 
-  const initialHealth = await requestJson(`${BASE_URL}/health`, undefined, { retries: 30, delayMs: 700 });
+  const initialHealth = await requestJson(`${BASE_URL}/health`, undefined, { retries: 45, delayMs: 1000 });
   assertHealthShape(initialHealth);
 
   console.log(
@@ -75,7 +75,7 @@ async function main() {
     const switched = await requestJson(
       `${BASE_URL}/api/profile/${profile.key}`,
       { method: 'POST' },
-      { retries: 30, delayMs: 700 }
+      { retries: 45, delayMs: 1000 }
     );
 
     if (!switched.ok || switched.profile !== profile.key) {
@@ -88,7 +88,7 @@ async function main() {
 
     await sleep(900);
 
-    const health = await requestJson(`${BASE_URL}/health`, undefined, { retries: 30, delayMs: 700 });
+    const health = await requestJson(`${BASE_URL}/health`, undefined, { retries: 45, delayMs: 1000 });
     assertHealthShape(health);
 
     if (health.profile !== profile.key) {

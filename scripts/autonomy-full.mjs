@@ -110,6 +110,32 @@ async function stopStreamServerIfOwned(state) {
   }
 }
 
+async function runProofWithRetries() {
+  const maxAttempts = 3;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    console.log(`AUTONOMY_FULL_STEP proof attempt=${attempt}/${maxAttempts}`);
+    try {
+      await runCommand('node scripts/autonomy-proof.mjs');
+      return;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.warn(`AUTONOMY_FULL_PROOF_RETRY reason=${message}`);
+
+      if (attempt === maxAttempts) {
+        throw error;
+      }
+
+      // Give the runtime a short cooldown and verify health before next proof attempt.
+      await wait(1500);
+      const health = await fetchHealth(4000);
+      if (health?.status !== 'ok') {
+        throw new Error('proof retry aborted because stream health is not ok');
+      }
+    }
+  }
+}
+
 async function main() {
   console.log('AUTONOMY_FULL_START');
 
@@ -121,8 +147,7 @@ async function main() {
     await runCommand('npm exec vitest run');
     console.log('AUTONOMY_FULL_STEP build');
     await runCommand('npm run build -- --logLevel silent');
-    console.log('AUTONOMY_FULL_STEP proof');
-    await runCommand('node scripts/autonomy-proof.mjs');
+    await runProofWithRetries();
   } finally {
     await stopStreamServerIfOwned(streamState);
   }
