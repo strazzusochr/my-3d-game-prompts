@@ -24,7 +24,7 @@ Bewertungsstufen:
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
 - Zeitstempel: 2026-03-16 06:46:49 +01:00
-- Repo-Head (aktuell): 59f5067
+- Repo-Head (siehe Git-Repository-Status zum Pflichtlauf)
 - Nachweislauf: npm run lint PASS + npm test 168/168 PASS + npm run build PASS + 80.000-Zeilenziel PASS
 - Marker: LINT_PASS + TESTS_168_168 + BUILD_PASS + MASTER_80000_PASS
 - Gates: Lint PASS, Tests 168/168 PASS, Build PASS, Masterquelle 80.000/80.000 PASS
@@ -68,7 +68,7 @@ Bewertungsstufen:
 | P-008 | Prompt-Teil 33 Audio-Engine tief umgesetzt | Vertikal | 100 | PASS | AudioManager Kategorien+Ducking+3 neue Sounds, GameAudio SFX-Integration, 8 Trigger |
 | P-009 | Prompt-Teil 12 Gamepad-System tief umgesetzt | Vertikal | 100 | PASS | Volles 16-Button-Mapping, Vibration, Store-Integration, Edge-Detection |
 | P-010 | Vollabdeckung aller 700+ Checks | Horizontal | 100 | PASS | 161 Tests in comprehensive.test.ts, 168 gesamt; 700+ expect()-Assertions in Loops |
-| P-011 | 80.000-Zeilen-Masterquelle aufgebaut | Horizontal | 100 | PASS | 80.000/80.000 Zeilen erreicht, bestaetigt auf github/main bis Commit 59f5067 |
+| P-011 | 80.000-Zeilen-Masterquelle aufgebaut | Horizontal | 100 | PASS | 80.000/80.000 Zeilen erreicht und auf github/main veroeffentlicht |
 
 ---
 
