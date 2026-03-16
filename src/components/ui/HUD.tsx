@@ -27,6 +27,11 @@ export const HUD = () => {
     // Timeline Scroll Ref
     const timelineRef = useRef<HTMLDivElement>(null);
     const activeEventRef = useRef<HTMLDivElement>(null);
+    const [hudScale, setHudScale] = useState(() => {
+        if (typeof window === 'undefined') return 1;
+        const stored = Number(window.localStorage.getItem('hud-scale'));
+        return Number.isFinite(stored) && stored >= 0.6 && stored <= 1.4 ? stored : 1;
+    });
 
     // FPS Counter
     const [fps, setFps] = useState(60);
@@ -66,8 +71,28 @@ export const HUD = () => {
         }
     }, [h, m]);
 
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            window.localStorage.setItem('hud-scale', String(hudScale));
+        }
+    }, [hudScale]);
+
+    const decreaseHudScale = () => setHudScale((value) => Math.max(0.6, Number((value - 0.1).toFixed(2))));
+    const increaseHudScale = () => setHudScale((value) => Math.min(1.4, Number((value + 0.1).toFixed(2))));
+    const resetHudScale = () => setHudScale(1);
+
     return (
         <div style={{ pointerEvents: 'none', position: 'absolute', inset: 0, fontFamily: '"Outfit", sans-serif' }}>
+            <div
+                style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: `${100 / hudScale}%`,
+                    height: `${100 / hudScale}%`,
+                    transform: `scale(${hudScale})`,
+                    transformOrigin: 'top left'
+                }}
+            >
             {/* Left Panel */}
             <div style={{ pointerEvents: 'auto', position: 'absolute', top: '40px', left: '40px', width: '380px', padding: '24px', background: 'rgba(10,10,10,0.85)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
                 <StatusBar label="Physische Verfassung" value={85} color="#ff4444" />
@@ -118,18 +143,25 @@ export const HUD = () => {
                 {/* Header with FPS */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                     <h3 style={{ margin: 0, color: '#00ccff', fontSize: '18px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: '800' }}>Streifen-Protokoll</h3>
-                    <div style={{ 
-                        padding: '4px 8px',
-                        background: 'rgba(0,0,0,0.4)',
-                        borderRadius: '4px',
-                        fontFamily: 'monospace',
-                        fontSize: '12px',
-                        fontWeight: 'bold',
-                        color: fps > 50 ? '#00ff88' : fps > 30 ? '#ffaa00' : '#ff4444',
-                        border: `1px solid ${fps > 50 ? 'rgba(0,255,136,0.2)' : fps > 30 ? 'rgba(255,170,0,0.2)' : 'rgba(255,68,68,0.2)'}`,
-                        textShadow: 'none'
-                    }}>
-                        {fps} FPS
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ 
+                            padding: '4px 8px',
+                            background: 'rgba(0,0,0,0.4)',
+                            borderRadius: '4px',
+                            fontFamily: 'monospace',
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                            color: fps > 50 ? '#00ff88' : fps > 30 ? '#ffaa00' : '#ff4444',
+                            border: `1px solid ${fps > 50 ? 'rgba(0,255,136,0.2)' : fps > 30 ? 'rgba(255,170,0,0.2)' : 'rgba(255,68,68,0.2)'}`,
+                            textShadow: 'none'
+                        }}>
+                            RENDER {fps} FPS
+                        </div>
+                        <div style={{ display: 'flex', gap: '4px', pointerEvents: 'auto' }}>
+                            <button onClick={decreaseHudScale} style={{ ...btnStyle, minWidth: '34px', padding: '4px 8px', fontSize: '14px' }} title="HUD kleiner">-</button>
+                            <button onClick={resetHudScale} style={{ ...btnStyle, minWidth: '56px', padding: '4px 8px', fontSize: '12px' }} title="HUD zurücksetzen">{Math.round(hudScale * 100)}%</button>
+                            <button onClick={increaseHudScale} style={{ ...btnStyle, minWidth: '34px', padding: '4px 8px', fontSize: '14px' }} title="HUD größer">+</button>
+                        </div>
                     </div>
                 </div>
 
@@ -375,6 +407,7 @@ export const HUD = () => {
                         {muted ? ' 0%' : `${Math.round(masterVolume * 100)}%`}
                     </span>
                 </div>
+            </div>
             </div>
         </div>
     );

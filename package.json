@@ -5,9 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:all": "concurrently \"npm run dev\" \"node server/server.js\"",
+    "dev:all": "concurrently \"npm run dev\" \"node server/server.js\" --names \"vite,socket\" --prefix-colors \"cyan,yellow\"",
     "build": "vite build",
     "start": "node server/server-prod.mjs",
+    "stream": "node server/stream-server.mjs --profile=low",
+    "stream:medium": "node server/stream-server.mjs --profile=medium",
+    "stream:high": "node server/stream-server.mjs --profile=high",
+    "stream:aaa": "node server/stream-server.mjs --profile=aaa",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest"
@@ -24,6 +28,7 @@
     "helmet": "^8.1.0",
     "leva": "^0.10.1",
     "postprocessing": "^6.38.2",
+    "puppeteer": "^24.6.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "socket.io": "^4.8.3",

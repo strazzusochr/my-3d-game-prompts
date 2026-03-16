@@ -4,6 +4,12 @@ import { workerManager } from '../managers/WorkerManager';
 import { EVENT_TIMELINE, TENSION_TIMELINE, PHASE_DESCRIPTIONS, NPC_COLORS, MAX_ACTIVE_NPCS, timeToMinutes } from '../systems/eventScheduler';
 import { io } from 'socket.io-client';
 
+declare global {
+    interface Window {
+        __GAME_STORE__?: typeof useGameStore;
+    }
+}
+
 const socket = io(window.location.origin, { autoConnect: false });
 
 export interface NPCData {
@@ -396,3 +402,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         gameState: { ...state.gameState, muted }
     }))
 }));
+
+if (typeof window !== 'undefined') {
+    window.__GAME_STORE__ = useGameStore;
+}

@@ -13,8 +13,15 @@ export default defineConfig({
     dedupe: ['three'],
   },
   server: {
-    port: 3000,
+    port: Number(process.env.VITE_PORT) || 5173,
     host: true,
+    proxy: {
+      '/socket.io': {
+        target: `http://localhost:${process.env.SOCKET_PORT || 3000}`,
+        ws: true,
+        changeOrigin: true,
+      },
+    },
     headers: {
       // Relaxed headers for Hugging Face iframe compatibility
     },

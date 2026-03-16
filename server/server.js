@@ -1,7 +1,7 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
+import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
+import path from 'path';
 
 const app = express();
 const server = http.createServer(app);
@@ -45,7 +45,7 @@ io.on('connection', (socket) => {
     });
 });
 
-const PORT = 3000;
+const PORT = Number(process.env.SOCKET_PORT) || 3000;
 server.listen(PORT, () => {
     console.log(`🚀 Corona Control Server running on port ${PORT}`);
     console.log(`🔗 Web-App API & Crawler-Endpoint active.`);
