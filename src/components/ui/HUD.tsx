@@ -265,21 +265,10 @@ export const HUD = () => {
     const timelineMaxHeight = Math.max(160, Math.min(360, Math.round((viewportHeight * 0.34) / effectiveHudScale)));
     const compactBottomLayout = viewportHeight < 920;
     const bottomOrderStyle = (order: number): React.CSSProperties => (compactBottomLayout ? { order } : {});
-    const squareControlStyle = (active = false): React.CSSProperties => ({
-        ...btnStyle,
-        minWidth: '26px',
-        padding: '2px 5px',
-        fontSize: '12px',
-        color: active ? '#c7f1ff' : '#8eeaff',
-        borderColor: active ? 'rgba(0,220,255,0.92)' : 'rgba(0,200,255,0.72)',
-        background: active ? 'rgba(0,95,130,0.55)' : 'rgba(0,70,105,0.42)',
-        boxShadow: active ? '0 0 12px rgba(0,220,255,0.55)' : '0 0 8px rgba(0,200,255,0.38)',
-        textShadow: '0 0 8px rgba(0,220,255,0.65)',
-    });
     const renderPanelControls = (panel: HudPanelKey, compact = false) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <button onClick={() => togglePanelMinimize(panel)} style={{ ...squareControlStyle(), minWidth: compact ? '38px' : '42px', padding: compact ? '2px 5px' : '3px 6px', fontSize: compact ? '9px' : '10px' }}>
-                {panelUi[panel].minimized ? '□ Open' : '□ Min'}
+            <button onClick={() => togglePanelMinimize(panel)} style={{ ...btnStyle, minWidth: compact ? '38px' : '42px', padding: compact ? '2px 5px' : '3px 6px', fontSize: compact ? '9px' : '10px' }}>
+                {panelUi[panel].minimized ? 'Open' : 'Min'}
             </button>
             <button onClick={() => adjustPanelZoom(panel, -1)} style={{ ...btnStyle, minWidth: compact ? '26px' : '28px', padding: compact ? '2px 4px' : '2px 5px', fontSize: compact ? '10px' : '11px' }} title="Zoom verkleinern">-</button>
             <span style={{ color: '#9edfff', fontSize: compact ? '9px' : '10px', minWidth: compact ? '20px' : '24px', textAlign: 'center' }}>{`Z${panelUi[panel].zoomLevel}`}</span>
@@ -320,14 +309,15 @@ export const HUD = () => {
                 <button
                     onClick={() => setLayoutEditMode((prev) => !prev)}
                     style={{
-                        ...squareControlStyle(layoutEditMode),
-                        minWidth: '54px',
-                        minHeight: '36px',
-                        fontSize: '16px',
+                        ...btnStyle,
+                        minWidth: '42px',
+                        fontSize: '13px',
+                        color: layoutEditMode ? '#ffcc00' : '#9edfff',
+                        borderColor: layoutEditMode ? 'rgba(255,204,0,0.55)' : 'rgba(255,255,255,0.14)',
                     }}
                     title="HUD-Layout bearbeiten (ziehen + pro Panel Zoom -3 bis +3)"
                 >
-                    □
+                    ▢
                 </button>
             </div>
             {/* Left Panel */}
