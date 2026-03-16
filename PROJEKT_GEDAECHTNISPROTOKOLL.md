@@ -51,6 +51,8 @@
 - NPC-KI-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 193/193 gruen, `npm run build` gruen, Browser-/Livecheck mit echter Socket-Verbindung bestaetigt; temporärer Hintergrundserver danach wieder beendet.
 - Missions-Hook-Block am 16.03.2026 ausgebaut: erfolgreiche Interaktionen wirken nun direkt auf NPC-Mood/Behavior (Responder, Security, populationsbezogene Evakuierung pro Zonen-Sektor).
 - Missions-Hook-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 195/195 gruen, `npm run build` gruen, Browser-/Livecheck mit echter Socket-Verbindung bestaetigt; temporärer Hintergrundserver danach wieder beendet.
+- 24h-Phasen-Hook-Block am 16.03.2026 ausgebaut: Zeitfenster-gebundene Folgeeffekte je Missionsfortschritt direkt in den Evaluationspfad integriert (Mittagslage, Evakuierungsphase, Spaetphase).
+- 24h-Phasen-Hook-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 201/201 gruen, `npm run build` gruen, Browser-/Livecheck mit echter Socket-Verbindung bestaetigt; temporärer Hintergrundserver danach wieder beendet.
 
 ## Naechster logischer Schritt
-- Auf Basis der nun gekoppelten Missions-Hooks als naechstes phasenbasierte 24h-Folgeereignisse (Kettenreaktionen je Zeitfenster) fuer NPC-KI und HUD-Storyline ausbauen.
+- Auf Basis der nun aktiven 24h-Phasen-Hooks als naechstes HUD-/Statistik-Komplettheit ausbauen und phasenspezifische Lagekennzahlen sichtbar machen.

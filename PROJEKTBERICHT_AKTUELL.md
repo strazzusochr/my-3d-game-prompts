@@ -264,3 +264,18 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - `npm run lint`: erfolgreich.
 - `npm run build`: erfolgreich.
 - Livecheck: `npm run dev:all` gestartet, Browserseite geoeffnet, Socket-Server meldete reale Client-Verbindung; der Hintergrundprozess wurde anschliessend wieder beendet.
+
+### 8.14 24h-Phasen-Folgehooks vom 16.03.2026
+- Der Missionspfad wurde um zeitfensterbasierte Folgehooks erweitert und direkt in `evaluateEvents` eingebunden.
+- Damit entstehen nun automatisch phasenabhaengige Reaktionen bei bestehendem Missionsfortschritt, ohne dass der Spieler jede Folge manuell anstossen muss.
+- Mittagsphase: Informationsrollen sammeln sich (`GATHER`) nach Epoch-Verifikation.
+- Evakuierungsphase: Sicherheits- und Bevoelkerungsreaktionen werden je priorisiertem Sektor erzwungen.
+- Spaetphase: bei vollstaendiger Sektorpriorisierung schalten Agitatoren in geordneten Rueckzug (`RETREAT`).
+
+### 8.15 24h-Phasen-Nachweis
+- Neuer Testblock `src/tests/missionPhaseHooks.test.ts` validiert Zeitfensterregeln und Sektorwirkung.
+- `src/tests/gameStore.test.ts` enthaelt zusaetzlich einen Integrationsnachweis fuer die Hook-Ausfuehrung in `evaluateEvents`.
+- `npx vitest run`: erfolgreich, 201 von 201 Tests bestanden.
+- `npm run lint`: erfolgreich.
+- `npm run build`: erfolgreich.
+- Livecheck: `npm run dev:all` gestartet, Browserseite geoeffnet, Socket-Server meldete reale Client-Verbindung; der Hintergrundprozess wurde anschliessend wieder beendet.

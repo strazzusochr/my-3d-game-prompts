@@ -226,4 +226,36 @@ describe('gameStore core flow', () => {
     expect(southCivilian.behavior).toBe(NPCBehavior.WANDER);
     expect(southCivilian.mood).toBe(NPCMood.PEACEFUL);
   });
+
+  it('applies phase hooks during evaluateEvents for completed mission chain', () => {
+    useGameStore.setState((state) => ({
+      ...state,
+      interactionState: {
+        ...state.interactionState,
+        missionProgress: {
+          epochBriefingVerified: true,
+          hazardMapPrepared: false,
+          prioritizedZoneIds: [],
+        },
+      },
+      npcs: [
+        {
+          id: 9201,
+          type: NPCType.ORGANIZER,
+          position: [4, 1.2, 10],
+          rotation: 0,
+          outfitColor: '#222',
+          emotionalState: EmotionalState.PEACEFUL,
+          mood: NPCMood.PEACEFUL,
+          behavior: NPCBehavior.IDLE,
+        },
+      ],
+    }));
+
+    useGameStore.getState().evaluateEvents('13:00');
+    const organizer = useGameStore.getState().npcs.find((n) => n.id === 9201)!;
+
+    expect(organizer.behavior).toBe(NPCBehavior.GATHER);
+    expect(organizer.mood).toBe(NPCMood.TENSE);
+  });
 });
