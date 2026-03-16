@@ -139,7 +139,6 @@ async function runProofWithRetries() {
 async function main() {
   console.log('AUTONOMY_FULL_START');
 
-  const streamState = await ensureStreamServer();
   try {
     console.log('AUTONOMY_FULL_STEP lint');
     await runCommand('npm run lint');
@@ -147,9 +146,15 @@ async function main() {
     await runCommand('npm exec vitest run');
     console.log('AUTONOMY_FULL_STEP build');
     await runCommand('npm run build -- --logLevel silent');
-    await runProofWithRetries();
+
+    const streamState = await ensureStreamServer();
+    try {
+      await runProofWithRetries();
+    } finally {
+      await stopStreamServerIfOwned(streamState);
+    }
   } finally {
-    await stopStreamServerIfOwned(streamState);
+    // no-op: all owned resources are closed in inner finally block
   }
 
   console.log('AUTONOMY_FULL_OK');

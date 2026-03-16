@@ -36,6 +36,8 @@
 - Weiterer Wiederholungslauf erfolgreich: `autonomy:full` erneut komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`.
 - Finaler Stabilitaetslauf erfolgreich: nach Retry-Haertung lief `autonomy:full` erneut ohne Abbruch bis `AUTONOMY_FULL_OK`.
 - Neuer GO-GO-GO-Zyklus erfolgreich: Browser-Check und Debug-Check ohne Fehler, danach `autonomy:full` komplett bis `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`.
+- Reihenfolgefix umgesetzt: `autonomy:full` baut nun vor Streamstart und verhindert damit fehlende Dist-Dateien beim Start.
+- Nachweislauf nach Reihenfolgefix erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`.
 
 ## Naechster logischer Schritt
 - Etappe 1 des Masterplans technisch ausbauen und nach jedem Block den Command `npm run autonomy:full` als Pflichtnachweis ausfuehren.

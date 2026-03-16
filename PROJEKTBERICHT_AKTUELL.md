@@ -94,6 +94,12 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Gesamtlauf endete erneut mit `AUTONOMY_FULL_OK`.
 - Ergebnis: Die Pipeline bleibt auch in weiterer Wiederholung stabil reproduzierbar.
 
+### 2.0.12 Reihenfolgefix und erfolgreicher Nachlauf vom 16.03.2026
+- Ein weiterer Stabilitaetsfix wurde umgesetzt: `autonomy:full` fuehrt nun zuerst `lint`, `test`, `build` aus und startet den Stream danach.
+- Damit ist `dist/index.html` vor dem Streamstart garantiert vorhanden.
+- Der anschliessende Nachlauf war erfolgreich und endete erneut mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`.
+- Ergebnis: Der GO-GO-GO-Flow ist auch gegen fehlende Dist-Artefakte beim Streamstart abgesichert.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.

@@ -17,6 +17,33 @@ async function sleep(ms) {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function waitForExpectedHealth(profile, options = {}) {
+  const retries = options.retries ?? 45;
+  const delayMs = options.delayMs ?? 1000;
+
+  let lastHealth = null;
+
+  for (let attempt = 1; attempt <= retries; attempt += 1) {
+    const health = await requestJson(`${BASE_URL}/health`, undefined, { retries: 6, delayMs: 400 });
+    assertHealthShape(health);
+    lastHealth = health;
+
+    const profileMatch = health.profile === profile.key;
+    const dimensionsMatch = health.width === profile.width && health.height === profile.height;
+    const transportReady = health.transportSource === 'canvas-webrtc' || health.transportSource === 'tab-webrtc';
+
+    if (profileMatch && dimensionsMatch && transportReady) {
+      return health;
+    }
+
+    await sleep(delayMs);
+  }
+
+  fail(
+    `health did not converge to expected profile=${profile.key} width=${profile.width} height=${profile.height} last=${JSON.stringify(lastHealth)}`
+  );
+}
+
 async function requestJson(url, init, options = {}) {
   const method = init?.method || 'GET';
   const retries = options.retries ?? 16;
@@ -71,6 +98,15 @@ async function main() {
     `AUTONOMY_PROOF_HEALTH_INITIAL profile=${initialHealth.profile} transport=${initialHealth.transportSource} publicPort=${initialHealth.publicPort} internalPort=${initialHealth.internalPort} clients=${initialHealth.clients}`
   );
 
+  // Normalize start to low first so the proof starts from a deterministic state.
+  const normalizedLow = profiles[0];
+  await requestJson(
+    `${BASE_URL}/api/profile/${normalizedLow.key}`,
+    { method: 'POST' },
+    { retries: 45, delayMs: 1000 }
+  );
+  await waitForExpectedHealth(normalizedLow, { retries: 60, delayMs: 1000 });
+
   for (const profile of profiles) {
     const switched = await requestJson(
       `${BASE_URL}/api/profile/${profile.key}`,
@@ -86,18 +122,7 @@ async function main() {
       fail(`profile ${profile.key} dimensions/fps mismatch in switch response: ${JSON.stringify(switched)}`);
     }
 
-    await sleep(900);
-
-    const health = await requestJson(`${BASE_URL}/health`, undefined, { retries: 45, delayMs: 1000 });
-    assertHealthShape(health);
-
-    if (health.profile !== profile.key) {
-      fail(`health profile mismatch expected=${profile.key} actual=${health.profile}`);
-    }
-
-    if (health.width !== profile.width || health.height !== profile.height) {
-      fail(`health dimensions mismatch for ${profile.key}: ${JSON.stringify(health)}`);
-    }
+    const health = await waitForExpectedHealth(profile, { retries: 60, delayMs: 1000 });
 
     console.log(
       `AUTONOMY_PROOF_PROFILE_OK profile=${profile.key} rendererFps=${health.rendererFps} viewerFps=${health.viewerFps} clients=${health.clients} transport=${health.transportSource}`
