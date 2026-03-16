@@ -4,6 +4,7 @@ import { EVENT_TIMELINE } from '../../systems/eventScheduler';
 import { getInteractionAvailability, getInteractionZoneById, getMissionChecklist } from '../../systems/interactionZones';
 import { getHudTelemetry } from '../../systems/hudTelemetry';
 import { getOperationsInsight } from '../../systems/operationsInsights';
+import { canStartHudDrag, computeHudDragOffset } from './hudDrag';
 
 const StatusBar = ({ label, value, color }: { label: string, value: number, color: string }) => (
     <div style={{ marginBottom: '12px' }}>
@@ -228,7 +229,7 @@ export const HUD = () => {
     };
 
     const makeHandleDrag = (panel: HudPanelKey) => (event: React.MouseEvent) => {
-        if (!layoutEditMode || event.button !== 0) return;
+        if (!canStartHudDrag(layoutEditMode, event.button)) return;
         event.preventDefault();
         event.stopPropagation();
         const startX = event.clientX;
@@ -236,10 +237,13 @@ export const HUD = () => {
         const originX = panelUi[panel].offsetX;
         const originY = panelUi[panel].offsetY;
         const onMove = (e: MouseEvent) => {
-            setPanelUi((prev) => ({
-                ...prev,
-                [panel]: { ...prev[panel], offsetX: originX + (e.clientX - startX), offsetY: originY + (e.clientY - startY) },
-            }));
+            setPanelUi((prev) => {
+                const next = computeHudDragOffset(originX, originY, startX, startY, e.clientX, e.clientY);
+                return {
+                    ...prev,
+                    [panel]: { ...prev[panel], offsetX: next.offsetX, offsetY: next.offsetY },
+                };
+            });
         };
         const onUp = () => {
             window.removeEventListener('mousemove', onMove);
