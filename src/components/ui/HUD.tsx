@@ -689,31 +689,66 @@ export const HUD = () => {
                         )}
 
                         {statsTab === 'operations' && (
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                            <div style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px', background: 'rgba(255,255,255,0.02)' }}>
-                                <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', marginBottom: '10px' }}>
-                                    Operative Belastung
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                <div style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px', background: 'rgba(255,255,255,0.02)' }}>
+                                    <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', marginBottom: '10px' }}>
+                                        Operative Belastung
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '8px', fontSize: '13px' }}>
+                                        <span style={{ color: '#9edfff' }}>Eskalationsstufe</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{Math.floor(tensionLevel / 5)} / 20</span>
+                                        <span style={{ color: '#9edfff' }}>Aktive Einheiten</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{npcCount}</span>
+                                        <span style={{ color: '#9edfff' }}>Panikquote</span><span style={{ color: telemetry.panicRatioPercent > 45 ? '#ff7777' : '#ffcc66', fontWeight: 700 }}>{telemetry.panicRatioPercent}%</span>
+                                        <span style={{ color: '#9edfff' }}>Sachschaden</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{dayStats.damage.toLocaleString('de-DE')} EUR</span>
+                                        <span style={{ color: '#9edfff' }}>Verletzte</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{dayStats.injured}</span>
+                                        <span style={{ color: '#9edfff' }}>Festnahmen</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{dayStats.arrested}</span>
+                                    </div>
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '8px', fontSize: '13px' }}>
-                                    <span style={{ color: '#9edfff' }}>Eskalationsstufe</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{Math.floor(tensionLevel / 5)} / 20</span>
-                                    <span style={{ color: '#9edfff' }}>Aktive Einheiten</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{npcCount}</span>
-                                    <span style={{ color: '#9edfff' }}>Panikquote</span><span style={{ color: telemetry.panicRatioPercent > 45 ? '#ff7777' : '#ffcc66', fontWeight: 700 }}>{telemetry.panicRatioPercent}%</span>
-                                    <span style={{ color: '#9edfff' }}>Sachschaden</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{dayStats.damage.toLocaleString('de-DE')} EUR</span>
-                                    <span style={{ color: '#9edfff' }}>Verletzte</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{dayStats.injured}</span>
-                                    <span style={{ color: '#9edfff' }}>Festnahmen</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{dayStats.arrested}</span>
+                                <div style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px', background: 'rgba(255,255,255,0.02)' }}>
+                                    <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', marginBottom: '10px' }}>
+                                        Einsatzempfehlung
+                                    </div>
+                                    <div style={{ color: '#9edfff', fontSize: '13px', lineHeight: 1.5 }}>
+                                        {telemetry.panicRatioPercent > 55
+                                            ? 'Prioritaet: Rueckzugsrouten sichern, Medizinachsen freihalten und Eskalationsgruppen separieren.'
+                                            : telemetry.roleBalance.aggressors > telemetry.roleBalance.security
+                                                ? `Aggressor-Uebermacht (${telemetry.roleBalance.aggressors} vs ${telemetry.roleBalance.security}): Sicherheitsverstaerkung anfordern!`
+                                                : telemetry.activeHooks >= 3
+                                                    ? 'Prioritaet: Hook-Kette stabil halten, sektoral deeskalieren und geordnete Abwanderung begleiten.'
+                                                    : 'Prioritaet: Missionskette weiter abschliessen, um phasenabhaengige Automatik voll zu aktivieren.'}
+                                    </div>
                                 </div>
                             </div>
+
                             <div style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px', background: 'rgba(255,255,255,0.02)' }}>
                                 <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', marginBottom: '10px' }}>
-                                    Einsatzempfehlung
+                                    Rollenverteilung
                                 </div>
-                                <div style={{ color: '#9edfff', fontSize: '13px', lineHeight: 1.5 }}>
-                                    {telemetry.panicRatioPercent > 55
-                                        ? 'Prioritaet: Rueckzugsrouten sichern, Medizinachsen freihalten und Eskalationsgruppen separieren.'
-                                        : telemetry.activeHooks >= 3
-                                            ? 'Prioritaet: Hook-Kette stabil halten, sektoral deeskalieren und geordnete Abwanderung begleiten.'
-                                            : 'Prioritaet: Missionskette weiter abschliessen, um phasenabhaengige Automatik voll zu aktivieren.'}
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '10px' }}>
+                                    {[
+                                        { label: 'Sicherheit', value: telemetry.roleBalance.security, color: '#4466ff' },
+                                        { label: 'Aggression', value: telemetry.roleBalance.aggressors, color: '#ff4444' },
+                                        { label: 'Untersttzg.', value: telemetry.roleBalance.support, color: '#00ff88' },
+                                        { label: 'Zivilisten', value: telemetry.roleBalance.civilian, color: '#aaaaaa' },
+                                    ].map((entry) => (
+                                        <div key={entry.label} style={{ border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '8px', textAlign: 'center', background: 'rgba(0,0,0,0.3)' }}>
+                                            <div style={{ color: '#9edfff', fontSize: '10px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{entry.label}</div>
+                                            <div style={{ color: entry.color, fontSize: '22px', fontWeight: 800, marginTop: '3px' }}>{entry.value}</div>
+                                            <div style={{ marginTop: '3px', height: '4px', borderRadius: '2px', background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+                                                <div style={{ height: '100%', width: `${npcCount > 0 ? Math.min(100, Math.round((entry.value / npcCount) * 100)) : 0}%`, background: entry.color }} />
+                                            </div>
+                                            <div style={{ color: entry.color, fontSize: '10px', marginTop: '2px', opacity: 0.8 }}>
+                                                {npcCount > 0 ? Math.round((entry.value / npcCount) * 100) : 0}%
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
+                                {telemetry.dominantRole && (
+                                    <div style={{ color: '#9edfff', fontSize: '12px' }}>
+                                        Dominante Gruppe: <span style={{ color: '#ffcc00', fontWeight: 700 }}>{telemetry.dominantRole}</span>
+                                        <span style={{ color: '#666' }}> ({telemetry.npcTypeCounts[telemetry.dominantRole] ?? 0} Einh.)</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
                         )}

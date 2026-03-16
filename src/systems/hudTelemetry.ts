@@ -1,4 +1,4 @@
-import { NPCBehavior, NPCMood } from '../types/enums';
+import { NPCBehavior, NPCMood, NPCType } from '../types/enums';
 import type { NPCData } from '../stores/gameStore';
 import type { MissionProgress } from './interactionZones';
 
@@ -17,9 +17,48 @@ export interface HudTelemetry {
         flee: number;
         retreat: number;
     };
+    npcTypeCounts: Partial<Record<NPCType, number>>;
+    dominantRole: NPCType | null;
+    roleBalance: {
+        security: number;
+        aggressors: number;
+        support: number;
+        civilian: number;
+    };
 }
 
 const MAX_MISSION_STEPS = 5;
+
+const SECURITY_TYPES = new Set<NPCType>([NPCType.POLICE, NPCType.RIOT_POLICE, NPCType.SEK]);
+const AGGRESSOR_TYPES = new Set<NPCType>([NPCType.RIOTER, NPCType.EXTREMIST]);
+const SUPPORT_TYPES = new Set<NPCType>([NPCType.MEDIC, NPCType.FIREFIGHTER]);
+
+const buildNpcTypeCounts = (npcs: NPCData[]): Partial<Record<NPCType, number>> => {
+    const counts: Partial<Record<NPCType, number>> = {};
+    for (const npc of npcs) {
+        counts[npc.type] = (counts[npc.type] ?? 0) + 1;
+    }
+    return counts;
+};
+
+const getDominantRole = (counts: Partial<Record<NPCType, number>>): NPCType | null => {
+    let max = 0;
+    let role: NPCType | null = null;
+    for (const [type, count] of Object.entries(counts) as [NPCType, number][]) {
+        if (count > max) {
+            max = count;
+            role = type;
+        }
+    }
+    return role;
+};
+
+const getRoleBalance = (npcs: NPCData[]) => ({
+    security: npcs.filter((n) => SECURITY_TYPES.has(n.type)).length,
+    aggressors: npcs.filter((n) => AGGRESSOR_TYPES.has(n.type)).length,
+    support: npcs.filter((n) => SUPPORT_TYPES.has(n.type)).length,
+    civilian: npcs.filter((n) => !SECURITY_TYPES.has(n.type) && !AGGRESSOR_TYPES.has(n.type) && !SUPPORT_TYPES.has(n.type)).length,
+});
 
 export const timeToMinutesSafe = (time: string): number => {
     const [hRaw, mRaw] = time.split(':');
@@ -90,6 +129,7 @@ export const getHudTelemetry = (
 ): HudTelemetry => {
     const currentMinutes = timeToMinutesSafe(time);
     const panicCount = npcs.filter((npc) => npc.mood === NPCMood.PANICKED || npc.mood === NPCMood.RIOTING).length;
+    const npcTypeCounts = buildNpcTypeCounts(npcs);
 
     return {
         currentMinutes,
@@ -106,5 +146,8 @@ export const getHudTelemetry = (
             flee: countBehavior(npcs, NPCBehavior.FLEE),
             retreat: countBehavior(npcs, NPCBehavior.RETREAT),
         },
+        npcTypeCounts,
+        dominantRole: getDominantRole(npcTypeCounts),
+        roleBalance: getRoleBalance(npcs),
     };
 };

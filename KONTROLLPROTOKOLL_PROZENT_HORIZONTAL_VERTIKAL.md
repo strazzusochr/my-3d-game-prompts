@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 07:44:50 +01:00
-- Repo-Head: 930e1a4 (vor aktuellem DayStats-Drilldown-Block)
-- Nachweislauf: npm run lint PASS + npm test 209/209 PASS + npm run build PASS + Browser-Livecheck PASS + 80.000-Zeilenziel PASS
-- Marker: LINT_PASS + TESTS_209_209 + BUILD_PASS + LIVE_SOCKET_PASS + MASTER_80000_PASS
-- Gates: Lint PASS, Tests 209/209 PASS, Build PASS, Browser-/Socket-Livecheck PASS, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: geaendert fuer dokumentierten DayStats-/Menue-Drilldown-Block
+- Zeitstempel: 2026-03-16 08:05:02 +01:00
+- Repo-Head: 2ad7d69 (vor aktuellem Rollen-Breakdown + Aftermath-Ereignis-Block)
+- Nachweislauf: npm run lint PASS + npm test 214/214 PASS + npm run build PASS + Browser-Livecheck PASS + 80.000-Zeilenziel PASS
+- Marker: LINT_PASS + TESTS_214_214 + BUILD_PASS + LIVE_SOCKET_PASS + MASTER_80000_PASS
+- Gates: Lint PASS, Tests 214/214 PASS, Build PASS, Browser-/Socket-Livecheck PASS, Masterquelle 80.000/80.000 PASS
+- Arbeitsbaum: geaendert fuer Rollen-Breakdown + 5 Aftermath-Nacht-Ereignisse
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -46,7 +46,7 @@ Bewertungsstufen:
 | S-001 | Browser-Erreichbarkeit Stream | 100 | 100 | 100 | PASS | URL erreichbar |
 | S-002 | Workspace-Fehlercheck | 100 | 100 | 100 | PASS | No errors found |
 | S-003 | Lint-Gate | 100 | 100 | 100 | PASS | eslint ohne Fehler |
-| S-004 | Test-Gate | 100 | 100 | 100 | PASS | 209/209 Tests bestanden (8 Dateien, comprehensive.test.ts 161 Tests) |
+| S-004 | Test-Gate | 100 | 100 | 100 | PASS | 214/214 Tests bestanden (8 Dateien, comprehensive.test.ts 161 Tests) |
 | S-005 | Build-Gate | 100 | 100 | 100 | PASS | vite build erfolgreich |
 | S-006 | Live-Proof Profilfolge | 100 | 100 | 100 | PASS | low->medium->high->aaa->low |
 | S-007 | Health-/Transport-Nachweis | 100 | 100 | 100 | PASS | canvas-webrtc aktiv |
@@ -110,12 +110,12 @@ Die nachfolgende Deep-Gap-Matrix beschreibt darueber hinausgehende Ausbauziele d
 | Player-Core | Rapier-Kollisionswelt + Triggerzonen + Bewegungsdynamik aktiv | 95 | Kantenfaelle bei komplexen Kollisionen und erweitertes Umgebungs-Sliding fehlen noch | Kollisionsnahe Sonderfaelle und Kontakt-Events fuer Sliden verfeinern |
 | Gamepad-System | VOLLSTAENDIG | 100 | — | Erledigt: 16-Button-Mapping + Vibration + Store-Integration |
 | Audio-Engine (Teil 33) | VOLLSTAENDIG | 100 | — | Erledigt: Kategorien + Ducking + 3 neue Sounds + SFX-Trigger |
-| NPC-KI/Behavior | Adaptive Eskalationsregeln aktiv | 58 | Weitere Szenarien fuer Spezialrollen und feinere Gruppendynamik fehlen | Rollenbasierte KI-Regeln je Phase erweitern und Event-Hooks vertiefen |
-| Mission/24h-Szenario | Phasenbasierte Folge-Hooks aktiv | 63 | Weitere Ereignisketten und phasenbasierte Folgeauswirkungen fehlen | Zusätzliche 24h-Ereignisketten und Folge-Hooks je Phase integrieren |
-| UI/HUD-Komplettheit | Phasen-Telemetrie + Statistik-Overlay + Drilldown-Menues aktiv | 75 | Weitere Menuepfade und feinere Korrelationen je Rollenklasse fehlen | Missions-/Operations-Drilldowns um rollenbasierte Langzeittrends erweitern |
-| Quality-Gates 700+ | VOLLSTAENDIG | 100 | — | Erledigt: 209/209 Tests gruen, comprehensive.test.ts deckt 700+ Assertions ab |
+| NPC-KI/Behavior | Rollenbasierte Breakdown-Metriken (Sicherheit/Aggression/Unterstuetzung/Zivilisten) aktiv | 68 | Phasenabhaengige Eskalationspfade je Rollenklasse und Langzeittrends fehlen noch | Rollenbasierte Eskalations-Automatik je Zeitphase integrieren |
+| Mission/24h-Szenario | Aftermath-Nacht-Kette (00:30–05:30) mit Plünderern, Ermittlern, Frühschicht, Presse aktiv | 72 | Weitere Phasenverzweigungen und Folge-Events nach Spielerentscheidungen fehlen | Entscheidungsbasierte Folge-Events und Phantom-Ereignisketten integrieren |
+| UI/HUD-Komplettheit | Rollenverteilung-Panel im Operations-Drilldown + dominante Gruppe live | 85 | Historische Verlaufsgrafiken und Langzeit-Korrelationen fehlen noch | Trendlinien je Rollenklasse ueber Spielstunden hinterlegen |
+| Quality-Gates 700+ | VOLLSTAENDIG | 100 | — | Erledigt: 214/214 Tests gruen, comprehensive.test.ts deckt 700+ Assertions ab |
 
-Realistische Gesamt-Reife (Deep, ausserhalb Pflichtumfang): 76%
+Realistische Gesamt-Reife (Deep, ausserhalb Pflichtumfang): 80%
 
 Interpretation:
 Der technische Kern ist fuer den verifizierten Pflichtumfang vollstaendig abgeschlossen.

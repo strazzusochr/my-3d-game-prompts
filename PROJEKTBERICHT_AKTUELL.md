@@ -306,3 +306,18 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - `npm run lint`: erfolgreich.
 - `npm run build`: erfolgreich.
 - Livecheck: lokaler Full-Stack gestartet, Browserseite geoeffnet, Socket-Client-Verbindung protokolliert; Hintergrundprozess anschliessend sauber beendet.
+
+### 8.20 Rollenbasierter Breakdown und Aftermath-Ereignisketten vom 16.03.2026
+- `src/systems/hudTelemetry.ts` wurde um `npcTypeCounts: Partial<Record<NPCType, number>>`, `dominantRole: NPCType | null` und `roleBalance: {security, aggressors, support, civilian}` erweitert.
+- Drei Hilfsfunktionen (`buildNpcTypeCounts`, `getDominantRole`, `getRoleBalance`) implementieren die Klassifizierung ohne Seiteneffekte.
+- Das Operations-Drilldown-Panel in `HUD.tsx` zeigt jetzt ein 4-Zellen-Rollen-Grid mit Prozentbalken und Dominant-Gruppen-Hinweis.
+- Die Einsatzempfehlung reagiert auf Aggressor-Uebermacht gegenueber den Sicherheitskraeften mit einer spezifischen Warnung.
+- `src/systems/eventScheduler.ts` wurde um 5 neue Aftermath-Nacht-Events erweitert: `00:30 Plünderer`, `02:00 Ermittlerteam`, `03:30 Festnahmen`, `05:00 Checkpoint-Wechsel`, `05:30 Presse`. Dazu 2 neue TENSION-Eintraege (`02:00 lvl 12`, `05:00 lvl 8`) und 5 neue PHASE_DESCRIPTIONS.
+
+### 8.21 Rollen-/Aftermath-Nachweis
+- `src/tests/hudTelemetry.test.ts` um 3 Rollen-Breakdown-Tests erweitert (`npcTypeCounts`, `dominantRole`, `roleBalance`).
+- `src/tests/gameStore.test.ts` um 2 Aftermath-Nacht-Tests erweitert (Plünderer spawn 00:30, Festnahmen 03:30).
+- `npx vitest run`: erfolgreich, 214 von 214 Tests bestanden.
+- `npm run lint`: erfolgreich.
+- `npm run build`: erfolgreich, 641 Module.
+- Livecheck: lokaler Full-Stack gestartet, Browserseite geoeffnet, Socket `z5ApIUARSI-bF1vHAAAD` verbunden; Prozess sauber beendet.

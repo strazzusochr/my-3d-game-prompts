@@ -72,5 +72,64 @@ describe('hud telemetry', () => {
     expect(telemetry.panicRatioPercent).toBe(0);
     expect(telemetry.activeHooks).toBe(0);
     expect(telemetry.missionCompletionPercent).toBe(0);
+    expect(telemetry.dominantRole).toBeNull();
+    expect(telemetry.roleBalance.security).toBe(0);
+    expect(telemetry.roleBalance.aggressors).toBe(0);
+    expect(telemetry.roleBalance.support).toBe(0);
+    expect(telemetry.roleBalance.civilian).toBe(0);
+  });
+});
+
+const npcOfType = (id: number, type: NPCType): NPCData => ({
+  id,
+  type,
+  position: [0, 1.2, 0],
+  rotation: 0,
+  outfitColor: '#fff',
+  emotionalState: EmotionalState.NEUTRAL,
+  mood: NPCMood.PEACEFUL,
+  behavior: NPCBehavior.IDLE,
+});
+
+describe('hud telemetry — role breakdown', () => {
+  it('builds npcTypeCounts from a mixed npc list', () => {
+    const npcs: NPCData[] = [
+      npcOfType(1, NPCType.POLICE),
+      npcOfType(2, NPCType.POLICE),
+      npcOfType(3, NPCType.RIOTER),
+      npcOfType(4, NPCType.MEDIC),
+    ];
+    const telemetry = getHudTelemetry('12:00', progressBase, npcs);
+    expect(telemetry.npcTypeCounts[NPCType.POLICE]).toBe(2);
+    expect(telemetry.npcTypeCounts[NPCType.RIOTER]).toBe(1);
+    expect(telemetry.npcTypeCounts[NPCType.MEDIC]).toBe(1);
+  });
+
+  it('identifies dominantRole as the type with the highest count', () => {
+    const npcs: NPCData[] = [
+      npcOfType(1, NPCType.EXTREMIST),
+      npcOfType(2, NPCType.EXTREMIST),
+      npcOfType(3, NPCType.EXTREMIST),
+      npcOfType(4, NPCType.POLICE),
+    ];
+    const telemetry = getHudTelemetry('19:00', progressBase, npcs);
+    expect(telemetry.dominantRole).toBe(NPCType.EXTREMIST);
+  });
+
+  it('computes roleBalance by security / aggressors / support / civilian groups', () => {
+    const npcs: NPCData[] = [
+      npcOfType(1, NPCType.POLICE),
+      npcOfType(2, NPCType.RIOT_POLICE),
+      npcOfType(3, NPCType.SEK),
+      npcOfType(4, NPCType.RIOTER),
+      npcOfType(5, NPCType.EXTREMIST),
+      npcOfType(6, NPCType.MEDIC),
+      npcOfType(7, NPCType.CIVILIAN),
+    ];
+    const telemetry = getHudTelemetry('21:00', progressBase, npcs);
+    expect(telemetry.roleBalance.security).toBe(3);
+    expect(telemetry.roleBalance.aggressors).toBe(2);
+    expect(telemetry.roleBalance.support).toBe(1);
+    expect(telemetry.roleBalance.civilian).toBe(1);
   });
 });
