@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 04:18:17
-- Repo-Head: 5a40896
+- Zeitstempel: 2026-03-16 04:24:31
+- Repo-Head: 3bdc810
 - Nachweislauf: npm run autonomy:full = PASS
 - Marker: AUTONOMY_PROOF_OK + AUTONOMY_FULL_OK
 - Gates: Lint PASS, Tests 7/7 PASS, Build PASS, Live-Proof PASS
-- Arbeitsbaum: sauber
+- Arbeitsbaum: lokale Aenderung in Player (Gamepad-Basis), sonst stabil
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -66,7 +66,7 @@ Bewertungsstufen:
 | P-006 | NASA Epoch-2 HUD-Briefing integriert | Horizontal | 100 | PASS | HUD umgestellt |
 | P-007 | Missionskontext an Prompt angepasst | Vertikal | 100 | PASS | neue Lage-/Missionsziele im HUD |
 | P-008 | Prompt-Teil 33 Audio-Engine tief umgesetzt | Vertikal | 25 | IN PROGRESS | Teilweise, nicht voll implementiert |
-| P-009 | Prompt-Teil 12 Gamepad-System tief umgesetzt | Vertikal | 0 | OPEN | noch nicht begonnen |
+| P-009 | Prompt-Teil 12 Gamepad-System tief umgesetzt | Vertikal | 35 | IN PROGRESS | Basis umgesetzt: Deadzone, Stick-Movement, Stick-Look, Sprint-Button |
 | P-010 | Vollabdeckung aller 700+ Checks | Horizontal | 0 | OPEN | ausstehend |
 | P-011 | 80.000-Zeilen-Masterquelle aufgebaut | Horizontal | 99,71 | IN PROGRESS | 79.768/80.000 Zeilen erreicht |
 
@@ -79,10 +79,10 @@ Bewertungsstufen:
 - Schritt-Protokoll Gesamt G%: 100
 
 - Punkt-Protokoll Durchschnitt H%: 75
-- Punkt-Protokoll Durchschnitt V%: 65
-- Punkt-Protokoll Gesamt G%: 70
+- Punkt-Protokoll Durchschnitt V%: 68,5
+- Punkt-Protokoll Gesamt G%: 71,75
 
-- Gesamtprojekt (aktueller Kontrollstand): 85
+- Gesamtprojekt (aktueller Kontrollstand): 87
 
 Beweispflicht-Hinweis:
 Dieser Block ist der verbindliche Ist-Nachweis und wird nach jedem Pflichtlauf aktualisiert.
