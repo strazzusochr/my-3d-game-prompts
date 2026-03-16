@@ -585,6 +585,23 @@ describe('gameStore core flow', () => {
     expect(state.gameState.replayRebuildStatus).toBe('reconstructed');
     expect(state.gameState.replayRebuildEventCount).toBeGreaterThan(0);
     expect(state.gameState.replayAnchorTime).toBe('20:00');
+
+    const rawSnapshot = window.localStorage.getItem(RUNTIME_SNAPSHOT_KEY);
+    expect(rawSnapshot).not.toBeNull();
+
+    const snapshot = JSON.parse(rawSnapshot as string) as {
+      replayState: {
+        mode: 'live' | 'rewind';
+        rebuildStatus: 'idle' | 'reconstructed';
+        rebuildEventCount: number;
+        anchorTime: string;
+      };
+    };
+
+    expect(snapshot.replayState.mode).toBe('rewind');
+    expect(snapshot.replayState.rebuildStatus).toBe('reconstructed');
+    expect(snapshot.replayState.rebuildEventCount).toBeGreaterThan(0);
+    expect(snapshot.replayState.anchorTime).toBe('20:00');
   });
 
   it('records role trend snapshots while time progresses', () => {

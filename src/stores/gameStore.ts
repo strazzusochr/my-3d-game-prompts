@@ -127,6 +127,13 @@ const persistedDayStats = persistedRuntimeSnapshot
 
 const persistedInGameTime = persistedRuntimeSnapshot?.inGameTime ?? RUNTIME_DEFAULTS.inGameTime;
 
+const persistedReplayState = persistedRuntimeSnapshot?.replayState ?? {
+    mode: 'live' as const,
+    rebuildStatus: 'idle' as const,
+    rebuildEventCount: 0,
+    anchorTime: persistedInGameTime,
+};
+
 const buildRuntimeSnapshot = (state: GameStore): RuntimeSnapshot => ({
     version: 1,
     savedAtEpochMs: Date.now(),
@@ -139,6 +146,12 @@ const buildRuntimeSnapshot = (state: GameStore): RuntimeSnapshot => ({
     missionProgress: cloneMissionProgress(state.interactionState.missionProgress),
     dayStats: { ...state.dayStats },
     roleTrendHistory: state.roleTrendHistory.slice(-MAX_ROLE_TREND_POINTS),
+    replayState: {
+        mode: state.gameState.replayMode,
+        rebuildStatus: state.gameState.replayRebuildStatus,
+        rebuildEventCount: state.gameState.replayRebuildEventCount,
+        anchorTime: state.gameState.replayAnchorTime,
+    },
 });
 
 const persistCurrentRuntimeSnapshot = (state: GameStore) => {
@@ -967,10 +980,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         tensionLevel: getTensionLevelForMinutes(timeToMinutes(persistedInGameTime)),
         timeSpeed: persistedRuntimeSnapshot?.timeSpeed ?? RUNTIME_DEFAULTS.timeSpeed,
         currentPhaseLabel: '🌅 Tagesbeginn — Stadt erwacht',
-        replayMode: 'live',
-        replayRebuildStatus: 'idle',
-        replayRebuildEventCount: 0,
-        replayAnchorTime: persistedInGameTime,
+        replayMode: persistedReplayState.mode,
+        replayRebuildStatus: persistedReplayState.rebuildStatus,
+        replayRebuildEventCount: persistedReplayState.rebuildEventCount,
+        replayAnchorTime: persistedReplayState.anchorTime,
         playerReputation: persistedRuntimeSnapshot?.playerReputation ?? RUNTIME_DEFAULTS.playerReputation,
         moralScore: persistedRuntimeSnapshot?.moralScore ?? RUNTIME_DEFAULTS.moralScore,
         showStatistics: false,

@@ -12,6 +12,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Health-Endpunkt `http://127.0.0.1:7860/health`: erfolgreich erreichbar.
 - Gemeldeter Health-Stand zum Verifikationszeitpunkt: `status=ok`, `profile=low`, `transportSource=canvas-webrtc`, `fps=128`, `rendererFps=128`, `viewerFps=0`, `internalPort=3099`, `publicPort=7860`.
 
+### 2.0.32 Replay-Metadaten-Persistenz ueber Reload vom 16.03.2026
+- Der Runtime-Snapshot wurde um eine dedizierte Replay-Sektion erweitert: `replayState` speichert jetzt `mode`, `rebuildStatus`, `rebuildEventCount` und `anchorTime`.
+- Die Snapshot-Sanitisierung validiert Replayfelder robust (ungueltige Modi/Status werden auf sichere Defaults gesetzt, Eventanzahl wird auf >=0 begrenzt, Zeitwerte normalisiert).
+- Der Store hydratisiert den Replaystatus nun beim Start aus dem Snapshot und persistiert aktualisierte Replaywerte bei allen relevanten Zustandsschritten weiter.
+- Testnachweis wurde erweitert: Persistenz- und Sanitisierungstests fuer Replaydaten plus Store-Nachweis, dass Rewind-Metadaten auch im gespeicherten Snapshot ankommen.
+- Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Tests weiterhin 251 von 251 bestanden, Lint und Build gruen.
+
 ### 2.0.1 Viewer- und Lastnachweis vom 16.03.2026
 - Zwei weitere Viewer-Seiten wurden geoeffnet und der Health-Endpunkt achtmal im Abstand von rund 1,5 Sekunden abgefragt.
 - Der Stream benoetigte eine kurze Aufwaermphase: zuerst `viewerFps=0`, danach stabile Werte zwischen 22 und 24 FPS.

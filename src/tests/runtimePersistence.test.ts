@@ -38,6 +38,12 @@ const baseSnapshot: RuntimeSnapshot = {
             panicRatioPercent: 22,
         },
     ],
+    replayState: {
+        mode: 'live',
+        rebuildStatus: 'idle',
+        rebuildEventCount: 0,
+        anchorTime: '18:30',
+    },
 };
 
 describe('runtimePersistence', () => {
@@ -53,6 +59,8 @@ describe('runtimePersistence', () => {
         expect(loaded?.inGameTime).toBe('18:30');
         expect(loaded?.missionProgress.epochBriefingVerified).toBe(true);
         expect(loaded?.roleTrendHistory).toHaveLength(1);
+        expect(loaded?.replayState.mode).toBe('live');
+        expect(loaded?.replayState.anchorTime).toBe('18:30');
     });
 
     it('liefert null bei ungueltigem JSON', () => {
@@ -76,6 +84,12 @@ describe('runtimePersistence', () => {
                     prioritizedZoneIds: ['evacuation-board-north', 'evil-zone', 'hazard-console'],
                 },
                 roleTrendHistory: [{ ...baseSnapshot.roleTrendHistory[0], panicRatioPercent: 999 }],
+                replayState: {
+                    mode: 'invalid-mode',
+                    rebuildStatus: 'broken',
+                    rebuildEventCount: -99,
+                    anchorTime: '77:77',
+                },
             }),
         );
 
@@ -88,6 +102,10 @@ describe('runtimePersistence', () => {
         expect(loaded?.masterVolume).toBe(1);
         expect(loaded?.missionProgress.prioritizedZoneIds).toEqual(['evacuation-board-north', 'hazard-console']);
         expect(loaded?.roleTrendHistory[0].panicRatioPercent).toBe(100);
+        expect(loaded?.replayState.mode).toBe('live');
+        expect(loaded?.replayState.rebuildStatus).toBe('idle');
+        expect(loaded?.replayState.rebuildEventCount).toBe(0);
+        expect(loaded?.replayState.anchorTime).toBe('06:00');
     });
 
     it('entfernt Snapshot mit clearRuntimeSnapshot', () => {

@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 15:34:00 +01:00
-- Repo-Head: f3e2500 (vor Replay-Transparenz-Commit; Arbeitsstand lokal voll verifiziert)
-- Nachweislauf: npm run autonomy:full PASS nach Replay-Transparenzblock (inkl. lint PASS + tests 251/251 PASS + build PASS + live proof PASS)
-- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_251_251 + BUILD_PASS + REPLAY_TRANSPARENCY_PASS + MASTER_80000_PASS
-- Gates: Lint PASS, Tests 251/251 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, Zeitreise-/Rebuildstatus im Operations-HUD live sichtbar, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: Replay-Metadaten im Store und HUD-Statusanzeige umgesetzt, per Vollproof verifiziert
+- Zeitstempel: 2026-03-16 15:42:00 +01:00
+- Repo-Head: lokal (nach Replay-Metadaten-Persistenz, vor neuem Commit)
+- Nachweislauf: npm run autonomy:full PASS nach Replay-Persistenzblock (inkl. lint PASS + tests 251/251 PASS + build PASS + live proof PASS)
+- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_251_251 + BUILD_PASS + REPLAY_PERSISTENCE_PASS + MASTER_80000_PASS
+- Gates: Lint PASS, Tests 251/251 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, Replay-Metadaten inkl. Snapshot-Rehydrierung verifiziert, Masterquelle 80.000/80.000 PASS
+- Arbeitsbaum: Replay-Snapshotfelder in Store/Persistence/Test erweitert und per Vollproof verifiziert
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -89,6 +89,7 @@ Bewertungsstufen:
 | P-029 | Adaptive Triggerkurven fuer NPC-KI umgesetzt | Vertikal | 100 | PASS | Kurvenmodul fuer Schwellwert-/Spawnfaktoren, Turbulenzwert im Insight, Store-Verdrahtung und neue Tests; Full-Proof mit 251/251 Tests gruen |
 | P-030 | HUD-Transparenz fuer adaptive Triggerkurven umgesetzt | Vertikal | 100 | PASS | Operations-Tab zeigt adaptive Schwellen/Faktoren, Aggressordruck und Turbulenz live; Full-Proof erneut gruen |
 | P-031 | Replay-Transparenz fuer Trigger-Rekonstruktion umgesetzt | Vertikal | 100 | PASS | Zeitreise-Indikator + Rebuild-Status/Events/Ankerzeit im HUD sowie Store-Metadaten und Testnachweis; Full-Proof gruen |
+| P-032 | Replay-Metadaten als Runtime-Snapshot persistent umgesetzt | Vertikal | 100 | PASS | replayState im Snapshot + Store-Rehydrierung + Sanitisierungs-/Storetests; Full-Proof gruen |
 
 ---
 

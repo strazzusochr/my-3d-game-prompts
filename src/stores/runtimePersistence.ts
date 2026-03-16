@@ -25,6 +25,13 @@ interface RuntimeTrendPoint {
     panicRatioPercent: number;
 }
 
+interface RuntimeReplayState {
+    mode: 'live' | 'rewind';
+    rebuildStatus: 'idle' | 'reconstructed';
+    rebuildEventCount: number;
+    anchorTime: string;
+}
+
 export interface RuntimeSnapshot {
     version: 1;
     savedAtEpochMs: number;
@@ -37,6 +44,7 @@ export interface RuntimeSnapshot {
     missionProgress: RuntimeMissionProgress;
     dayStats: RuntimeDayStats;
     roleTrendHistory: RuntimeTrendPoint[];
+    replayState: RuntimeReplayState;
 }
 
 const ALLOWED_ZONE_IDS = new Set<InteractionZoneId>([
@@ -113,15 +121,34 @@ const normalizeRoleTrendHistory = (value: unknown): RuntimeTrendPoint[] => {
         .slice(-MAX_TREND_POINTS);
 };
 
+const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): RuntimeReplayState => {
+    const asObj = typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
+    const mode = asObj.mode === 'rewind' ? 'rewind' : 'live';
+    const rebuildStatus = asObj.rebuildStatus === 'reconstructed' ? 'reconstructed' : 'idle';
+    const anchorTime = normalizeClock(asObj.anchorTime ?? fallbackAnchorTime);
+    const rebuildEventCountRaw =
+        typeof asObj.rebuildEventCount === 'number' && Number.isFinite(asObj.rebuildEventCount)
+            ? asObj.rebuildEventCount
+            : 0;
+
+    return {
+        mode,
+        rebuildStatus,
+        rebuildEventCount: Math.max(0, Math.round(rebuildEventCountRaw)),
+        anchorTime,
+    };
+};
+
 const normalizeSnapshot = (value: unknown): RuntimeSnapshot => {
     const asObj = typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
+    const inGameTime = normalizeClock(asObj.inGameTime);
 
     return {
         version: 1,
         savedAtEpochMs: typeof asObj.savedAtEpochMs === 'number' && Number.isFinite(asObj.savedAtEpochMs)
             ? Math.max(0, Math.round(asObj.savedAtEpochMs))
             : Date.now(),
-        inGameTime: normalizeClock(asObj.inGameTime),
+        inGameTime,
         timeSpeed: clamp(
             typeof asObj.timeSpeed === 'number' && Number.isFinite(asObj.timeSpeed) ? asObj.timeSpeed : 1,
             0.25,
@@ -150,6 +177,7 @@ const normalizeSnapshot = (value: unknown): RuntimeSnapshot => {
         missionProgress: normalizeMissionProgress(asObj.missionProgress),
         dayStats: normalizeDayStats(asObj.dayStats),
         roleTrendHistory: normalizeRoleTrendHistory(asObj.roleTrendHistory),
+        replayState: normalizeReplayState(asObj.replayState, inGameTime),
     };
 };
 

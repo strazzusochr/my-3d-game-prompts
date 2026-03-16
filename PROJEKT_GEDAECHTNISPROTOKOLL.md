@@ -152,6 +152,10 @@
 - HUD-Operationsansicht erweitert: Zeitreise-Indikator und Trigger-Rekonstruktionsstatus inkl. Eventanzahl und Ankerzeit sind live sichtbar.
 - Testnachweis erweitert: `src/tests/gameStore.test.ts` prueft Rewind-Rebuildstatus direkt nach Ruecksprung.
 - Vollverifikation nach Replay-Transparenzblock erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 251/251.
+- Replay-Metadaten-Persistenz am 16.03.2026 abgeschlossen: `runtimePersistence` fuehrt jetzt explizite Snapshot-Sektion `replayState` (Mode, Rebuildstatus, Eventanzahl, Ankerzeit) mit robuster Sanitisierung.
+- Store-Hydration erweitert: `gameStore` laedt Replay-Metadaten beim Initialzustand aus dem Snapshot und schreibt sie in jedem Runtime-Save konsistent zurueck.
+- Testabdeckung erweitert: `runtimePersistence.test.ts` prueft Replay-Sanitisierung; `gameStore.test.ts` verifiziert Replay-Snapshotwerte nach Rewind direkt in LocalStorage.
+- Vollverifikation nach Replay-Persistenzblock erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 251/251.
 
 ## Naechster logischer Schritt
-- Replay-Transparenz ist geschlossen; naechster Ausbaupunkt ist Persistenz der Replay-Metadaten im Runtime-Snapshot inkl. Reload-Nachweis.
+- Replay-Persistenz ist geschlossen; naechster Ausbaupunkt ist eine kleine Replay-Historie (letzte Rebuilds mit Zeit/Count) fuer die Operationsansicht inkl. Snapshot-Nachweis.
