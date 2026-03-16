@@ -505,6 +505,33 @@ describe('gameStore core flow', () => {
     expect(state.npcs.filter((npc) => npc.type === NPCType.MEDIC).length).toBeGreaterThanOrEqual(4);
   });
 
+  it('triggers trend synchronization branch for strong weighted mission path', () => {
+    useGameStore.setState((state) => ({
+      ...state,
+      interactionState: {
+        ...state.interactionState,
+        missionProgress: {
+          epochBriefingVerified: true,
+          hazardMapPrepared: true,
+          prioritizedZoneIds: ['north-bridge', 'south-hub', 'east-avenue'],
+        },
+      },
+    }));
+
+    useGameStore.getState().evaluateEvents('20:30');
+    const state = useGameStore.getState();
+
+    expect(state.firedEventKeys).toContain('dyn-trend-synchronization');
+  });
+
+  it('triggers trend fracture wave for weak weighted mission path', () => {
+    useGameStore.getState().evaluateEvents('21:30');
+    const state = useGameStore.getState();
+
+    expect(state.firedEventKeys).toContain('dyn-trend-fracture-wave');
+    expect(state.npcs.filter((npc) => npc.type === NPCType.RIOTER).length).toBeGreaterThanOrEqual(3);
+  });
+
   it('triggers fragmented command fallback when priorities stay too low', () => {
     useGameStore.getState().evaluateEvents('22:30');
     const state = useGameStore.getState();

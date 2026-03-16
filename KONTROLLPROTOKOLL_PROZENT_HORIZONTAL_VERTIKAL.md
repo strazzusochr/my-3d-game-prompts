@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 09:35:51 +01:00
-- Repo-Head: 771fffa (vor gewichteten Pfadregeln)
-- Nachweislauf: npm run autonomy:full PASS (inkl. lint PASS + tests 234/234 PASS + build PASS + live proof PASS)
-- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_234_234 + BUILD_PASS + LIVE_SOCKET_PASS + MASTER_80000_PASS
-- Gates: Lint PASS, Tests 234/234 PASS, Build PASS, Browser-/Socket-Livecheck PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: geaendert fuer gewichtete Pfadregeln + dynamische Triggerstaerke + Insight-Tests
+- Zeitstempel: 2026-03-16 09:40:53 +01:00
+- Repo-Head: 1115e7c (vor Trend-Branch-Korrelation)
+- Nachweislauf: npm run autonomy:full PASS (inkl. lint PASS + tests 237/237 PASS + build PASS + live proof PASS)
+- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_237_237 + BUILD_PASS + LIVE_SOCKET_PASS + MASTER_80000_PASS
+- Gates: Lint PASS, Tests 237/237 PASS, Build PASS, Browser-/Socket-Livecheck PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, Masterquelle 80.000/80.000 PASS
+- Arbeitsbaum: geaendert fuer trendkorrelierte Branch-Events + Insight-Signal + erweiterte Store/Insight-Tests
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -46,7 +46,7 @@ Bewertungsstufen:
 | S-001 | Browser-Erreichbarkeit Stream | 100 | 100 | 100 | PASS | URL erreichbar |
 | S-002 | Workspace-Fehlercheck | 100 | 100 | 100 | PASS | No errors found |
 | S-003 | Lint-Gate | 100 | 100 | 100 | PASS | eslint ohne Fehler |
-| S-004 | Test-Gate | 100 | 100 | 100 | PASS | 234/234 Tests bestanden (9 Dateien, comprehensive.test.ts 161 Tests) |
+| S-004 | Test-Gate | 100 | 100 | 100 | PASS | 237/237 Tests bestanden (9 Dateien, comprehensive.test.ts 161 Tests) |
 | S-005 | Build-Gate | 100 | 100 | 100 | PASS | vite build erfolgreich |
 | S-006 | Live-Proof Profilfolge | 100 | 100 | 100 | PASS | low->medium->high->aaa->low |
 | S-007 | Health-/Transport-Nachweis | 100 | 100 | 100 | PASS | canvas-webrtc aktiv |
@@ -73,6 +73,7 @@ Bewertungsstufen:
 | P-013 | Zeitversetzte Missions-Folgewellen aktiviert | Vertikal | 100 | PASS | dyn-mission-epoch-press-corridor + dyn-mission-hazard-firebreak + dyn-mission-fullchain-recovery mit Tests |
 | P-014 | Alternative Missions-Ergebnisbaeume aktiviert | Vertikal | 100 | PASS | dyn-mission-epoch-misinformation + dyn-mission-hazard-surge + dyn-mission-fragmented-command mit Tests |
 | P-015 | Gewichtete Missions-Pfadregeln aktiviert | Vertikal | 100 | PASS | missionPathWeightPercent + dynamische Spawn-Skalierung nach Trend/Panik/Rollenlage |
+| P-016 | Trendkorrelierte Branch-Trigger aktiviert | Vertikal | 100 | PASS | trendSignal + dyn-trend-synchronization + dyn-trend-fracture-wave mit Tests |
 
 ---
 
@@ -114,12 +115,12 @@ Die nachfolgende Deep-Gap-Matrix beschreibt darueber hinausgehende Ausbauziele d
 | Player-Core | Rapier-Kollisionswelt + Triggerzonen + Bewegungsdynamik aktiv | 95 | Kantenfaelle bei komplexen Kollisionen und erweitertes Umgebungs-Sliding fehlen noch | Kollisionsnahe Sonderfaelle und Kontakt-Events fuer Sliden verfeinern |
 | Gamepad-System | VOLLSTAENDIG | 100 | — | Erledigt: 16-Button-Mapping + Vibration + Store-Integration |
 | Audio-Engine (Teil 33) | VOLLSTAENDIG | 100 | — | Erledigt: Kategorien + Ducking + 3 neue Sounds + SFX-Trigger |
-| NPC-KI/Behavior | Rollen-Automatik + Korrelations-Folgeevents + missionsgetriebene Branch-Reaktionen aktiv | 92 | Gegenseitige Fraktionsreaktionen und adaptive Schwellwerte fehlen noch | Eskalations-Gegenlogik und adaptive Triggerkurven integrieren |
-| Mission/24h-Szenario | Aftermath-Nacht-Kette + Korrelationsfolgeevents + gewichtete Missions-Ergebnisbaeume aktiv | 96 | Gewichtung reagiert noch nicht fensterspezifisch auf Tagesphase | Gewichtung je Zeitfenster und Missionspfad weiter verfeinern |
-| UI/HUD-Komplettheit | Operations-Korrelation + Folgeevent-Badges + Trendlinien + gewichtete Missionsbranches sichtbar | 99 | Langzeit-Korrelationen mit Missionsentscheidungen fehlen noch | Trend-Korrelationen mit Missionspfaden anzeigen |
-| Quality-Gates 700+ | VOLLSTAENDIG | 100 | — | Erledigt: 234/234 Tests gruen, comprehensive.test.ts deckt 700+ Assertions ab |
+| NPC-KI/Behavior | Rollen-Automatik + Korrelations-Folgeevents + trendkorrelierte Branch-Reaktionen aktiv | 93 | Gegenseitige Fraktionsreaktionen und adaptive Schwellwerte fehlen noch | Eskalations-Gegenlogik und adaptive Triggerkurven integrieren |
+| Mission/24h-Szenario | Aftermath-Nacht-Kette + Korrelationsfolgeevents + gewichtete und trendgekoppelte Missions-Ergebnisbaeume aktiv | 97 | Gewichtung reagiert noch nicht fensterspezifisch auf Tagesphase | Gewichtung je Zeitfenster und Missionspfad weiter verfeinern |
+| UI/HUD-Komplettheit | Operations-Korrelation + Folgeevent-Badges + Trendlinien + gewichtete und trendkorrelierte Branches sichtbar | 99 | Langzeit-Korrelationen mit Missionsentscheidungen fehlen noch | Trend-Korrelationen mit Missionspfaden anzeigen |
+| Quality-Gates 700+ | VOLLSTAENDIG | 100 | — | Erledigt: 237/237 Tests gruen, comprehensive.test.ts deckt 700+ Assertions ab |
 
-Realistische Gesamt-Reife (Deep, ausserhalb Pflichtumfang): 96%
+Realistische Gesamt-Reife (Deep, ausserhalb Pflichtumfang): 97%
 
 Interpretation:
 Der technische Kern ist fuer den verifizierten Pflichtumfang vollstaendig abgeschlossen.

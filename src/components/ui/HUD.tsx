@@ -120,6 +120,8 @@ export const HUD = () => {
         { key: 'dyn-mission-fullchain-deescalation', label: 'Mission Branch: Vollkette Deeskalation', color: '#99ffbb' },
         { key: 'dyn-mission-fullchain-recovery', label: 'Mission Branch: Recovery-Welle', color: '#66ffcc' },
         { key: 'dyn-mission-fragmented-command', label: 'Mission Branch: Fragmented Command', color: '#ff6666' },
+        { key: 'dyn-trend-synchronization', label: 'Trend Branch: Synchronisierung', color: '#66ddff' },
+        { key: 'dyn-trend-fracture-wave', label: 'Trend Branch: Fracture-Wave', color: '#ff7755' },
     ].filter((response) => firedEventKeys.includes(response.key));
     const operationsInsight = getOperationsInsight({
         trendHistory: roleTrendHistory,

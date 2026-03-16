@@ -31,6 +31,7 @@ describe('operations insights', () => {
     expect(insight.recommendation).toContain('Kritisch');
     expect(insight.confidencePercent).toBeGreaterThanOrEqual(60);
     expect(insight.missionPathWeightPercent).toBeLessThan(100);
+    expect(insight.trendSignal).toBe('deteriorating');
   });
 
   it('returns medium priority when mission progress and support are weak', () => {
@@ -52,6 +53,7 @@ describe('operations insights', () => {
     expect(insight.correlationLine).toContain('Hook-Auslastung');
     expect(insight.correlationLine).toContain('Pfadgewicht');
     expect(insight.missionPathWeightPercent).toBeLessThanOrEqual(100);
+    expect(insight.trendSignal).not.toBe('stabilizing');
   });
 
   it('returns low priority for stable trends', () => {
@@ -71,6 +73,7 @@ describe('operations insights', () => {
     expect(insight.priority).toBe('low');
     expect(insight.recommendation).toContain('stabil');
     expect(insight.missionPathWeightPercent).toBeGreaterThanOrEqual(95);
+    expect(insight.trendSignal).toBe('flat');
   });
 
   it('raises mission path weight for high completion and hook utilization', () => {
@@ -89,5 +92,23 @@ describe('operations insights', () => {
 
     expect(insight.priority).toBe('low');
     expect(insight.missionPathWeightPercent).toBeGreaterThan(110);
+    expect(insight.correlationLine).toContain('Trend');
+  });
+
+  it('reports stabilizing trend when aggressors and panic drop', () => {
+    const insight = getOperationsInsight({
+      trendHistory: baseTrend([
+        { security: 8, aggressors: 14, support: 4, panicRatioPercent: 42 },
+        { security: 11, aggressors: 10, support: 5, panicRatioPercent: 36 },
+      ]),
+      dayStats: { killed: 0, arrested: 2, injured: 5, damage: 11000 },
+      missionCompletionPercent: 74,
+      panicRatioPercent: 36,
+      activeHooks: 3,
+      maxHooks: 4,
+      activeDynamicResponses: 3,
+    });
+
+    expect(insight.trendSignal).toBe('stabilizing');
   });
 });

@@ -23,6 +23,7 @@ export interface OperationsInsight {
     correlationLine: string;
     confidencePercent: number;
     missionPathWeightPercent: number;
+    trendSignal: 'stabilizing' | 'deteriorating' | 'volatile' | 'flat';
 }
 
 const trendWord = (delta: number) => {
@@ -55,12 +56,22 @@ export const getOperationsInsight = (input: OperationsInsightInput): OperationsI
 
     const missionPathWeightPercent = Math.max(60, Math.min(140, missionPathWeightRaw));
 
+    let trendSignal: OperationsInsight['trendSignal'] = 'flat';
+    if (deltaAggressors <= -2 && deltaPanic <= -3 && deltaSupport >= 0) {
+        trendSignal = 'stabilizing';
+    } else if (deltaAggressors >= 2 || deltaPanic >= 4 || deltaSecurity <= -2) {
+        trendSignal = 'deteriorating';
+    } else if (Math.abs(deltaAggressors) + Math.abs(deltaPanic) + Math.abs(deltaSupport) >= 8) {
+        trendSignal = 'volatile';
+    }
+
     const correlationLine =
         `Aggression ${trendWord(deltaAggressors)} (${deltaAggressors >= 0 ? '+' : ''}${deltaAggressors}), ` +
         `Sicherheit ${trendWord(deltaSecurity)} (${deltaSecurity >= 0 ? '+' : ''}${deltaSecurity}), ` +
         `Panik ${deltaPanic >= 0 ? '+' : ''}${deltaPanic}pp, ` +
         `Hook-Auslastung ${hookUtilization}%, ` +
-        `Pfadgewicht ${missionPathWeightPercent}%.`;
+        `Pfadgewicht ${missionPathWeightPercent}%, ` +
+        `Trend ${trendSignal}.`;
 
     let priority: OperationsInsight['priority'] = 'low';
     let recommendation = 'Lage stabil: Sektorbeobachtung halten und Missionskette kontrolliert fortsetzen.';
@@ -92,5 +103,6 @@ export const getOperationsInsight = (input: OperationsInsightInput): OperationsI
         correlationLine,
         confidencePercent,
         missionPathWeightPercent,
+        trendSignal,
     };
 };

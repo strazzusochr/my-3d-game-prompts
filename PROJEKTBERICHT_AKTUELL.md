@@ -128,6 +128,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Die Korrelationszeile im Operations-Insight zeigt das berechnete Pfadgewicht explizit an.
 - Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 234 von 234 bestanden, Lint und Build gruen.
 
+### 2.0.17 Trendkorrelierte Branch-Trigger vom 16.03.2026
+- Die Korrelations-Engine wurde um ein explizites `trendSignal` erweitert (`stabilizing`, `deteriorating`, `volatile`, `flat`).
+- Auf dieser Basis wurden zwei neue Runtime-Pfade integriert: `dyn-trend-synchronization` als stabilisierender Folgepfad und `dyn-trend-fracture-wave` als verschlechternder Gegenpfad.
+- Die Branch-Entscheidung kombiniert nun Missionspfadgewicht und Trendlage, wodurch Folgewellen nicht nur statisch zeitgebunden, sondern lagegebunden ausgelöst werden.
+- Das Operations-Overlay zeigt die neuen trendgekoppelten Trigger als eigene aktive Badges.
+- Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 237 von 237 bestanden, Lint und Build gruen.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.

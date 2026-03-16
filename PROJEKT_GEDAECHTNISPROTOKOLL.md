@@ -91,7 +91,11 @@
 - Runtime-Skalierung aktiviert: positive und negative Missionszweige nutzen dynamische Spawn-Skalierung statt fester Mengen; Triggerstaerke reagiert damit auf Lagegewichtung.
 - Korrelationszeile erweitert: Operations-Insight zeigt nun explizit das Pfadgewicht in Prozent.
 - Vollverifikation nach Gewichtungs-Block erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 234/234.
+- Trend-Korrelation am 16.03.2026 vertieft: `operationsInsights` liefert jetzt zusaetzlich `trendSignal` (`stabilizing`/`deteriorating`/`volatile`/`flat`) aus Rollen- und Panikdeltas.
+- Neue trendgekoppelte Runtime-Branches integriert: `dyn-trend-synchronization` (stabilisierender Folgepfad) und `dyn-trend-fracture-wave` (zerfallender Folgepfad) reagieren auf Pfadgewicht plus Trendsignal.
+- Operations-HUD erweitert: trendgekoppelte Branches werden als aktive Badges sichtbar und laufen gemeinsam mit Missionszweigen.
+- Vollverifikation nach Trend-Korrelationsblock erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 237/237.
 
 ## Naechster logischer Schritt
-- Trend-Korrelationen ausweiten: Verlaufslinien mit Missionsentscheidungspfaden verknuepfen und als konkrete Trigger fuer weitere Folge-Events nutzen.
 - Gewichtung je Tagesfenster differenzieren: Schwellen und Skalierungsfaktoren fuer MORNING/MIDDAY/EVENING/LATE getrennt justieren.
+- Trend-Historie in Trigger einbinden: Mehrpunkt-Deltas (nicht nur First/Last) fuer robustere Branch-Entscheidungen nutzen.
