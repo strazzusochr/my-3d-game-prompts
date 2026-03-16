@@ -59,6 +59,10 @@
 - DayStats-Runtime-Block am 16.03.2026 ausgebaut: Tagesstatistik wird nun aus Timeline-Events und Missionsinteraktionen fortlaufend gefuellt (Verletzte, Festnahmen, Sachschaden) statt statisch zu bleiben.
 - Statistik-Overlay um Menue-Drilldowns erweitert (`Overview`, `Operations`, `Mission`) mit operativen Kennzahlen und missionsbezogenen Handlungsempfehlungen.
 - DayStats-/Drilldown-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 209/209 gruen, `npm run build` gruen, Browser-/Socket-Livecheck bestaetigt.
+- Rollen-Breakdown-Block am 16.03.2026 ausgebaut: `hudTelemetry.ts` um `npcTypeCounts`, `dominantRole` und `roleBalance` (Sicherheit / Aggression / Unterstuetzung / Zivilisten) erweitert; Operations-Tab im Statistik-Overlay um Rollenverteilungs-Panel mit 4-Zellen-Grid, Prozentbalken und Dominant-Gruppe-Anzeige ergaenzt; Einsatzempfehlung reagiert nun auf Aggressor-Uebermacht.
+- Aftermath-Nacht-Block am 16.03.2026 eingebaut: 5 neue Ereignisketten (00:30 Plünderer, 02:00 Ermittlerteam, 03:30 Festnahmen, 05:00 Checkpoint-Wechsel, 05:30 Presse) plus 2 neue TENSION_TIMELINE-Eintraege und 5 neue PHASE_DESCRIPTIONS; 24h-Timeline jetzt vollstaendig lueckenlos von 00:30 bis 06:00.
+- Rollen-/Aftermath-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 214/214 gruen, `npm run build` gruen, Browser-/Socket-Livecheck bestaetigt (Socket `z5ApIUARSI-bF1vHAAAD`).
 
 ## Naechster logischer Schritt
-- Rollenbasierte Langzeittrends und feinere Korrelation zwischen KI-Eskalationsgruppen und DayStats-Verlauf in das Statistiksystem integrieren.
+- Phasenabhaengige Eskalations-Automatik je Rollenklasse: Wenn Aggressoren die Sicherheitskraefte ueberwiegen, soll automatisch ein Verstaerkungs-Event ausgeloest werden.
+- Entscheidungsbasierte Folge-Events: Spieleraktionen sollen zugeschnittene Kettenevents ausloesen (z.B. nach erfolgreicher Epoch-Verifikation wird ein spezifischer Journalist-Mob aktiviert).

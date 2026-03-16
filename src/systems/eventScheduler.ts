@@ -585,6 +585,49 @@ export const EVENT_TIMELINE: GameEvent[] = [
     phaseLabel: '🌃 Nachtruhe — Stadt schläft'
   },
 
+  // ═══════════════════════════════════════════════════════════════
+  // ═══  CHUNK 11: AFTERMATH-NACHT (00:30–05:30) — NACHWIRKUNG  ═══
+  // ═══════════════════════════════════════════════════════════════
+
+  // 00:30 — PLÜNDERER: Opportunisten nach dem Chaos
+  {
+    time: '00:30', action: 'SPAWN', npcType: NPCType.RIOTER, count: 3, position: [0, 0, 20], radius: 15,
+    description: '00:30 — 3 Plünderer sichten Tatort. Opportunisten versuchen Beute zu sichern.',
+    mood: NPCMood.TENSE, behavior: NPCBehavior.WANDER,
+    phaseLabel: '🔦 Nachtrunde — Plünderer & Patrouille'
+  },
+
+  // 02:00 — SPURENSICHERUNG: Ermittlerteam betritt Tatort
+  {
+    time: '02:00', action: 'SPAWN', npcType: NPCType.CIVILIAN, count: 2, position: [-15, 0, 15], radius: 5,
+    description: '02:00 — Ermittlerteam Spurensicherung. Fotodokumentation, Beweissicherung.',
+    mood: NPCMood.TENSE, behavior: NPCBehavior.WANDER,
+    phaseLabel: '🔎 Spurensicherung — Ermittlerteam aktiv'
+  },
+
+  // 03:30 — FESTNAHMEN: Plünderer verhaftet
+  {
+    time: '03:30', action: 'DESPAWN', npcType: NPCType.RIOTER, count: 3,
+    description: '03:30 — Plünderer verhaftet. Polizei meldet 3 Festnahmen nach Nacht-Razzia.',
+    phaseLabel: '🔒 Nacht-Festnahmen — Plünderer verhaftet'
+  },
+
+  // 05:00 — CHECKPOINT-WECHSEL: Frühschicht
+  {
+    time: '05:00', action: 'SPAWN', npcType: NPCType.POLICE, count: 3, position: [0, 0, 42], radius: 8,
+    description: '05:00 — Frühschicht tritt an. Checkpoint-Wechsel. Lagebericht übergeben.',
+    mood: NPCMood.PEACEFUL, behavior: NPCBehavior.PATROL,
+    phaseLabel: '🌄 Checkpoint-Wechsel — Frühschicht'
+  },
+
+  // 05:30 — PRESSE: Erste Journalisten kehren zurück
+  {
+    time: '05:30', action: 'SPAWN', npcType: NPCType.JOURNALIST, count: 4, position: [15, 0, 30], radius: 10,
+    description: '05:30 — 4 Journalisten: Morgen-Lagebericht. Kamera-Teams dokumentieren Schäden.',
+    mood: NPCMood.PEACEFUL, behavior: NPCBehavior.WANDER,
+    phaseLabel: '📰 Presse kehrt zurück — Morgen-Lagebericht'
+  },
+
   // 06:00 — NEUER TAG: "Cycle Repeats" (handled by resetDayCycle)
 ];
 
@@ -621,6 +664,8 @@ export const TENSION_TIMELINE: { time: string; level: number }[] = [
   { time: '23:00', level: 20 },
   { time: '00:00', level: 15 },
   { time: '01:00', level: 10 },
+  { time: '02:00', level: 12 },
+  { time: '05:00', level: 8 },
 ];
 
 /**
@@ -656,7 +701,12 @@ export const PHASE_DESCRIPTIONS: { time: string; label: string }[] = [
   { time: '22:00', label: '🏥 Aftermath — Crime Scene Processing' },
   { time: '23:00', label: '🌙 Nächtliche Ruhe — Calm Returns' },
   { time: '00:00', label: '🕛 Mitternacht — Tag endet' },
+  { time: '00:30', label: '🔦 Nachtrunde — Plünderer & Patrouille' },
   { time: '01:00', label: '🌃 Nachtruhe — Stadt schläft' },
+  { time: '02:00', label: '🔎 Spurensicherung — Ermittlerteam' },
+  { time: '03:30', label: '🔒 Nacht-Festnahmen — Plünderer verhaftet' },
+  { time: '05:00', label: '🌄 Checkpoint-Wechsel — Frühschicht' },
+  { time: '05:30', label: '📰 Presse zurück — Morgen-Lagebericht' },
 ];
 
 export function timeToMinutes(t: string): number {

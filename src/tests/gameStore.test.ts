@@ -86,8 +86,11 @@ describe('gameStore core flow', () => {
     const state = useGameStore.getState();
 
     expect(state.gameState.inGameTime).toBe('06:00');
-    expect(state.gameState.tensionLevel).toBe(10);
-    expect(state.npcs.length).toBe(25);
+    // tension 8: last TENSION_TIMELINE entry matching 06:00 is { time:'05:00', level:8 } (dawn patrol)
+    expect(state.gameState.tensionLevel).toBe(8);
+    // overnight aftermath events (00:30+2, 02:00+2, 03:30-3, 05:00+3, 05:30+4=+9)
+    // plus 06:00 first wave (+25) = 34 total
+    expect(state.npcs.length).toBe(34);
     expect(workerState.workerManager.syncNpcs).toHaveBeenCalled();
     expect(socketState.socket.emit).toHaveBeenCalledWith('update-time', '06:00');
   });
@@ -309,5 +312,22 @@ describe('gameStore core flow', () => {
     expect(stats.arrested).toBe(3);
     expect(stats.injured).toBe(3);
     expect(stats.damage).toBe(8500);
+  });
+
+  it('spawns rioter plunderers at 00:30 in overnight aftermath', () => {
+    useGameStore.getState().evaluateEvents('00:30');
+    const npcs = useGameStore.getState().npcs;
+    const rioters = npcs.filter((n) => n.type === NPCType.RIOTER);
+    expect(rioters.length).toBe(3);
+  });
+
+  it('records arrests for plunderers despawned at 03:30 overnight', () => {
+    useGameStore.getState().evaluateEvents('03:30');
+    const stats = useGameStore.getState().dayStats;
+    // 03:30 DESPAWN RIOTER count 3 → arrested += ceil(3 * 0.75) = 3
+    expect(stats.arrested).toBeGreaterThanOrEqual(3);
+    // Rioters should be gone after despawn
+    const rioters = useGameStore.getState().npcs.filter((n) => n.type === NPCType.RIOTER);
+    expect(rioters.length).toBe(0);
   });
 });
