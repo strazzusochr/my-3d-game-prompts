@@ -13,6 +13,18 @@ const StatusBar = ({ label, value, color }: { label: string, value: number, colo
     </div>
 );
 
+const PDC25_EPOCH2 = {
+    assessmentDate: '28.04.2028',
+    impactDate: '24.04.2041',
+    impactProbability: 100,
+    diameterRange: '141 - 159 m',
+    diameterLikely: '147 - 152 m',
+    diameterMedian: '150 m',
+    energyRange: '45 - 158 Mt',
+    energyLikely: '63 - 105 Mt',
+    energyMedian: '88 Mt',
+};
+
 export const HUD = () => {
     const inGameTime = useGameStore(state => state.gameState.inGameTime);
     const isTimePaused = useGameStore(state => state.gameState.isTimePaused);
@@ -165,19 +177,54 @@ export const HUD = () => {
                     </div>
                 </div>
 
+                <div style={{
+                    marginBottom: '16px',
+                    padding: '12px',
+                    borderRadius: '10px',
+                    background: 'rgba(0,0,0,0.42)',
+                    border: '1px solid rgba(0,204,255,0.25)'
+                }}>
+                    <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>
+                        NASA PDC25 Epoch 2 Lagebild
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 12px', fontSize: '12px' }}>
+                        <span style={{ color: '#9edfff' }}>Assessment</span>
+                        <span style={{ color: '#ffffff', textAlign: 'right' }}>{PDC25_EPOCH2.assessmentDate}</span>
+                        <span style={{ color: '#9edfff' }}>Potenzieller Impact</span>
+                        <span style={{ color: '#ffcc00', textAlign: 'right', fontWeight: '700' }}>{PDC25_EPOCH2.impactDate}</span>
+                        <span style={{ color: '#9edfff' }}>Impact-Wahrscheinlichkeit</span>
+                        <span style={{ color: '#ff6666', textAlign: 'right', fontWeight: '800' }}>{PDC25_EPOCH2.impactProbability}%</span>
+                        <span style={{ color: '#9edfff' }}>Durchmesser (gesamt)</span>
+                        <span style={{ color: '#ffffff', textAlign: 'right' }}>{PDC25_EPOCH2.diameterRange}</span>
+                        <span style={{ color: '#9edfff' }}>Durchmesser (likely)</span>
+                        <span style={{ color: '#ffffff', textAlign: 'right' }}>{PDC25_EPOCH2.diameterLikely}</span>
+                        <span style={{ color: '#9edfff' }}>Durchmesser (Median)</span>
+                        <span style={{ color: '#ffffff', textAlign: 'right' }}>{PDC25_EPOCH2.diameterMedian}</span>
+                        <span style={{ color: '#9edfff' }}>Energie (gesamt)</span>
+                        <span style={{ color: '#ffffff', textAlign: 'right' }}>{PDC25_EPOCH2.energyRange}</span>
+                        <span style={{ color: '#9edfff' }}>Energie (likely)</span>
+                        <span style={{ color: '#ffffff', textAlign: 'right' }}>{PDC25_EPOCH2.energyLikely}</span>
+                        <span style={{ color: '#9edfff' }}>Energie (Median)</span>
+                        <span style={{ color: '#ffffff', textAlign: 'right' }}>{PDC25_EPOCH2.energyMedian}</span>
+                    </div>
+                    <div style={{ marginTop: '8px', fontSize: '11px', color: '#9edfff' }}>
+                        Quelle: NASA ATAP, PDC25 Hypothetical Exercise.
+                    </div>
+                </div>
+
                 {/* Missions */}
                 <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px 0', fontSize: '13px', lineHeight: '1.6' }}>
                     <li style={{ marginBottom: '10px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
                         <span style={{ color: '#00ff88', marginTop: '1px' }}>●</span>
-                        <span style={{ color: '#00ff88' }}>Beobachtungsposten Nordseite erreichen (0/1)</span>
+                        <span style={{ color: '#00ff88' }}>Epoch-2 Datenlage verifizieren und freigeben (1/1)</span>
                     </li>
                     <li style={{ marginBottom: '10px', display: 'flex', gap: '10px', alignItems: 'flex-start', opacity: 0.8 }}>
                         <span style={{ color: '#ffcc00', marginTop: '1px' }}>●</span>
-                        <span style={{ color: '#ffcc00' }}>Martin Krause identifizieren die Menge filmen (0/1)</span>
+                        <span style={{ color: '#ffcc00' }}>Schaedensbild fuer Locations und Hazards vorbereiten (0/1)</span>
                     </li>
                     <li style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', opacity: 0.8 }}>
                         <span style={{ color: '#ffcc00', marginTop: '1px' }}>●</span>
-                        <span style={{ color: '#ffcc00' }}>Situation deeskalieren oder Randalierer zerstreuen (0/5)</span>
+                        <span style={{ color: '#ffcc00' }}>Betroffene Bevoelkerung nach Risikozonen priorisieren (0/3)</span>
                     </li>
                 </ul>
 
