@@ -62,7 +62,11 @@
 - Rollen-Breakdown-Block am 16.03.2026 ausgebaut: `hudTelemetry.ts` um `npcTypeCounts`, `dominantRole` und `roleBalance` (Sicherheit / Aggression / Unterstuetzung / Zivilisten) erweitert; Operations-Tab im Statistik-Overlay um Rollenverteilungs-Panel mit 4-Zellen-Grid, Prozentbalken und Dominant-Gruppe-Anzeige ergaenzt; Einsatzempfehlung reagiert nun auf Aggressor-Uebermacht.
 - Aftermath-Nacht-Block am 16.03.2026 eingebaut: 5 neue Ereignisketten (00:30 Plünderer, 02:00 Ermittlerteam, 03:30 Festnahmen, 05:00 Checkpoint-Wechsel, 05:30 Presse) plus 2 neue TENSION_TIMELINE-Eintraege und 5 neue PHASE_DESCRIPTIONS; 24h-Timeline jetzt vollstaendig lueckenlos von 00:30 bis 06:00.
 - Rollen-/Aftermath-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 214/214 gruen, `npm run build` gruen, Browser-/Socket-Livecheck bestaetigt (Socket `z5ApIUARSI-bF1vHAAAD`).
+- Rollen-Automatik-Block am 16.03.2026 ausgebaut: Der Store besitzt nun phasenbasierte dynamische Reaktionen (`dyn-evening-reinforcement`, `dyn-late-triage`), die abends automatisch Verstaerkung und in der Spaetphase zusaetzliche Triage-Einheiten aktivieren.
+- Rewind-/Replay-Pfad verhaertet: Rueckwaertsspruenge rekonstruieren jetzt nicht nur `SPAWN`/`DESPAWN`, sondern auch `MOVE`, `MOOD_CHANGE`, `BEHAVIOR_CHANGE`, aktuelle Phasenlabels sowie dynamische Rollenreaktionen konsistent aus dem Timeline-Stand.
+- HUD-Operations-Drilldown erweitert: aktive dynamische Rollenreaktionen werden als Live-Badges im Rollenverteilungs-Panel angezeigt.
+- Rollen-Automatik-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 217/217 gruen, `npm run build` gruen, Browser-/Socket-Livecheck bestaetigt (Socket `gfOeXoY-9IyYb1jnAAAF`).
 
 ## Naechster logischer Schritt
-- Phasenabhaengige Eskalations-Automatik je Rollenklasse: Wenn Aggressoren die Sicherheitskraefte ueberwiegen, soll automatisch ein Verstaerkungs-Event ausgeloest werden.
+- Rollen-Trendhistorie im Store halten, damit aus Live-Breakdown echte Verlaufsdiagramme und Korrelationen entstehen.
 - Entscheidungsbasierte Folge-Events: Spieleraktionen sollen zugeschnittene Kettenevents ausloesen (z.B. nach erfolgreicher Epoch-Verifikation wird ein spezifischer Journalist-Mob aktiviert).

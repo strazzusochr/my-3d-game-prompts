@@ -41,6 +41,7 @@ export const HUD = () => {
     const missionProgress = useGameStore(state => state.interactionState.missionProgress);
     const dayStats = useGameStore(state => state.dayStats);
     const showStatistics = useGameStore(state => state.gameState.showStatistics);
+    const firedEventKeys = useGameStore(state => state.firedEventKeys);
     const masterVolume = useGameStore(state => state.gameState.masterVolume);
     const muted = useGameStore(state => state.gameState.muted);
     const interactionState = useGameStore(state => state.interactionState);
@@ -103,6 +104,10 @@ export const HUD = () => {
         EVENING: '#ffaa44',
         LATE: '#ff6666',
     }[telemetry.phaseWindow];
+    const activeRoleResponses = [
+        { key: 'dyn-evening-reinforcement', label: 'Hundertschaft dynamisch aktiviert', color: '#88ddff' },
+        { key: 'dyn-late-triage', label: 'Triage-Korridor dynamisch aktiv', color: '#99ffcc' },
+    ].filter((response) => firedEventKeys.includes(response.key));
 
     // Auto-Scroll to current event
     useEffect(() => {
@@ -749,6 +754,17 @@ export const HUD = () => {
                                         <span style={{ color: '#666' }}> ({telemetry.npcTypeCounts[telemetry.dominantRole] ?? 0} Einh.)</span>
                                     </div>
                                 )}
+                                <div style={{ marginTop: '10px', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                    {activeRoleResponses.length > 0 ? activeRoleResponses.map((response) => (
+                                        <div key={response.key} style={{ padding: '5px 8px', borderRadius: '999px', border: `1px solid ${response.color}55`, background: 'rgba(0,0,0,0.25)', color: response.color, fontSize: '11px', fontWeight: 700, letterSpacing: '0.4px' }}>
+                                            {response.label}
+                                        </div>
+                                    )) : (
+                                        <div style={{ color: '#67808d', fontSize: '11px' }}>
+                                            Keine dynamische Rollenreaktion aktiv.
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                         )}
