@@ -1,6 +1,5 @@
----
 name: security-ci-homepc
-'on':
+on:
   push:
     branches:
       - main

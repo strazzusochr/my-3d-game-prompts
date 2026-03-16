@@ -2,6 +2,7 @@ import net from 'node:net';
 
 import { describe, expect, it } from 'vitest';
 
+// @ts-expect-error - Runtime-MJS wird hier bewusst direkt getestet.
 import { applyResolvedPorts, resolvePorts } from '../../scripts/security/port-check.mjs';
 
 describe('security/port-check', () => {
