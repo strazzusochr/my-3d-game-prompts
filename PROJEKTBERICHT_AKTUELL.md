@@ -135,6 +135,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Das Operations-Overlay zeigt die neuen trendgekoppelten Trigger als eigene aktive Badges.
 - Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 237 von 237 bestanden, Lint und Build gruen.
 
+### 2.0.18 Fensterspezifische Gewichtung vom 16.03.2026
+- Die Korrelations-Engine liefert nun zusaetzlich `phaseBand` (`NIGHT`, `MORNING`, `MIDDAY`, `EVENING`, `LATE`) aus der aktuellen Trendzeit.
+- Das Pfadgewicht wird je Zeitfenster differenziert angepasst, statt global identische Schwellen zu verwenden.
+- Die Runtime nutzt fensterspezifische Profile fuer Skalierung und Triggergrenzen (Synchronisierung/Fracture), wodurch der gleiche Lagezustand zu unterschiedlichen Tageszeiten differenziert bewertet wird.
+- Damit sind Triggerstaerke und Trigger-Schwelle jetzt gleichzeitig trend-, missions- und fenstergekoppelt.
+- Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 238 von 238 bestanden, Lint und Build gruen.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.

@@ -95,7 +95,11 @@
 - Neue trendgekoppelte Runtime-Branches integriert: `dyn-trend-synchronization` (stabilisierender Folgepfad) und `dyn-trend-fracture-wave` (zerfallender Folgepfad) reagieren auf Pfadgewicht plus Trendsignal.
 - Operations-HUD erweitert: trendgekoppelte Branches werden als aktive Badges sichtbar und laufen gemeinsam mit Missionszweigen.
 - Vollverifikation nach Trend-Korrelationsblock erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 237/237.
+- Fensterspezifische Gewichtung am 16.03.2026 integriert: `operationsInsights` liefert jetzt `phaseBand` (NIGHT/MORNING/MIDDAY/EVENING/LATE) und passt das Pfadgewicht je Zeitfenster an.
+- Runtime-Schwellen differenziert: Synchronisierungs- und Fracture-Trigger nutzen nun fensterspezifische Schwellen plus fensterabhaengige Skalierungsfaktoren.
+- Skalierung je Tagesphase aktiv: positive und fallback-Zweige werden je nach `phaseBand` unterschiedlich verstaerkt oder gedrosselt.
+- Vollverifikation nach Fenstergewichtung erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 238/238.
 
 ## Naechster logischer Schritt
-- Gewichtung je Tagesfenster differenzieren: Schwellen und Skalierungsfaktoren fuer MORNING/MIDDAY/EVENING/LATE getrennt justieren.
 - Trend-Historie in Trigger einbinden: Mehrpunkt-Deltas (nicht nur First/Last) fuer robustere Branch-Entscheidungen nutzen.
+- Pfadgewicht mit Rollenverhaeltnis koppeln: dynamische Sicherheits-/Aggressor-Quoten als eigenstaendigen Triggerfaktor ausbauen.

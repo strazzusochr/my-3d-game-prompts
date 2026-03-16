@@ -32,6 +32,7 @@ describe('operations insights', () => {
     expect(insight.confidencePercent).toBeGreaterThanOrEqual(60);
     expect(insight.missionPathWeightPercent).toBeLessThan(100);
     expect(insight.trendSignal).toBe('deteriorating');
+    expect(insight.phaseBand).toBe('MORNING');
   });
 
   it('returns medium priority when mission progress and support are weak', () => {
@@ -52,6 +53,7 @@ describe('operations insights', () => {
     expect(insight.recommendation).toContain('Mittel');
     expect(insight.correlationLine).toContain('Hook-Auslastung');
     expect(insight.correlationLine).toContain('Pfadgewicht');
+    expect(insight.correlationLine).toContain('Fenster');
     expect(insight.missionPathWeightPercent).toBeLessThanOrEqual(100);
     expect(insight.trendSignal).not.toBe('stabilizing');
   });
@@ -74,6 +76,7 @@ describe('operations insights', () => {
     expect(insight.recommendation).toContain('stabil');
     expect(insight.missionPathWeightPercent).toBeGreaterThanOrEqual(95);
     expect(insight.trendSignal).toBe('flat');
+    expect(insight.phaseBand).toBe('MORNING');
   });
 
   it('raises mission path weight for high completion and hook utilization', () => {
@@ -93,6 +96,7 @@ describe('operations insights', () => {
     expect(insight.priority).toBe('low');
     expect(insight.missionPathWeightPercent).toBeGreaterThan(110);
     expect(insight.correlationLine).toContain('Trend');
+    expect(insight.phaseBand).toBe('MORNING');
   });
 
   it('reports stabilizing trend when aggressors and panic drop', () => {
@@ -110,5 +114,37 @@ describe('operations insights', () => {
     });
 
     expect(insight.trendSignal).toBe('stabilizing');
+  });
+
+  it('applies evening/late phase weighting to path score', () => {
+    const midday = getOperationsInsight({
+      trendHistory: baseTrend([
+        { time: '13:00', security: 11, aggressors: 9, support: 5, panicRatioPercent: 20 },
+        { time: '13:30', security: 11, aggressors: 9, support: 5, panicRatioPercent: 20 },
+      ]),
+      dayStats: { killed: 0, arrested: 1, injured: 3, damage: 5000 },
+      missionCompletionPercent: 70,
+      panicRatioPercent: 20,
+      activeHooks: 2,
+      maxHooks: 4,
+      activeDynamicResponses: 2,
+    });
+
+    const late = getOperationsInsight({
+      trendHistory: baseTrend([
+        { time: '22:00', security: 11, aggressors: 9, support: 5, panicRatioPercent: 20 },
+        { time: '22:30', security: 11, aggressors: 9, support: 5, panicRatioPercent: 20 },
+      ]),
+      dayStats: { killed: 0, arrested: 1, injured: 3, damage: 5000 },
+      missionCompletionPercent: 70,
+      panicRatioPercent: 20,
+      activeHooks: 2,
+      maxHooks: 4,
+      activeDynamicResponses: 2,
+    });
+
+    expect(midday.phaseBand).toBe('MIDDAY');
+    expect(late.phaseBand).toBe('LATE');
+    expect(late.missionPathWeightPercent).toBeLessThan(midday.missionPathWeightPercent);
   });
 });

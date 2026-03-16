@@ -361,6 +361,16 @@ const applyDynamicRoleResponses = (
     const aggressorPressure = latestTrend ? latestTrend.aggressors - latestTrend.security : 0;
     const supportReserve = latestTrend ? latestTrend.support : 0;
 
+    const phaseScaleProfile = insight.phaseBand === 'MORNING'
+        ? { positive: 1.08, fallback: 0.92, syncThreshold: 102, fractureThreshold: 93 }
+        : insight.phaseBand === 'MIDDAY'
+            ? { positive: 1.12, fallback: 0.9, syncThreshold: 103, fractureThreshold: 92 }
+            : insight.phaseBand === 'EVENING'
+                ? { positive: 0.94, fallback: 1.12, syncThreshold: 106, fractureThreshold: 96 }
+                : insight.phaseBand === 'LATE'
+                    ? { positive: 0.9, fallback: 1.2, syncThreshold: 108, fractureThreshold: 98 }
+                    : { positive: 1.03, fallback: 0.97, syncThreshold: 103, fractureThreshold: 94 };
+
     let positiveWaveScale = 1;
     if (insight.missionPathWeightPercent >= 120) {
         positiveWaveScale = 1.35;
@@ -387,10 +397,13 @@ const applyDynamicRoleResponses = (
         fallbackWaveScale = Math.max(0.75, fallbackWaveScale - 0.1);
     }
 
+    positiveWaveScale *= phaseScaleProfile.positive;
+    fallbackWaveScale *= phaseScaleProfile.fallback;
+
     if (
         currentMinutes >= 20 * 60 + 30 &&
         getMissionCompletionPercent(missionProgress) >= 80 &&
-        insight.missionPathWeightPercent >= 105 &&
+        insight.missionPathWeightPercent >= phaseScaleProfile.syncThreshold &&
         (insight.trendSignal === 'stabilizing' || insight.trendSignal === 'flat') &&
         !firedSet.has('dyn-trend-synchronization')
     ) {
@@ -422,7 +435,7 @@ const applyDynamicRoleResponses = (
     if (
         currentMinutes >= 21 * 60 + 30 &&
         getMissionCompletionPercent(missionProgress) < 60 &&
-        insight.missionPathWeightPercent <= 95 &&
+        insight.missionPathWeightPercent <= phaseScaleProfile.fractureThreshold &&
         insight.trendSignal !== 'stabilizing' &&
         !firedSet.has('dyn-trend-fracture-wave')
     ) {
