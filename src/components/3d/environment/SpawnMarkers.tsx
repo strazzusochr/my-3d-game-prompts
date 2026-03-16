@@ -11,6 +11,7 @@ interface SpawnPoint {
     time: string;
     title: string;
     details: string[];
+    totalCount: number;
     minutesUntilSpawn: number;
     cardOffsetX: number;
     cardOffsetZ: number;
@@ -91,6 +92,7 @@ export const SpawnMarkers = () => {
             if (grouped.has(key)) {
                 const existing = grouped.get(key)!;
                 existing.details.push(detailLine);
+                existing.totalCount += event.count;
                 existing.emphasis = Math.max(existing.emphasis, emphasis);
             } else {
                 grouped.set(key, {
@@ -101,6 +103,7 @@ export const SpawnMarkers = () => {
                     time: event.time,
                     title: detailLine,
                     details: [detailLine],
+                    totalCount: event.count,
                     minutesUntilSpawn,
                     cardOffsetX,
                     cardOffsetZ,
@@ -110,14 +113,22 @@ export const SpawnMarkers = () => {
             }
         });
 
-        return Array.from(grouped.values()).sort((a, b) => a.minutesUntilSpawn - b.minutesUntilSpawn);
+        return Array.from(grouped.values()).sort((a, b) => {
+            if (a.minutesUntilSpawn !== b.minutesUntilSpawn) {
+                return a.minutesUntilSpawn - b.minutesUntilSpawn;
+            }
+            return b.totalCount - a.totalCount;
+        });
     }, [inGameTime]);
 
     const currentMinutes = timeToMinutes(inGameTime);
     const phaseBand = getPhaseBandForMinutes(currentMinutes);
     const phaseTheme = PHASE_THEME[phaseBand];
-    const denseMode = markers.length >= 6;
-    const mediumDenseMode = markers.length >= 4;
+    const maxVisibleMarkers = 8;
+    const visibleMarkers = markers.slice(0, maxVisibleMarkers);
+    const hiddenMarkerCount = Math.max(0, markers.length - visibleMarkers.length);
+    const denseMode = visibleMarkers.length >= 6;
+    const mediumDenseMode = visibleMarkers.length >= 4;
     const cardScale = denseMode ? 0.82 : mediumDenseMode ? 0.9 : 1;
     const cardWidth = 6.5 * cardScale;
     const cardHeight = 8.5 * cardScale;
@@ -133,7 +144,7 @@ export const SpawnMarkers = () => {
 
     return (
         <group>
-            {markers.map((m, idx) => (
+            {visibleMarkers.map((m, idx) => (
                 <group key={m.id} position={[m.position[0], 0, m.position[2]]}>
                     <mesh
                         rotation={[-Math.PI / 2, 0, 0]}
@@ -239,6 +250,20 @@ export const SpawnMarkers = () => {
                             >
                                 {m.details.slice(0, detailMaxLines).join('\n')}
                             </Text>
+
+                            {hiddenMarkerCount > 0 && idx === visibleMarkers.length - 1 && (
+                                <Text
+                                    position={[0, -1.25 * cardScale, 0.03]}
+                                    fontSize={0.34 * baseFont}
+                                    color="#ff9f6e"
+                                    anchorX="center"
+                                    anchorY="middle"
+                                    outlineWidth={0.02}
+                                    outlineColor="#000"
+                                >
+                                    {`+ ${hiddenMarkerCount} weitere Spawn-Karten priorisiert ausgeblendet`}
+                                </Text>
+                            )}
 
                             <Text
                                 position={[0, countdownY, 0.03]}

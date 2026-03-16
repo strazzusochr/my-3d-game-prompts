@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 10:34:48 +01:00
-- Repo-Head: 8e2389a (vor Spawn-Marker-Phasenkalibrierung)
+- Zeitstempel: 2026-03-16 10:40:59 +01:00
+- Repo-Head: a8483ed (vor Spawn-Marker-Dichtepriorisierung)
 - Nachweislauf: npm run autonomy:full PASS (inkl. lint PASS + tests 239/239 PASS + build PASS + live proof PASS)
 - Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_239_239 + BUILD_PASS + LIVE_SOCKET_PASS + MASTER_80000_PASS
 - Gates: Lint PASS, Tests 239/239 PASS, Build PASS, Browser-/Socket-Livecheck PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: geaendert fuer SpawnMarker-Phasenkalibrierung + adaptive Kartenkompression nach Marker-Dichte
+- Arbeitsbaum: geaendert fuer SpawnMarker-Priorisierung bei hoher Dichte (Top-8 sichtbar + Hinweis auf ausgeblendete Karten)
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -79,6 +79,7 @@ Bewertungsstufen:
 | P-019 | SpawnMarker-Zeitfenster und Fotostil umgesetzt | Vertikal | 100 | PASS | Marker nur T-10 bis T-5 sichtbar, danach Ausblendung; Neon-Card am Spawn-Ort |
 | P-020 | SpawnMarker-Feintuning fuer Live-Lesbarkeit umgesetzt | Vertikal | 100 | PASS | Offset-Lanes gegen Karten-Overlap, Standfuss/Standsaeule, detailreduzierte Kartenzeilen |
 | P-021 | SpawnMarker-Phasenkalibrierung umgesetzt | Vertikal | 100 | PASS | Tagesphasen-Theme (NIGHT/MORNING/MIDDAY/EVENING/LATE) + adaptive Kartengroesse/Detailtiefe je Marker-Dichte |
+| P-022 | SpawnMarker-Dichtepriorisierung umgesetzt | Vertikal | 100 | PASS | Bei hoher Last nur priorisierte Top-8 Marker sichtbar, Rest als Sammelhinweis ausgeblendet |
 
 ---
 
@@ -122,7 +123,7 @@ Die nachfolgende Deep-Gap-Matrix beschreibt darueber hinausgehende Ausbauziele d
 | Audio-Engine (Teil 33) | VOLLSTAENDIG | 100 | — | Erledigt: Kategorien + Ducking + 3 neue Sounds + SFX-Trigger |
 | NPC-KI/Behavior | Rollen-Automatik + Korrelations-Folgeevents + trendkorrelierte Branch-Reaktionen aktiv | 93 | Gegenseitige Fraktionsreaktionen und adaptive Schwellwerte fehlen noch | Eskalations-Gegenlogik und adaptive Triggerkurven integrieren |
 | Mission/24h-Szenario | Aftermath-Nacht-Kette + Korrelationsfolgeevents + gewichtete, trend-, fenster- und mehrpunktgekoppelte Missions-Ergebnisbaeume aktiv | 100 | — | Erledigt: Mehrpunkt-Momentum/Turbulenz als Triggerbasis integriert |
-| UI/HUD-Komplettheit | Operations-Korrelation + Folgeevent-Badges + Trendlinien + gewichtete und trendkorrelierte Branches sichtbar; Spawn-Neonmarker inkl. Feintuning und Phasenkalibrierung aktiv | 100 | — | Erledigt: Spawn-Ort-Visualisierung zeitgesteuert (T-10..T-5), entzerrt und je Tagesphase visuell kalibriert |
+| UI/HUD-Komplettheit | Operations-Korrelation + Folgeevent-Badges + Trendlinien + gewichtete und trendkorrelierte Branches sichtbar; Spawn-Neonmarker inkl. Feintuning, Phasenkalibrierung und Dichtepriorisierung aktiv | 100 | — | Erledigt: Spawn-Ort-Visualisierung zeitgesteuert (T-10..T-5), entzerrt, je Tagesphase kalibriert und bei Last priorisiert |
 | Quality-Gates 700+ | VOLLSTAENDIG | 100 | — | Erledigt: 239/239 Tests gruen, comprehensive.test.ts deckt 700+ Assertions ab |
 
 Realistische Gesamt-Reife (Deep, ausserhalb Pflichtumfang): 100%

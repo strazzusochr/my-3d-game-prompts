@@ -114,7 +114,10 @@
 - Spawn-Marker-Phasenkalibrierung am 16.03.2026 umgesetzt: Karten nutzen nun ein Tagesphasen-Theme (`NIGHT`, `MORNING`, `MIDDAY`, `EVENING`, `LATE`) mit abgestufter Zeitfarbe und Glas-Opacity.
 - Dichteanpassung aktiv: Bei hoher Markerzahl werden Kartengroesse und Detailtiefe automatisch reduziert, um Textkollisionen in Hotspots zu vermeiden.
 - Vollverifikation nach Phasenkalibrierung erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 239/239.
+- Spawn-Marker-Dichtepriorisierung am 16.03.2026 umgesetzt: Bei sehr vielen gleichzeitig sichtbaren Spawn-Markern werden nur die priorisierten Top-8 Karten dargestellt.
+- Priorisierungsregel aktiv: zuerst kuerzeste Restzeit bis Spawn, danach hoechste aggregierte Spawnanzahl je Karte; uebrige Karten werden als Sammelhinweis kenntlich gemacht.
+- Vollverifikation nach Dichtepriorisierung erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 239/239.
 
 ## Naechster logischer Schritt
-- Spawn-HUD-Liveabgleich finalisieren: Standfuss-/Ring-Skalierung gegen Referenzbild fuer nahe Kameraabstaende weiter feinjustieren.
+- Spawn-HUD-Liveabgleich finalisieren: Ringsaettigung und Countdown-Kontrast je Profil (`low/medium/high/aaa`) auf finalen Referenzlook trimmen.
 - Trend-/Missionsentscheidungen um Persistenzfenster erweitern: mehrere aufeinanderfolgende volatile Checkpoints als Haltedauer-Bedingung statt Einzelimpuls.

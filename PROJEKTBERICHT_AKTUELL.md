@@ -170,6 +170,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Die Taktiklesbarkeit bleibt dadurch auch in Stoßzeiten stabil, ohne die T-10 bis T-5 Sichtfensterregel zu verletzen.
 - Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 239 von 239 bestanden, Lint und Build gruen.
 
+### 2.0.23 Spawn-Marker-Priorisierung bei Lastspitzen vom 16.03.2026
+- Fuer sehr dichte Spawn-Phasen wurde ein Priorisierungslimit eingefuehrt: maximal acht Spawn-Karten werden gleichzeitig sichtbar dargestellt.
+- Die Priorisierung folgt operativer Relevanz: zuerst kuerzeste Restzeit bis Spawn, dann hoechste aggregierte Spawnmenge pro Karte.
+- Nicht dargestellte Karten werden nicht still verworfen, sondern als Sammelhinweis auf der letzten sichtbaren Karte transparent kommuniziert.
+- Damit bleibt die Karte bei Lastspitzen lesbar und entscheidungsfaehig, ohne die zeitliche Spawn-Vorschau oder Datenintegritaet zu verlieren.
+- Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 239 von 239 bestanden, Lint und Build gruen.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
