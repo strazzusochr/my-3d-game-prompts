@@ -244,6 +244,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Commits: `cee7810` (entkoppelt panel-controls von drag-events), `0184896` (verschieben nur noch ueber expliziten drag-handle).
 - Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Tests 243/243 gruen.
 
+### 2.0.34 HUD-Drag-Regressionstest und Helper-Extraktion vom 16.03.2026
+- Der kritische Drag-Pfad wurde in zwei kleine pure Helper ausgelagert: `canStartHudDrag` und `computeHudDragOffset` in `src/components/ui/hudDrag.ts`.
+- `src/components/ui/HUD.tsx` nutzt diese Helper jetzt direkt im `makeHandleDrag`-Pfad, wodurch die eigentliche Panel-Komponente schlanker und nachvollziehbarer bleibt.
+- Neuer Regressionstest `src/tests/hudDrag.test.ts` deckt die zwei Kernregeln gezielt ab: Drag startet nur im Edit-Modus mit linker Maustaste und Offset-Berechnung erfolgt korrekt aus Ursprung plus Pointer-Delta.
+- Commit: `7d8a6ac` (`test(hud): add drag helper regression coverage`).
+- Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Gesamtstand jetzt 245/245 Tests gruen.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
