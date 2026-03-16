@@ -22,6 +22,8 @@
  *   RETREAT       — Geordneter Rückzug
  */
 
+import { computeAdaptiveBehavior, isAgitatorType, isPoliceType } from '../systems/ai/behaviorEscalation';
+
 interface WorkerNPC {
     id: number;
     type: string;
@@ -363,10 +365,17 @@ function updateBehaviors(dt: number) {
             npc.targetZ = 35 + (Math.random() - 0.5) * 3;
         }
 
-        // === CLUSTERING & AVOIDANCE ===
+        // === CLUSTERING, THREAT-SCAN & AVOIDANCE ===
         let neighborCount = 0;
         let avgX = 0;
         let avgZ = 0;
+        let hostileNearby = 0;
+        let policeNearby = 0;
+        let agitatorNearby = 0;
+        let panicNearby = 0;
+
+        const selfIsPolice = isPoliceType(npc.type);
+        const selfIsAgitator = isAgitatorType(npc.type);
 
         const step = Math.max(1, Math.floor(npcs.length / 5));
         for (let j = 0; j < npcs.length; j += step) {
@@ -379,7 +388,43 @@ function updateBehaviors(dt: number) {
                 neighborCount++;
                 avgX += other.x;
                 avgZ += other.z;
+
+                if (isPoliceType(other.type)) {
+                    policeNearby++;
+                    if (selfIsAgitator) {
+                        hostileNearby++;
+                    }
+                }
+
+                if (isAgitatorType(other.type)) {
+                    agitatorNearby++;
+                    if (selfIsPolice || npc.type === 'DEMONSTRATOR' || npc.type === 'ORGANIZER' || npc.type === 'KRAUSE') {
+                        hostileNearby++;
+                    }
+                }
+
+                if (other.behavior === 'FLEE' || other.behavior === 'RETREAT') {
+                    panicNearby++;
+                }
             }
+        }
+
+        const adaptiveBehavior = computeAdaptiveBehavior({
+            type: npc.type,
+            behavior: npc.behavior,
+            tension: currentTension,
+            hostileNearby,
+            policeNearby,
+            agitatorNearby,
+            panicNearby,
+        });
+
+        if (adaptiveBehavior !== npc.behavior) {
+            npc.behavior = adaptiveBehavior;
+            npc.speed = getSpeed(npc.type, npc.behavior);
+            npc.targetX = undefined;
+            npc.targetZ = undefined;
+            npc.behaviorTimer = Math.max(0.4, npc.behaviorTimer);
         }
 
         let currentSpeed = npc.speed;
