@@ -65,6 +65,8 @@ interface ReplayQualityState {
     recentStabilityTrend: ReplayQualityStability[];
     riskLevel: ReplayRiskLevel;
     riskHint: ReplayRiskHint;
+    riskLastHighAnchorTime: string | null;
+    riskRecoveryMinutes: number | null;
 }
 
 interface GameStore {
@@ -95,6 +97,8 @@ interface GameStore {
         replayQualityRecentTrend: ReplayQualityStability[];
         replayRiskLevel: ReplayRiskLevel;
         replayRiskHint: ReplayRiskHint;
+        replayRiskLastHighAnchorTime: string | null;
+        replayRiskRecoveryMinutes: number | null;
         // === CHUNK 11: Dynamisches System ===
         playerReputation: number;  // -100 (brutal) bis +100 (fair)
         moralScore: number;        // 0 (böse) bis 100 (gut)
@@ -174,7 +178,19 @@ const persistedReplayState = persistedRuntimeSnapshot?.replayState ?? {
         recentStabilityTrend: [] as ReplayQualityStability[],
         riskLevel: 'low' as ReplayRiskLevel,
         riskHint: 'Stabiler Replay-Betrieb.' as ReplayRiskHint,
+        riskLastHighAnchorTime: null as string | null,
+        riskRecoveryMinutes: null as number | null,
     },
+};
+
+const getMinutesSinceAnchor = (referenceClock: string, anchorClock: string) => {
+    const referenceMinutes = timeToMinutes(referenceClock);
+    const anchorMinutes = timeToMinutes(anchorClock);
+    let delta = referenceMinutes - anchorMinutes;
+    if (delta < 0) {
+        delta += 24 * 60;
+    }
+    return delta;
 };
 
 const pushReplayHistory = (
@@ -208,6 +224,7 @@ const getReplayQualityState = (
     history: ReplayRebuildHistoryEntry[],
     referenceClock: string,
     previousTrend: ReplayQualityStability[],
+    previousLastHighAnchorTime: string | null,
 ): ReplayQualityState => {
     const referenceMinutes = timeToMinutes(referenceClock);
     const inWindow = history.filter((entry) => {
@@ -238,6 +255,12 @@ const getReplayQualityState = (
             : riskLevel === 'medium'
                 ? 'Rewind-Takt reduzieren und grobere Spruenge nutzen.'
                 : 'Stabiler Replay-Betrieb.';
+    const riskLastHighAnchorTime = riskLevel === 'high' ? referenceClock : previousLastHighAnchorTime;
+    const riskRecoveryMinutes = riskLevel === 'high'
+        ? 0
+        : riskLastHighAnchorTime
+            ? getMinutesSinceAnchor(referenceClock, riskLastHighAnchorTime)
+            : null;
 
     return {
         windowMinutes: REPLAY_QUALITY_WINDOW_MINUTES,
@@ -247,6 +270,8 @@ const getReplayQualityState = (
         recentStabilityTrend: pushReplayQualityTrend(previousTrend, stability),
         riskLevel,
         riskHint,
+        riskLastHighAnchorTime,
+        riskRecoveryMinutes,
     };
 };
 
@@ -276,6 +301,8 @@ const buildRuntimeSnapshot = (state: GameStore): RuntimeSnapshot => ({
             recentStabilityTrend: state.gameState.replayQualityRecentTrend,
             riskLevel: state.gameState.replayRiskLevel,
             riskHint: state.gameState.replayRiskHint,
+            riskLastHighAnchorTime: state.gameState.replayRiskLastHighAnchorTime,
+            riskRecoveryMinutes: state.gameState.replayRiskRecoveryMinutes,
         },
     },
 });
@@ -1118,6 +1145,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         replayQualityRecentTrend: persistedReplayState.quality.recentStabilityTrend,
         replayRiskLevel: persistedReplayState.quality.riskLevel,
         replayRiskHint: persistedReplayState.quality.riskHint,
+        replayRiskLastHighAnchorTime: persistedReplayState.quality.riskLastHighAnchorTime,
+        replayRiskRecoveryMinutes: persistedReplayState.quality.riskRecoveryMinutes,
         playerReputation: persistedRuntimeSnapshot?.playerReputation ?? RUNTIME_DEFAULTS.playerReputation,
         moralScore: persistedRuntimeSnapshot?.moralScore ?? RUNTIME_DEFAULTS.moralScore,
         showStatistics: false,
@@ -1164,6 +1193,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityRecentTrend: [],
                 replayRiskLevel: 'low',
                 replayRiskHint: 'Stabiler Replay-Betrieb.',
+                replayRiskLastHighAnchorTime: null,
+                replayRiskRecoveryMinutes: null,
                 playerReputation: 0, moralScore: 50, showStatistics: false,
                 masterVolume: 0.5, muted: false
             }
@@ -1260,6 +1291,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 state.gameState.replayRebuildHistory,
                 currentTime,
                 state.gameState.replayQualityRecentTrend,
+                state.gameState.replayRiskLastHighAnchorTime,
             );
 
             return {
@@ -1284,6 +1316,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     replayQualityRecentTrend: replayQuality.recentStabilityTrend,
                     replayRiskLevel: replayQuality.riskLevel,
                     replayRiskHint: replayQuality.riskHint,
+                    replayRiskLastHighAnchorTime: replayQuality.riskLastHighAnchorTime,
+                    replayRiskRecoveryMinutes: replayQuality.riskRecoveryMinutes,
                     showStatistics: crossedMidnight ? true : state.gameState.showStatistics,
                 }
             };
@@ -1333,6 +1367,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             replayRebuildHistory,
             newTime,
             state.gameState.replayQualityRecentTrend,
+            state.gameState.replayRiskLastHighAnchorTime,
         );
 
         workerManager.syncNpcs(dynamicState.npcs);
@@ -1358,6 +1393,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityRecentTrend: replayQuality.recentStabilityTrend,
                 replayRiskLevel: replayQuality.riskLevel,
                 replayRiskHint: replayQuality.riskHint,
+                replayRiskLastHighAnchorTime: replayQuality.riskLastHighAnchorTime,
+                replayRiskRecoveryMinutes: replayQuality.riskRecoveryMinutes,
             }
         });
         persistCurrentRuntimeSnapshot(get());
@@ -1409,6 +1446,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             replayRebuildHistory,
             newTime,
             state.gameState.replayQualityRecentTrend,
+            state.gameState.replayRiskLastHighAnchorTime,
         );
 
         workerManager.syncNpcs(dynamicState.npcs);
@@ -1434,6 +1472,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityRecentTrend: replayQuality.recentStabilityTrend,
                 replayRiskLevel: replayQuality.riskLevel,
                 replayRiskHint: replayQuality.riskHint,
+                replayRiskLastHighAnchorTime: replayQuality.riskLastHighAnchorTime,
+                replayRiskRecoveryMinutes: replayQuality.riskRecoveryMinutes,
             }
         });
         persistCurrentRuntimeSnapshot(get());
@@ -1476,6 +1516,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayQualityRecentTrend: [],
                 replayRiskLevel: 'low',
                 replayRiskHint: 'Stabiler Replay-Betrieb.',
+                replayRiskLastHighAnchorTime: null,
+                replayRiskRecoveryMinutes: null,
                 playerReputation: get().gameState.playerReputation,
                 moralScore: get().gameState.moralScore,
                 showStatistics: false,

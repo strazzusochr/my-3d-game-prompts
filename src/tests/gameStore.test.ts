@@ -69,6 +69,8 @@ const resetStore = () => {
       replayQualityRecentTrend: [],
       replayRiskLevel: 'low',
       replayRiskHint: 'Stabiler Replay-Betrieb.',
+      replayRiskLastHighAnchorTime: null,
+      replayRiskRecoveryMinutes: null,
       playerReputation: 0,
       moralScore: 50,
       showStatistics: false,
@@ -603,6 +605,7 @@ describe('gameStore core flow', () => {
     expect(['stable', 'watch', 'critical']).toContain(state.gameState.replayQualityRecentTrend[0]);
     expect(['low', 'medium', 'high']).toContain(state.gameState.replayRiskLevel);
     expect(state.gameState.replayRiskHint.length).toBeGreaterThan(0);
+    expect(state.gameState.replayRiskRecoveryMinutes === null || state.gameState.replayRiskRecoveryMinutes >= 0).toBe(true);
 
     const rawSnapshot = window.localStorage.getItem(RUNTIME_SNAPSHOT_KEY);
     expect(rawSnapshot).not.toBeNull();
@@ -627,6 +630,8 @@ describe('gameStore core flow', () => {
           recentStabilityTrend: Array<'stable' | 'watch' | 'critical'>;
           riskLevel: 'low' | 'medium' | 'high';
           riskHint: string;
+          riskLastHighAnchorTime: string | null;
+          riskRecoveryMinutes: number | null;
         };
       };
     };
@@ -643,6 +648,29 @@ describe('gameStore core flow', () => {
     expect(snapshot.replayState.quality.recentStabilityTrend.length).toBeGreaterThan(0);
     expect(['low', 'medium', 'high']).toContain(snapshot.replayState.quality.riskLevel);
     expect(snapshot.replayState.quality.riskHint.length).toBeGreaterThan(0);
+    expect(snapshot.replayState.quality.riskRecoveryMinutes === null || snapshot.replayState.quality.riskRecoveryMinutes >= 0).toBe(true);
+  });
+
+  it('tracks replay recovery minutes since last high risk anchor', () => {
+    useGameStore.setState((state) => ({
+      ...state,
+      gameState: {
+        ...state.gameState,
+        inGameTime: '21:00',
+        replayRebuildHistory: [],
+        replayRiskLevel: 'low',
+        replayRiskHint: 'Stabiler Replay-Betrieb.',
+        replayRiskLastHighAnchorTime: '20:00',
+        replayRiskRecoveryMinutes: 0,
+      },
+    }));
+
+    useGameStore.getState().evaluateEvents('21:30');
+    const state = useGameStore.getState();
+
+    expect(state.gameState.replayRiskLevel).toBe('low');
+    expect(state.gameState.replayRiskLastHighAnchorTime).toBe('20:00');
+    expect(state.gameState.replayRiskRecoveryMinutes).toBe(90);
   });
 
   it('records role trend snapshots while time progresses', () => {

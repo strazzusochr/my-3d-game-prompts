@@ -50,6 +50,8 @@ interface RuntimeReplayQuality {
     recentStabilityTrend: Array<'stable' | 'watch' | 'critical'>;
     riskLevel: 'low' | 'medium' | 'high';
     riskHint: 'Stabiler Replay-Betrieb.' | 'Rewind-Takt reduzieren und grobere Spruenge nutzen.' | 'Replay-Risiko hoch: Rewind-Frequenz sofort senken.';
+    riskLastHighAnchorTime: string | null;
+    riskRecoveryMinutes: number | null;
 }
 
 export interface RuntimeSnapshot {
@@ -78,6 +80,18 @@ const ALLOWED_ZONE_IDS = new Set<InteractionZoneId>([
 const hasStorage = () => typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+
+const getMinutesSinceAnchor = (referenceClock: string, anchorClock: string) => {
+    const referenceParts = referenceClock.split(':').map(Number);
+    const anchorParts = anchorClock.split(':').map(Number);
+    const referenceMinutes = referenceParts[0] * 60 + referenceParts[1];
+    const anchorMinutes = anchorParts[0] * 60 + anchorParts[1];
+    let delta = referenceMinutes - anchorMinutes;
+    if (delta < 0) {
+        delta += 24 * 60;
+    }
+    return delta;
+};
 
 const normalizeClock = (value: unknown) => {
     if (typeof value !== 'string') return '06:00';
@@ -203,6 +217,22 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
         qualityObj.riskHint === 'Rewind-Takt reduzieren und grobere Spruenge nutzen.'
             ? qualityObj.riskHint
             : 'Stabiler Replay-Betrieb.';
+    let qualityRiskLastHighAnchorTime =
+        typeof qualityObj.riskLastHighAnchorTime === 'string'
+            ? normalizeClock(qualityObj.riskLastHighAnchorTime)
+            : null;
+    let qualityRiskRecoveryMinutes =
+        typeof qualityObj.riskRecoveryMinutes === 'number' && Number.isFinite(qualityObj.riskRecoveryMinutes)
+            ? clamp(Math.round(qualityObj.riskRecoveryMinutes), 0, 24 * 60)
+            : null;
+
+    if (qualityRiskLevel === 'high') {
+        qualityRiskLastHighAnchorTime = anchorTime;
+        qualityRiskRecoveryMinutes = 0;
+    } else if (qualityRiskLastHighAnchorTime && qualityRiskRecoveryMinutes === null) {
+        qualityRiskRecoveryMinutes = getMinutesSinceAnchor(anchorTime, qualityRiskLastHighAnchorTime);
+    }
+
     const qualityTrend = Array.isArray(qualityObj.recentStabilityTrend)
         ? qualityObj.recentStabilityTrend
             .filter(
@@ -226,6 +256,8 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
             recentStabilityTrend: qualityTrend,
             riskLevel: qualityRiskLevel,
             riskHint: qualityRiskHint,
+            riskLastHighAnchorTime: qualityRiskLastHighAnchorTime,
+            riskRecoveryMinutes: qualityRiskRecoveryMinutes,
         },
     };
 };

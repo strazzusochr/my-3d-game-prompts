@@ -176,6 +176,11 @@
 - HUD-Operationsansicht erweitert: zusaetzlicher Badge `Replay-Risiko` sowie live sichtbarer `Risiko-Hinweis` fuer direktes Operator-Handeln.
 - Testabdeckung erweitert: `runtimePersistence.test.ts` verifiziert Risiko-Sanitisierung, `gameStore.test.ts` prueft Risiko-Felder im Store und Snapshot nach Rewind.
 - Vollverifikation nach Replay-Risikoampel erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 251/251.
+- Replay-Recovery-Indikator am 16.03.2026 umgesetzt: Store fuehrt jetzt `replayRiskLastHighAnchorTime` und `replayRiskRecoveryMinutes` als laufende Erholungsmetrik seit letztem `high`-Risiko.
+- Snapshot erweitert: `runtimePersistence` persistiert und sanitisiert `riskLastHighAnchorTime`/`riskRecoveryMinutes` robust (inkl. Auto-Ableitung bei fehlendem Recovery-Wert).
+- HUD-Operationsansicht erweitert: neue Live-Kennzahlen `Recovery seit HIGH` und `Letzter HIGH-Anker` direkt im operativen Replay-Block sichtbar.
+- Testabdeckung erweitert: `runtimePersistence.test.ts` und `gameStore.test.ts` pruefen Recovery-Felder in Store und Snapshot inklusive Verlauf ueber Zeit.
+- Vollverifikation nach Replay-Recovery-Indikator erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 252/252.
 
 ## Naechster logischer Schritt
-- Replay-Risikoampel ist geschlossen; naechster Ausbaupunkt ist ein kurzer Replay-Recovery-Indikator (Zeit seit letztem `high`-Risiko) im Operations-Panel inkl. Snapshot-Nachweis.
+- Replay-Recovery ist geschlossen; naechster Ausbaupunkt ist ein Replay-Cooldown-Hinweis mit Schwellwertampel (z. B. <30m, 30-90m, >90m) im Operations-Panel inkl. Snapshot-Nachweis.

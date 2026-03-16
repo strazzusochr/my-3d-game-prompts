@@ -51,6 +51,14 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Testnachweis erweitert: Risiko-Persistenz/Sanitisierung in `runtimePersistence.test.ts` und Store-/Snapshot-Nachweis nach Rewind in `gameStore.test.ts`.
 - Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 251 von 251 gruen, Build gruen.
 
+### 2.0.37 Replay-Recovery-Indikator (Zeit seit letztem HIGH) vom 16.03.2026
+- Die Replay-Risikoauswertung wurde um eine Erholungsmetrik erweitert: Store fuehrt jetzt `replayRiskLastHighAnchorTime` (letzter HIGH-Anker) und `replayRiskRecoveryMinutes` (Minuten seitdem).
+- Verhalten ist konsistent geregelt: bei `riskLevel=high` wird der HIGH-Anker auf die aktuelle Replayzeit gesetzt und Recovery auf 0; bei niedrigeren Stufen steigt der Recovery-Wert automatisch mit der Zeit.
+- `runtimePersistence` speichert die Felder unter `replayState.quality.riskLastHighAnchorTime` und `replayState.quality.riskRecoveryMinutes` und sanitisiert/rekonstruiert sie robust beim Laden.
+- Das Operations-Panel zeigt die neuen Live-Werte `Recovery seit HIGH` und `Letzter HIGH-Anker` direkt neben Risikoampel und Hinweis.
+- Testnachweis erweitert: Persistenz-/Sanitisierungsnachweise in `runtimePersistence.test.ts` sowie Store-/Snapshot-Verlaufstest in `gameStore.test.ts`.
+- Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 252 von 252 gruen, Build gruen.
+
 ### 2.0.1 Viewer- und Lastnachweis vom 16.03.2026
 - Zwei weitere Viewer-Seiten wurden geoeffnet und der Health-Endpunkt achtmal im Abstand von rund 1,5 Sekunden abgefragt.
 - Der Stream benoetigte eine kurze Aufwaermphase: zuerst `viewerFps=0`, danach stabile Werte zwischen 22 und 24 FPS.

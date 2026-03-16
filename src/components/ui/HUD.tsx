@@ -73,6 +73,8 @@ export const HUD = () => {
     const replayQualityRecentTrend = useGameStore(state => state.gameState.replayQualityRecentTrend);
     const replayRiskLevel = useGameStore(state => state.gameState.replayRiskLevel);
     const replayRiskHint = useGameStore(state => state.gameState.replayRiskHint);
+    const replayRiskLastHighAnchorTime = useGameStore(state => state.gameState.replayRiskLastHighAnchorTime);
+    const replayRiskRecoveryMinutes = useGameStore(state => state.gameState.replayRiskRecoveryMinutes);
     const playerReputation = useGameStore(state => state.gameState.playerReputation);
     const moralScore = useGameStore(state => state.gameState.moralScore);
     const npcCount = useGameStore(state => state.npcs.length);
@@ -1028,6 +1030,8 @@ export const HUD = () => {
                                         <span style={{ color: '#9edfff' }}>Rebuilds im Fenster</span><span style={{ color: '#ffcc66', fontWeight: 700 }}>{replayQualityRebuildCount} / {replayQualityWindowMinutes}m</span>
                                         <span style={{ color: '#9edfff' }}>Avg Events/Rebuild</span><span style={{ color: '#c6d9ff', fontWeight: 700 }}>{replayQualityAvgEvents}</span>
                                         <span style={{ color: '#9edfff' }}>Risiko-Hinweis</span><span style={{ color: replayRiskLevel === 'high' ? '#ff7777' : replayRiskLevel === 'medium' ? '#ffcc66' : '#99ffcc', fontWeight: 700 }}>{replayRiskHint}</span>
+                                        <span style={{ color: '#9edfff' }}>Recovery seit HIGH</span><span style={{ color: replayRiskRecoveryMinutes === null ? '#67808d' : '#99ffcc', fontWeight: 700 }}>{replayRiskRecoveryMinutes === null ? 'n/a' : `${replayRiskRecoveryMinutes}m`}</span>
+                                        <span style={{ color: '#9edfff' }}>Letzter HIGH-Anker</span><span style={{ color: replayRiskLastHighAnchorTime ? '#c6d9ff' : '#67808d', fontWeight: 700 }}>{replayRiskLastHighAnchorTime ?? 'n/a'}</span>
                                     </div>
                                     <div style={{ marginTop: '10px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '8px' }}>
                                         <div style={{ color: '#9edfff', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: '6px' }}>
