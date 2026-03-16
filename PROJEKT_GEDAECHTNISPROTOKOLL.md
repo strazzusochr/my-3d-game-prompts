@@ -21,6 +21,8 @@
 - Praktischer Capture-Fallback bestaetigt: in allen Profilen blieb `transportSource=canvas-webrtc`; der experimentelle `tab-webrtc`-Pfad wurde in dieser Umgebung nicht aktiv.
 - Viewer-Metrik unter Last ist profilabhaengig und nicht in jedem Snapshot stabil, war aber in allen vier Profilphasen reproduzierbar groesser als 0.
 - `.gitignore` wurde auf Artefakt-Trennung erweitert, damit `dist/`, `hf_space_pull/` und lokale Env-Dateien kuenftig nicht mit Quellcodeaenderungen vermischt werden.
+- Vollautonomie-Lauf am 16.03.2026 erneut ausgefuehrt: Live-Health und Profilumschaltung (`low -> medium -> high -> aaa -> low`) erfolgreich, konsistente Server-Zahlen `publicPort=7860`, `internalPort=3099`, `transportSource=canvas-webrtc`, `clients=1`.
+- Finaler Quality-Gate-Nachweis am 16.03.2026 im Einzelmodus erfolgreich: `npm run lint` gruen, `vitest` 7 von 7 gruen, Build gruen (`BUILD_OK`).
 
 ## Naechster logischer Schritt
 - Projektbericht mit frischen Verifikationsdaten pflegen und kuenftige Quellcodeaenderungen gegen diesen Referenzstand abgleichen.
