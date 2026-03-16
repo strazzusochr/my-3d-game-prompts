@@ -78,6 +78,12 @@ interface GameStore {
 
 let nextNpcId = 1000;
 
+interface WorldReplayState {
+    npcs: NPCData[];
+    dayStats: DayStats;
+    firedSet: Set<string>;
+}
+
 /** Helper: create NPCs of a given type at a position with radius */
 function createNpcs(
     type: NPCType, count: number, position: [number, number, number], radius: number,
@@ -145,6 +151,131 @@ const applyDayStatsDelta = (dayStats: DayStats, delta: Partial<DayStats>): DaySt
     injured: dayStats.injured + (delta.injured ?? 0),
     damage: dayStats.damage + (delta.damage ?? 0),
 });
+
+const getTensionLevelForMinutes = (currentMinutes: number) => {
+    let tensionLevel = 10;
+    for (const t of TENSION_TIMELINE) {
+        if (timeToMinutes(t.time) <= currentMinutes) {
+            tensionLevel = t.level;
+        }
+    }
+    return tensionLevel;
+};
+
+const getPhaseLabelForMinutes = (currentMinutes: number, fallbackLabel: string) => {
+    let currentPhaseLabel = fallbackLabel;
+    for (const p of PHASE_DESCRIPTIONS) {
+        if (timeToMinutes(p.time) <= currentMinutes) {
+            currentPhaseLabel = p.label;
+        }
+    }
+    return currentPhaseLabel;
+};
+
+const applyNpcState = (
+    npc: NPCData,
+    targetMood?: NPCMood,
+    targetBehavior?: NPCBehavior,
+): NPCData => ({
+    ...npc,
+    mood: targetMood ?? npc.mood,
+    behavior: targetBehavior ?? npc.behavior,
+    emotionalState: targetMood ? moodToEmotionalState(targetMood) : npc.emotionalState,
+});
+
+const spawnDynamicWave = (
+    npcs: NPCData[],
+    type: NPCType,
+    count: number,
+    position: [number, number, number],
+    radius: number,
+    mood: NPCMood,
+    behavior: NPCBehavior,
+) => {
+    const maxCanSpawn = Math.max(0, MAX_ACTIVE_NPCS - npcs.length);
+    const effectiveCount = Math.min(count, maxCanSpawn);
+
+    if (effectiveCount <= 0) {
+        return npcs;
+    }
+
+    return [...npcs, ...createNpcs(type, effectiveCount, position, radius, mood, behavior)];
+};
+
+const applyDynamicRoleResponses = (
+    npcs: NPCData[],
+    dayStats: DayStats,
+    firedSet: Set<string>,
+    currentMinutes: number,
+): WorldReplayState => {
+    let nextNpcs = npcs;
+    let nextDayStats = dayStats;
+
+    if (
+        currentMinutes >= 18 * 60 &&
+        !firedSet.has('dyn-evening-reinforcement')
+    ) {
+        const spawned = spawnDynamicWave(nextNpcs, NPCType.RIOT_POLICE, 6, [0, 0, 58], 9, NPCMood.TENSE, NPCBehavior.SHIELD_WALL);
+        if (spawned !== nextNpcs) {
+            nextNpcs = spawned;
+            nextDayStats = applyDayStatsDelta(nextDayStats, { injured: -1, damage: -1600 });
+            firedSet.add('dyn-evening-reinforcement');
+        }
+    }
+
+    if (
+        currentMinutes >= 21 * 60 &&
+        !firedSet.has('dyn-late-triage')
+    ) {
+        const spawned = spawnDynamicWave(nextNpcs, NPCType.MEDIC, 2, [42, 0, 24], 7, NPCMood.TENSE, NPCBehavior.CLEANUP);
+        if (spawned !== nextNpcs) {
+            nextNpcs = spawned;
+            nextDayStats = applyDayStatsDelta(nextDayStats, { injured: -2, damage: -900 });
+            firedSet.add('dyn-late-triage');
+        }
+    }
+
+    return { npcs: nextNpcs, dayStats: nextDayStats, firedSet };
+};
+
+const replayWorldStateToMinutes = (currentMinutes: number): WorldReplayState => {
+    nextNpcId = 1000;
+    const firedSet = new Set<string>();
+    let npcs: NPCData[] = [];
+    let dayStats: DayStats = { killed: 0, arrested: 0, injured: 0, damage: 0 };
+
+    EVENT_TIMELINE.forEach((event, index) => {
+        const eventKey = `evt-${index}`;
+        const eventMinutes = timeToMinutes(event.time);
+
+        if (eventMinutes <= currentMinutes) {
+            firedSet.add(eventKey);
+
+            const countForStats = event.count === -1
+                ? npcs.filter((npc) => npc.type === event.npcType).length
+                : Math.max(0, event.count);
+            dayStats = applyDayStatsDelta(dayStats, getEventDayStatsDelta(event, countForStats));
+
+            if (event.action === 'SPAWN' && event.position) {
+                const maxCanSpawn = Math.max(0, MAX_ACTIVE_NPCS - npcs.length);
+                const count = Math.min(event.count, maxCanSpawn);
+                if (count > 0) {
+                    npcs = [...npcs, ...createNpcs(event.npcType, count, event.position, event.radius || 5, event.mood, event.behavior)];
+                }
+            } else if (event.action === 'DESPAWN') {
+                npcs = removeNpcs(npcs, event.npcType, event.count);
+            } else if (event.action === 'MOVE' && event.position) {
+                npcs = npcs.map((npc) => (npc.type === event.npcType ? { ...npc, position: event.position } : npc));
+            } else if (event.action === 'MOOD_CHANGE') {
+                npcs = npcs.map((npc) => (npc.type === event.npcType ? applyNpcState(npc, event.targetMood, event.targetBehavior) : npc));
+            } else if (event.action === 'BEHAVIOR_CHANGE') {
+                npcs = npcs.map((npc) => (npc.type === event.npcType ? applyNpcState(npc, undefined, event.targetBehavior) : npc));
+            }
+        }
+    });
+
+    return { npcs, dayStats, firedSet };
+};
 
 const getInteractionDayStatsDelta = (zoneId: InteractionZoneId): Partial<DayStats> => {
     if (zoneId === 'epoch-terminal') {
@@ -364,21 +495,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
                         const ids = npcs.filter(n => n.type === event.npcType).map(n => n.id);
                         moveCommands.push({ ids, target: event.position });
                     } else if (event.action === 'MOOD_CHANGE') {
-                        // Update mood and behavior of all NPCs of this type
                         npcs = npcs.map(n => {
                             if (n.type === event.npcType) {
-                                return {
-                                    ...n,
-                                    mood: event.targetMood || n.mood,
-                                    behavior: event.targetBehavior || n.behavior
-                                };
+                                return applyNpcState(n, event.targetMood, event.targetBehavior);
                             }
                             return n;
                         });
                     } else if (event.action === 'BEHAVIOR_CHANGE') {
                         npcs = npcs.map(n => {
                             if (n.type === event.npcType) {
-                                return { ...n, behavior: event.targetBehavior || n.behavior };
+                                return applyNpcState(n, undefined, event.targetBehavior);
                             }
                             return n;
                         });
@@ -386,23 +512,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 }
             });
 
-            // Update tension
-            let tensionLevel = state.gameState.tensionLevel;
-            for (const t of TENSION_TIMELINE) {
-                if (timeToMinutes(t.time) <= currentMinutes) {
-                    tensionLevel = t.level;
-                }
-            }
-
-            // Update phase label
-            let currentPhaseLabel = state.gameState.currentPhaseLabel;
-            for (const p of PHASE_DESCRIPTIONS) {
-                if (timeToMinutes(p.time) <= currentMinutes) {
-                    currentPhaseLabel = p.label;
-                }
-            }
+            const tensionLevel = getTensionLevelForMinutes(currentMinutes);
+            const currentPhaseLabel = getPhaseLabelForMinutes(currentMinutes, state.gameState.currentPhaseLabel);
 
             npcs = applyMissionPhaseHooks(npcs, currentMinutes, state.interactionState.missionProgress);
+            const dynamicState = applyDynamicRoleResponses(npcs, dayStats, firedSet, currentMinutes);
+            npcs = dynamicState.npcs;
+            dayStats = dynamicState.dayStats;
 
             // Sync worker AFTER computing final NPC list
             workerManager.syncNpcs(npcs);
@@ -446,52 +562,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
         let [h, m] = state.gameState.inGameTime.split(':').map(Number);
         h = (h - 1 + 24) % 24;
         const newTime = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-        
-        // When rewinding: rebuild NPC state from scratch up to new time
-        nextNpcId = 1000;
         const currentMinutes = timeToMinutes(newTime);
-        const firedSet = new Set<string>();
-        let npcs: NPCData[] = [];
-        let dayStats: DayStats = { killed: 0, arrested: 0, injured: 0, damage: 0 };
+        const rebuilt = replayWorldStateToMinutes(currentMinutes);
+        const npcs = applyMissionPhaseHooks(rebuilt.npcs, currentMinutes, state.interactionState.missionProgress);
+        const dynamicState = applyDynamicRoleResponses(npcs, rebuilt.dayStats, rebuilt.firedSet, currentMinutes);
+        const tensionLevel = getTensionLevelForMinutes(currentMinutes);
+        const currentPhaseLabel = getPhaseLabelForMinutes(currentMinutes, state.gameState.currentPhaseLabel);
 
-        EVENT_TIMELINE.forEach((event, index) => {
-            const eventKey = `evt-${index}`;
-            const eventMinutes = timeToMinutes(event.time);
-
-            if (eventMinutes <= currentMinutes) {
-                firedSet.add(eventKey);
-
-                const countForStats = event.count === -1
-                    ? npcs.filter((npc) => npc.type === event.npcType).length
-                    : Math.max(0, event.count);
-                dayStats = applyDayStatsDelta(dayStats, getEventDayStatsDelta(event, countForStats));
-
-                if (event.action === 'SPAWN' && event.position) {
-                    const maxCanSpawn = Math.max(0, MAX_ACTIVE_NPCS - npcs.length);
-                    const count = Math.min(event.count, maxCanSpawn);
-                    if (count > 0) {
-                        const newNpcs = createNpcs(event.npcType, count, event.position, event.radius || 5, event.mood, event.behavior);
-                        npcs = [...npcs, ...newNpcs];
-                    }
-                } else if (event.action === 'DESPAWN') {
-                    npcs = removeNpcs(npcs, event.npcType, event.count);
-                }
-            }
-        });
-
-        let tensionLevel = 10;
-        for (const t of TENSION_TIMELINE) {
-            if (timeToMinutes(t.time) <= currentMinutes) {
-                tensionLevel = t.level;
-            }
-        }
-
-        workerManager.syncNpcs(npcs);
+        workerManager.syncNpcs(dynamicState.npcs);
         set({
-            npcs,
-            dayStats,
-            firedEventKeys: Array.from(firedSet),
-            gameState: { ...state.gameState, inGameTime: newTime, tensionLevel }
+            npcs: dynamicState.npcs,
+            dayStats: dynamicState.dayStats,
+            firedEventKeys: Array.from(dynamicState.firedSet),
+            gameState: { ...state.gameState, inGameTime: newTime, tensionLevel, currentPhaseLabel }
         });
     },
 
@@ -516,52 +599,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
             h = (h - 1 + 24) % 24;
         }
         const newTime = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-        
-        // When rewinding: rebuild NPC state from scratch up to new time
-        nextNpcId = 1000;
         const currentMinutes = timeToMinutes(newTime);
-        const firedSet = new Set<string>();
-        let npcs: NPCData[] = [];
-        let dayStats: DayStats = { killed: 0, arrested: 0, injured: 0, damage: 0 };
+        const rebuilt = replayWorldStateToMinutes(currentMinutes);
+        const npcs = applyMissionPhaseHooks(rebuilt.npcs, currentMinutes, state.interactionState.missionProgress);
+        const dynamicState = applyDynamicRoleResponses(npcs, rebuilt.dayStats, rebuilt.firedSet, currentMinutes);
+        const tensionLevel = getTensionLevelForMinutes(currentMinutes);
+        const currentPhaseLabel = getPhaseLabelForMinutes(currentMinutes, state.gameState.currentPhaseLabel);
 
-        EVENT_TIMELINE.forEach((event, index) => {
-            const eventKey = `evt-${index}`;
-            const eventMinutes = timeToMinutes(event.time);
-
-            if (eventMinutes <= currentMinutes) {
-                firedSet.add(eventKey);
-
-                const countForStats = event.count === -1
-                    ? npcs.filter((npc) => npc.type === event.npcType).length
-                    : Math.max(0, event.count);
-                dayStats = applyDayStatsDelta(dayStats, getEventDayStatsDelta(event, countForStats));
-
-                if (event.action === 'SPAWN' && event.position) {
-                    const maxCanSpawn = Math.max(0, MAX_ACTIVE_NPCS - npcs.length);
-                    const count = Math.min(event.count, maxCanSpawn);
-                    if (count > 0) {
-                        const newNpcs = createNpcs(event.npcType, count, event.position, event.radius || 5, event.mood, event.behavior);
-                        npcs = [...npcs, ...newNpcs];
-                    }
-                } else if (event.action === 'DESPAWN') {
-                    npcs = removeNpcs(npcs, event.npcType, event.count);
-                }
-            }
-        });
-
-        let tensionLevel = 10;
-        for (const t of TENSION_TIMELINE) {
-            if (timeToMinutes(t.time) <= currentMinutes) {
-                tensionLevel = t.level;
-            }
-        }
-
-        workerManager.syncNpcs(npcs);
+        workerManager.syncNpcs(dynamicState.npcs);
         set({
-            npcs,
-            dayStats,
-            firedEventKeys: Array.from(firedSet),
-            gameState: { ...state.gameState, inGameTime: newTime, tensionLevel }
+            npcs: dynamicState.npcs,
+            dayStats: dynamicState.dayStats,
+            firedEventKeys: Array.from(dynamicState.firedSet),
+            gameState: { ...state.gameState, inGameTime: newTime, tensionLevel, currentPhaseLabel }
         });
     },
 

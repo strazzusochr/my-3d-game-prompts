@@ -321,3 +321,16 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - `npm run lint`: erfolgreich.
 - `npm run build`: erfolgreich, 641 Module.
 - Livecheck: lokaler Full-Stack gestartet, Browserseite geoeffnet, Socket `z5ApIUARSI-bF1vHAAAD` verbunden; Prozess sauber beendet.
+
+### 8.22 Phasenbasierte Rollen-Automatik und Replay-Haertung vom 16.03.2026
+- `src/stores/gameStore.ts` wurde um einen gemeinsamen Replay-Pfad erweitert, der bei Rueckwaertsspruengen jetzt `SPAWN`, `DESPAWN`, `MOVE`, `MOOD_CHANGE` und `BEHAVIOR_CHANGE` konsistent rekonstruiert.
+- Zwei neue dynamische Rollenreaktionen wurden integriert: `dyn-evening-reinforcement` aktiviert ab 18:00 eine zusaetzliche Hundertschaft, `dyn-late-triage` aktiviert ab 21:00 einen Triage-Korridor mit weiteren Sanitaetern.
+- Die dynamischen Reaktionen reduzieren gleichzeitig Druck in den Tagesstatistiken (Verletzte/Sachschaden), damit Statistik und Runtime nicht auseinanderlaufen.
+- `HUD.tsx` zeigt aktive Automatik-Reaktionen jetzt im Operations-Drilldown als Live-Badges direkt im Rollenverteilungs-Panel.
+
+### 8.23 Rollen-Automatik-Nachweis
+- `src/tests/gameStore.test.ts` um 3 weitere Store-Tests erweitert: Abend-Verstaerkung, Spaetphasen-Triage und Rewind-Konsistenz der dynamischen Reaktionen.
+- `npx vitest run`: erfolgreich, 217 von 217 Tests bestanden.
+- `npm run lint`: erfolgreich.
+- `npm run build`: erfolgreich, 641 Module.
+- Livecheck: lokaler Full-Stack gestartet, Browserseite geoeffnet, Socket `gfOeXoY-9IyYb1jnAAAF` verbunden; Prozess sauber beendet.

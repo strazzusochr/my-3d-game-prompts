@@ -330,4 +330,34 @@ describe('gameStore core flow', () => {
     const rioters = useGameStore.getState().npcs.filter((n) => n.type === NPCType.RIOTER);
     expect(rioters.length).toBe(0);
   });
+
+  it('activates evening reinforcement when aggressors outnumber security forces', () => {
+    useGameStore.getState().evaluateEvents('18:00');
+    const state = useGameStore.getState();
+
+    expect(state.firedEventKeys).toContain('dyn-evening-reinforcement');
+    expect(state.npcs.filter((npc) => npc.type === NPCType.RIOT_POLICE).length).toBeGreaterThanOrEqual(6);
+    expect(state.dayStats.damage).toBeGreaterThan(0);
+  });
+
+  it('activates late triage corridor when panic pressure stays high', () => {
+    useGameStore.getState().evaluateEvents('21:00');
+    const state = useGameStore.getState();
+
+    expect(state.firedEventKeys).toContain('dyn-evening-reinforcement');
+    expect(state.firedEventKeys).toContain('dyn-late-triage');
+    expect(state.npcs.filter((npc) => npc.type === NPCType.MEDIC).length).toBeGreaterThanOrEqual(5);
+  });
+
+  it('rebuilds dynamic role responses correctly when rewinding', () => {
+    useGameStore.getState().evaluateEvents('21:00');
+    useGameStore.getState().rewindHour();
+
+    const state = useGameStore.getState();
+
+    expect(state.gameState.inGameTime).toBe('20:00');
+    expect(state.firedEventKeys).toContain('dyn-evening-reinforcement');
+    expect(state.firedEventKeys).not.toContain('dyn-late-triage');
+    expect(state.npcs.filter((npc) => npc.type === NPCType.MEDIC)).toHaveLength(0);
+  });
 });
