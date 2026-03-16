@@ -1,35 +1,8 @@
 import { useMemo } from 'react';
 import { Billboard, Text } from '@react-three/drei';
 import { useGameStore } from '../../../stores/gameStore';
-import { EVENT_TIMELINE, NPC_COLORS, timeToMinutes } from '../../../systems/eventScheduler';
-
-interface SpawnPoint {
-    position: [number, number, number];
-    color: string;
-    radius: number;
-    id: string;
-    time: string;
-    title: string;
-    details: string[];
-    totalCount: number;
-    minutesUntilSpawn: number;
-    cardOffsetX: number;
-    cardOffsetZ: number;
-    cardLiftY: number;
-    emphasis: number;
-}
-
-type SpawnUrgency = 'watch' | 'ready' | 'imminent';
-
-type PhaseBand = 'NIGHT' | 'MORNING' | 'MIDDAY' | 'EVENING' | 'LATE';
-
-const getPhaseBandForMinutes = (minutes: number): PhaseBand => {
-    if (minutes < 6 * 60) return 'NIGHT';
-    if (minutes < 12 * 60) return 'MORNING';
-    if (minutes < 17 * 60) return 'MIDDAY';
-    if (minutes < 21 * 60) return 'EVENING';
-    return 'LATE';
-};
+import { timeToMinutes } from '../../../systems/eventScheduler';
+import { formatCountdown, getPhaseBandForMinutes, getSpawnMarkerView, getSpawnUrgency, type PhaseBand } from '../../../systems/spawnMarkerLogic';
 
 const PHASE_THEME: Record<PhaseBand, { timeColor: string; glassOpacity: number; cardBackdrop: string }> = {
     NIGHT: { timeColor: '#7bd6ff', glassOpacity: 0.18, cardBackdrop: '#030916' },
@@ -39,102 +12,17 @@ const PHASE_THEME: Record<PhaseBand, { timeColor: string; glassOpacity: number; 
     LATE: { timeColor: '#bba8ff', glassOpacity: 0.23, cardBackdrop: '#080513' },
 };
 
-const getSpawnUrgency = (minutesUntilSpawn: number): SpawnUrgency => {
-    if (minutesUntilSpawn <= 6) return 'imminent';
-    if (minutesUntilSpawn <= 8) return 'ready';
-    return 'watch';
-};
-
-const SHORT_NAMES: Record<string, string> = {
-    'CIVILIAN': 'ZIV',
-    'POLICE': 'POL',
-    'DEMONSTRATOR': 'DEMO',
-    'RIOT_POLICE': 'RIOT',
-    'MEDIC': 'SANI',
-    'EXTREMIST': 'EXTR',
-    'SEK': 'SEK',
-    'FIREFIGHTER': 'FEU',
-    'RIOTER': 'RAND',
-    'JOURNALIST': 'JOUR',
-    'KRAUSE': 'KRAU',
-    'TOURIST': 'TOUR',
-};
-
 export const SpawnMarkers = () => {
     const inGameTime = useGameStore((state) => state.gameState.inGameTime);
-    const formatCountdown = (minutesUntilSpawn: number) => {
-        const mm = Math.max(0, minutesUntilSpawn).toString().padStart(2, '0');
-        return `SPAWN IN 00:${mm}`;
-    };
 
-    const markers = useMemo(() => {
-        const currentMinutes = timeToMinutes(inGameTime);
-        const grouped = new Map<string, SpawnPoint>();
-
-        EVENT_TIMELINE.forEach((event, i) => {
-            if (event.action !== 'SPAWN' || !event.position || event.count <= 0) {
-                return;
-            }
-
-            const eventMinutes = timeToMinutes(event.time);
-            const minutesUntilSpawn = (eventMinutes - currentMinutes + 24 * 60) % (24 * 60);
-
-            // Sichtbarkeitsfenster: ab T-10 bis T-5, danach ausblenden.
-            if (minutesUntilSpawn > 10 || minutesUntilSpawn < 5) {
-                return;
-            }
-
-            const roundedX = Math.round(event.position[0]);
-            const roundedZ = Math.round(event.position[2]);
-            const key = `${event.time}:${roundedX}:${roundedZ}`;
-            const shortName = SHORT_NAMES[event.npcType] || event.npcType;
-            const detailLine = `${event.count}x ${shortName}`;
-            const hash = Math.abs((roundedX * 31 + roundedZ * 17 + eventMinutes * 13) % 9);
-            const lane = hash % 3;
-            const row = Math.floor(hash / 3);
-            const cardOffsetX = (lane - 1) * 2.1;
-            const cardOffsetZ = (row - 1) * 1.4;
-            const cardLiftY = row * 0.28;
-            const emphasis = (10 - minutesUntilSpawn) / 5;
-
-            if (grouped.has(key)) {
-                const existing = grouped.get(key)!;
-                existing.details.push(detailLine);
-                existing.totalCount += event.count;
-                existing.emphasis = Math.max(existing.emphasis, emphasis);
-            } else {
-                grouped.set(key, {
-                    position: event.position,
-                    color: NPC_COLORS[event.npcType] || '#888',
-                    radius: Math.min(event.radius || 5, 15),
-                    id: `marker-${i}`,
-                    time: event.time,
-                    title: detailLine,
-                    details: [detailLine],
-                    totalCount: event.count,
-                    minutesUntilSpawn,
-                    cardOffsetX,
-                    cardOffsetZ,
-                    cardLiftY,
-                    emphasis,
-                });
-            }
-        });
-
-        return Array.from(grouped.values()).sort((a, b) => {
-            if (a.minutesUntilSpawn !== b.minutesUntilSpawn) {
-                return a.minutesUntilSpawn - b.minutesUntilSpawn;
-            }
-            return b.totalCount - a.totalCount;
-        });
-    }, [inGameTime]);
+    const { visibleMarkers, hiddenMarkerCount } = useMemo(
+        () => getSpawnMarkerView(inGameTime, 8),
+        [inGameTime],
+    );
 
     const currentMinutes = timeToMinutes(inGameTime);
     const phaseBand = getPhaseBandForMinutes(currentMinutes);
     const phaseTheme = PHASE_THEME[phaseBand];
-    const maxVisibleMarkers = 8;
-    const visibleMarkers = markers.slice(0, maxVisibleMarkers);
-    const hiddenMarkerCount = Math.max(0, markers.length - visibleMarkers.length);
     const denseMode = visibleMarkers.length >= 6;
     const mediumDenseMode = visibleMarkers.length >= 4;
     const cardScale = denseMode ? 0.82 : mediumDenseMode ? 0.9 : 1;

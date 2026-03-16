@@ -120,7 +120,10 @@
 - Spawn-Marker-Dringlichkeitsstufen am 16.03.2026 umgesetzt: Karten werden jetzt countdown-basiert als `WATCH`, `READY` und `IMMINENT` markiert.
 - Visuelle Priorisierung aktiv: nahe Spawns erhalten zusaetzliche Emphasis in Ring-/Glow-Staerke sowie Akzentfarbe im Countdownbereich.
 - Vollverifikation nach Dringlichkeitsstufen erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 239/239.
+- Spawn-Marker-Logik am 16.03.2026 modularisiert: Zeitfenster-, Grouping-, Priorisierungs- und Dringlichkeitsentscheidungen in `src/systems/spawnMarkerLogic.ts` extrahiert.
+- Neue Testsuite aktiv: `src/tests/spawnMarkerLogic.test.ts` verifiziert T-10..T-5-Fenster, Urgency-Stufen, Aggregation je Zeit/Position und Top-8-Priorisierung.
+- Vollverifikation nach Logik-Extraktion erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 243/243.
 
 ## Naechster logischer Schritt
-- Spawn-HUD-Liveabgleich finalisieren: Karten-Badge-Abstaende und Urgency-Farbkontrast fuer sehr helle Tagesphasen weiter angleichen.
+- Spawn-HUD-Liveabgleich finalisieren: Badge-Kontrast bei Tageslicht und Sammelhinweis-Platzierung am letzten Marker visuell trimmen.
 - Trend-/Missionsentscheidungen um Persistenzfenster erweitern: mehrere aufeinanderfolgende volatile Checkpoints als Haltedauer-Bedingung statt Einzelimpuls.
