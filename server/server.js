@@ -4,7 +4,7 @@ import { Server } from 'socket.io';
 import path from 'path';
 
 function parseAllowedOrigins(raw) {
-    return String(raw || 'http://127.0.0.1:3001,http://localhost:3001,http://127.0.0.1:7860,http://localhost:7860')
+    return String(raw || 'http://127.0.0.1:3001,http://localhost:3001,http://127.0.0.1:5173,http://localhost:5173,http://127.0.0.1:5174,http://localhost:5174,http://127.0.0.1:7860,http://localhost:7860')
         .split(',')
         .map((value) => value.trim())
         .filter(Boolean);
@@ -20,6 +20,7 @@ function isAllowedOrigin(origin) {
 
 const app = express();
 const server = http.createServer(app);
+const PORT = Number(process.env.SOCKET_PORT) || 3000;
 const io = new Server(server, {
     cors: {
         origin: (origin, callback) => {
@@ -44,6 +45,14 @@ let worldState = {
     },
     tension: 10
 };
+
+app.get('/health', (_req, res) => {
+    res.json({
+        status: 'ok',
+        socketPort: PORT,
+        allowedOrigins: ALLOWED_ORIGINS,
+    });
+});
 
 io.on('connection', (socket) => {
     const socketOrigin = String(socket.handshake.headers.origin || '');
@@ -80,7 +89,6 @@ io.on('connection', (socket) => {
     });
 });
 
-const PORT = Number(process.env.SOCKET_PORT) || 3000;
 server.listen(PORT, () => {
     console.log(`🚀 Corona Control Server running on port ${PORT}`);
     console.log(`🔗 Web-App API & Crawler-Endpoint active.`);

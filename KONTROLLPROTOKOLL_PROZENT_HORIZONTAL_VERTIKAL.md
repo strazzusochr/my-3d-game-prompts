@@ -110,6 +110,7 @@ Bewertungsstufen:
 | P-050 | HUD-Positions-Reset fuer Drag-Layouts integriert | Vertikal | 100 | PASS | In `src/components/ui/HUD.tsx` ist ein neuer `Reset`-Button in der rechten HUD-Steuerleiste aktiv und setzt gespeicherte Positionen auf Default (`hud-panel-positions-v1`) zurueck; Vollproof danach 256/256 gruen |
 | P-051 | HUD-Teilsektionen im rechten Panel sortierbar + persistent gemacht | Vertikal | 100 | PASS | `src/components/ui/HUD.tsx`: Reihenfolge-Store `HUD_RIGHT_SECTION_ORDER_KEY` (Zeile 52), Sanitizer `sanitizeRightSubSectionOrder` (Zeile 59), Drag-Start `beginRightSubSectionDrag` (Zeile 497), Drop-Reorder `onRightSubSectionDrop` (Zeile 508), Render-Reihenfolge `rightSectionOrder.map` (Zeile 667), Sort-Handles NASA/Telemetrie/Mission/Timeline (Zeilen 684/740/792/824) |
 | P-052 | Sort-Reset fuer rechte HUD-Teilsektionen integriert | Vertikal | 100 | PASS | `src/components/ui/HUD.tsx`: Funktion `resetRightSubSectionOrder` (Zeile 550) setzt die persistierte Reihenfolge auf Default; neuer Header-Button `Sort-Reset` (Zeile 664) triggert den Ruecksetzpfad live |
+| P-053 | Socket-Origin-Allowlist fuer Vite-Devports erweitert + Health-Endpunkt integriert | Vertikal | 100 | PASS | `server/server.js`: `parseAllowedOrigins` (Zeile 6) enthaelt jetzt `5173/5174`; `PORT` frueh definiert (Zeile 23); neuer Endpoint `app.get('/health')` (Zeile 49) liefert Live-Status fuer Full-Stack-Checks |
 
 ---
 
@@ -129,6 +130,9 @@ Bewertungsstufen:
 | REF-010 | YAML-FIX | `.github/workflows/security-ci.yml` | Workflow-Key `on:` | 2 | PASS | Parser-/Diagnosecheck im Workspace ohne Fehler |
 | REF-011 | P-052 | `src/components/ui/HUD.tsx` | `resetRightSubSectionOrder` | 550 | PASS | Reihenfolge wird auf `RIGHT_SUB_SECTION_DEFAULT_ORDER` zurueckgesetzt und lokal gespeichert |
 | REF-012 | P-052 | `src/components/ui/HUD.tsx` | `Sort-Reset` Button (`onClick={resetRightSubSectionOrder}`) | 664 | PASS | Live im Header erreichbar, Ruecksetzen ohne Reload moeglich |
+| REF-013 | P-053 | `server/server.js` | `parseAllowedOrigins` | 6 | PASS | Default-Allowlist deckt `localhost/127.0.0.1` fuer Ports `5173` und `5174` ab |
+| REF-014 | P-053 | `server/server.js` | `const PORT = Number(process.env.SOCKET_PORT) \|\| 3000` | 23 | PASS | Health-Endpoint und Listener verwenden denselben konsistenten Portwert |
+| REF-015 | P-053 | `server/server.js` | `app.get('/health', ...)` | 49 | PASS | Livecheck liefert `status: ok` + `socketPort` + `allowedOrigins` |
 
 ---
 
