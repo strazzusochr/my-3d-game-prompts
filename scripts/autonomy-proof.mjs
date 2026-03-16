@@ -13,13 +13,40 @@ function fail(message) {
   process.exit(1);
 }
 
-async function requestJson(url, init) {
-  const response = await fetch(url, init);
-  if (!response.ok) {
-    const text = await response.text();
-    fail(`${init?.method || 'GET'} ${url} -> ${response.status} ${response.statusText} :: ${text}`);
+async function sleep(ms) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function requestJson(url, init, options = {}) {
+  const method = init?.method || 'GET';
+  const retries = options.retries ?? 12;
+  const delayMs = options.delayMs ?? 500;
+
+  for (let attempt = 1; attempt <= retries; attempt += 1) {
+    try {
+      const response = await fetch(url, init);
+      if (response.ok) {
+        return response.json();
+      }
+
+      const text = await response.text();
+      const isRetryableStatus = response.status === 409 || response.status >= 500;
+      if (isRetryableStatus && attempt < retries) {
+        await sleep(delayMs);
+        continue;
+      }
+
+      fail(`${method} ${url} -> ${response.status} ${response.statusText} :: ${text}`);
+    } catch (error) {
+      if (attempt < retries) {
+        await sleep(delayMs);
+        continue;
+      }
+      throw error;
+    }
   }
-  return response.json();
+
+  fail(`${method} ${url} exhausted retry budget`);
 }
 
 function assertHealthShape(health) {
@@ -37,7 +64,7 @@ function assertHealthShape(health) {
 async function main() {
   console.log(`AUTONOMY_PROOF_START base=${BASE_URL}`);
 
-  const initialHealth = await requestJson(`${BASE_URL}/health`);
+  const initialHealth = await requestJson(`${BASE_URL}/health`, undefined, { retries: 30, delayMs: 700 });
   assertHealthShape(initialHealth);
 
   console.log(
@@ -45,7 +72,11 @@ async function main() {
   );
 
   for (const profile of profiles) {
-    const switched = await requestJson(`${BASE_URL}/api/profile/${profile.key}`, { method: 'POST' });
+    const switched = await requestJson(
+      `${BASE_URL}/api/profile/${profile.key}`,
+      { method: 'POST' },
+      { retries: 30, delayMs: 700 }
+    );
 
     if (!switched.ok || switched.profile !== profile.key) {
       fail(`profile switch failed for ${profile.key}: ${JSON.stringify(switched)}`);
@@ -55,9 +86,9 @@ async function main() {
       fail(`profile ${profile.key} dimensions/fps mismatch in switch response: ${JSON.stringify(switched)}`);
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 700));
+    await sleep(900);
 
-    const health = await requestJson(`${BASE_URL}/health`);
+    const health = await requestJson(`${BASE_URL}/health`, undefined, { retries: 30, delayMs: 700 });
     assertHealthShape(health);
 
     if (health.profile !== profile.key) {

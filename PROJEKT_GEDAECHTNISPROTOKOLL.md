@@ -31,6 +31,8 @@
 - Wiederholungslauf nach Doku-Update erfolgreich: `npm run autonomy:full` erneut komplett gruen inklusive Proof-Marker `AUTONOMY_PROOF_OK`.
 - Runner-Haertung am 16.03.2026 abgeschlossen: Windows-Spawn-Problem (`EINVAL`) in `autonomy:full` behoben, neuer Shell-basierter Prozessstart validiert.
 - Neuer Nachweislauf erfolgreich: `AUTONOMY_FULL_OK` sowie `AUTONOMY_PROOF_OK` in einem Durchgang erreicht.
+- Retry-Haertung am 16.03.2026 abgeschlossen: `autonomy:proof` faengt nun kurzzeitige Reconnect-Phasen bei Profilwechseln ab.
+- Selbstheilender Lauf bestaetigt: `autonomy:full` startete den Stream bei nicht erreichbarer Health-URL selbst, fuehrte alle Gates aus und beendete den runner-eigenen Stream kontrolliert.
 
 ## Naechster logischer Schritt
 - Etappe 1 des Masterplans technisch ausbauen und nach jedem Block den Command `npm run autonomy:full` als Pflichtnachweis ausfuehren.
