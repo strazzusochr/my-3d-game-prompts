@@ -11,6 +11,17 @@
 - Zielzustand ist immer null Probleme und null Fehler; autonom weiterarbeiten bis der Zielzustand erreicht ist.
 
 ## Aktueller Arbeitsstand
+- Security-Generierungsblock am 16.03.2026 abgeschlossen: Security-Skripte (`port-check`, `resource-guard`, `validate-memory-logs`), gehärtete Server-Guards (Origin-Allowlist, optionales WS-/Admin-Token, Endpoint-/Socket-Rate-Limits, No-Remote-Compute-Check), `.env.example`-Hardening sowie GitHub Security-CI (`Lint -> Test -> Build -> Audit -> SBOM -> Trivy`), Dependabot-Konfiguration umgesetzt.
+- Vollnachweis nach Security-Block erfolgreich: `npm run autonomy:full` gruen mit `AUTONOMY_FULL_OK` und `AUTONOMY_PROOF_OK`; Teststand unveraendert 253/253, Build und Lint gruen, Transport weiter `canvas-webrtc`.
+- Zusatznachweis erfolgreich: `npm run security:memory-validate` gruen (`MEMORY_LOG_VALIDATION_OK`).
+- Port-Checker-Fix am 16.03.2026 abgeschlossen: Doppelzuweisung innerhalb eines Laufs ausgeschlossen (reservierte Portmenge), Nachlauf `npm run port:check` validiert eindeutige Portbelegung.
+- Finaler Vollnachweis nach Port-Checker-Fix erfolgreich: `npm run autonomy:full` erneut komplett gruen mit `AUTONOMY_FULL_OK` und `AUTONOMY_PROOF_OK`.
+- Port-Resolver-Laufzeitverdrahtung am 16.03.2026 abgeschlossen: `port-check` zu Modul mit Export (`resolvePorts`/`applyResolvedPorts`) refaktoriert, Stream-Start ueber `run-stream-secure.mjs` aufgelöst und `autonomy:full` auf dynamische Port-Basis (`AUTONOMY_BASE_URL` aus aufgeloestem Port) umgestellt.
+- Vollnachweis nach Laufzeitverdrahtung erfolgreich: `npm run port:check` gruen und `npm run autonomy:full` erneut komplett gruen mit `AUTONOMY_FULL_OK`/`AUTONOMY_PROOF_OK`, Teststand weiterhin 253/253.
+- Standalone-Proof-Portresolver am 16.03.2026 abgeschlossen: `autonomy:proof` nutzt jetzt ebenfalls `resolvePorts`/`applyResolvedPorts` und setzt `AUTONOMY_BASE_URL` dynamisch statt statischer Portannahme.
+- Doppelter Nachweis erfolgreich: `npm run autonomy:proof` gruen und danach `npm run autonomy:full` erneut komplett gruen mit `AUTONOMY_FULL_OK`/`AUTONOMY_PROOF_OK`.
+- P-45 Deep-Kontrolle von vorne am 16.03.2026 abgeschlossen: Sicherheitskriterien per Code/Config-Scan gegen `package.json`, `server/*`, `.env.example`, `.github/workflows/security-ci.yml`, `.github/dependabot.yml` erneut verifiziert.
+- Vollstaendiger Re-Nachweis fuer P-45 erfolgreich: `npm run security:memory-validate` gruen, `npm run port:check` gruen, `npm run autonomy:proof` gruen, `npm run autonomy:full` gruen (inkl. 253/253 Tests).
 - Persistente Nutzerpraeferenzen wurden um die neuen Ablaufregeln erweitert.
 - Aktueller Repository-Stand enthaelt bereits Test-, Lint- und Streaming-Anpassungen aus der vorigen Arbeitsphase.
 - Fuer den aktuellen Schritt wird ein professioneller Projektbericht erzeugt und der gegenwaertige Stand festgehalten.

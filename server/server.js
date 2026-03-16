@@ -3,11 +3,32 @@ import http from 'http';
 import { Server } from 'socket.io';
 import path from 'path';
 
+function parseAllowedOrigins(raw) {
+    return String(raw || 'http://127.0.0.1:3001,http://localhost:3001,http://127.0.0.1:7860,http://localhost:7860')
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean);
+}
+
+const ALLOWED_ORIGINS = parseAllowedOrigins(process.env.ALLOWED_ORIGINS);
+const WS_SHARED_TOKEN = String(process.env.WS_SHARED_TOKEN || '');
+
+function isAllowedOrigin(origin) {
+    if (!origin) return true;
+    return ALLOWED_ORIGINS.includes(origin);
+}
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "*",
+        origin: (origin, callback) => {
+            if (isAllowedOrigin(origin)) {
+                callback(null, true);
+                return;
+            }
+            callback(new Error('origin_denied'));
+        },
         methods: ["GET", "POST"]
     }
 });
@@ -25,6 +46,20 @@ let worldState = {
 };
 
 io.on('connection', (socket) => {
+    const socketOrigin = String(socket.handshake.headers.origin || '');
+    if (!isAllowedOrigin(socketOrigin)) {
+        socket.disconnect(true);
+        return;
+    }
+
+    if (WS_SHARED_TOKEN) {
+        const token = String(socket.handshake.auth?.token || '');
+        if (token !== WS_SHARED_TOKEN) {
+            socket.disconnect(true);
+            return;
+        }
+    }
+
     console.log('👤 Client connected:', socket.id);
     
     // Send current world state on join

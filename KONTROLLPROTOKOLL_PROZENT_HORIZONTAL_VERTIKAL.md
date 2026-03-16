@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 18:17:36 +01:00
-- Repo-Head: lokal (nach Replay-Delta-Anomalieindikator, vor neuem Commit)
-- Nachweislauf: npm run autonomy:full PASS nach Replay-Delta-Anomalieindikator (inkl. lint PASS + tests 253/253 PASS + build PASS + live proof PASS)
-- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_253_253 + BUILD_PASS + REPLAY_DELTA_ANOMALY_PASS + MASTER_80000_PASS
-- Gates: Lint PASS, Tests 253/253 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, Replay-Delta-Anomalieindikator inkl. Snapshot-Sanitisierung verifiziert, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: Replay-Delta-Anomalieindikator (Ausreissererkennung + Sofort-Hinweis) in Store/HUD/Persistence/Test erweitert und per Vollproof verifiziert
+- Zeitstempel: 2026-03-16 19:12:28 +01:00
+- Repo-Head: lokal (nach erneuter Vollkontrolle Zeile 1-107, vor neuem Commit)
+- Nachweislauf: Vollkontrolle horizontal/vertikal erneut ausgefuehrt (Browser-Check + Workspace-Fehlercheck + autonomy:full)
+- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_253_253 + BUILD_PASS + P45_DEEP_RECHECK_FROM_START_PASS + LINE_1_107_RECHECK_PASS + MASTER_80000_PASS
+- Gates: Browser erreichbar PASS (`http://127.0.0.1:7860`), Workspace-Fehlercheck PASS, Lint PASS, Tests 253/253 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport aktiv, Masterquelle 80.000/80.000 PASS
+- Arbeitsbaum: Zeile 1-107 voll geprueft und auf Ist-Stand synchronisiert; Hinweis: Worktree aktuell bewusst nicht sauber wegen laufender Dokumentations-/Sicherheitsaenderungen
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -50,7 +50,7 @@ Bewertungsstufen:
 | S-005 | Build-Gate | 100 | 100 | 100 | PASS | vite build erfolgreich |
 | S-006 | Live-Proof Profilfolge | 100 | 100 | 100 | PASS | low->medium->high->aaa->low |
 | S-007 | Health-/Transport-Nachweis | 100 | 100 | 100 | PASS | canvas-webrtc aktiv |
-| S-008 | Repo-Sauberkeit nach Lauf | 100 | 100 | 100 | PASS | sauberer status |
+| S-008 | Repo-Sauberkeit nach Lauf | 50 | 50 | 50 | FAIL | `git status --short` zeigt laufende Aenderungen (in Umsetzung, noch nicht committed) |
 
 ---
 
@@ -102,20 +102,23 @@ Bewertungsstufen:
 | P-042 | Replay-Delta-Momentumindikator umgesetzt | Vertikal | 100 | PASS | deltaMomentumScore/deltaMomentumDirection/deltaMomentumBand/deltaMomentumHint im Store + replayState.quality Momentum-Sanitisierung + HUD-Momentum-Ampel + Tests; Full-Proof gruen |
 | P-043 | Replay-Delta-Driftindikator umgesetzt | Vertikal | 100 | PASS | deltaDriftScore/deltaDriftDirection/deltaDriftBand/deltaDriftHint im Store + replayState.quality Drift-Sanitisierung + HUD-Drift-Warnstufe + Tests; Full-Proof gruen |
 | P-044 | Replay-Delta-Anomalieindikator umgesetzt | Vertikal | 100 | PASS | deltaAnomalyScore/deltaAnomalyDirection/deltaAnomalyBand/deltaAnomalyHint im Store + replayState.quality Anomalie-Sanitisierung + HUD-Ausreisserwarnung + Tests; Full-Proof gruen |
+| P-045 | Security-Hardening und Supply-Chain-CI umgesetzt | Vertikal | 100 | PASS | Deep-Recheck von vorne ausgefuehrt: Code/Config-Scan + `security:memory-validate` + `port:check` + `autonomy:proof` + `autonomy:full` alle gruen; Status reproduzierbar bestaetigt |
+| P-046 | Port-Resolver als Runtime-Quelle in Stream/Autonomy verdrahtet | Vertikal | 100 | PASS | `port-check` als Modul exportiert, sicherer Stream-Wrapper aktiv, `autonomy:full` nutzt aufgeloeste Ports fuer BASE_URL/Health; Vollproof erneut gruen |
+| P-047 | Port-Resolver in standalone `autonomy:proof` aktiviert | Vertikal | 100 | PASS | `autonomy:proof` setzt aufgeloeste Ports fuer BASE_URL/Health, Standalone-Proof und anschliessender Vollproof gruen |
 
 ---
 
 ## C) AGGREGIERTE PROZENTWERTE
 
-- Schritt-Protokoll Durchschnitt H%: 100
-- Schritt-Protokoll Durchschnitt V%: 100
-- Schritt-Protokoll Gesamt G%: 100
+- Schritt-Protokoll Durchschnitt H%: 93.75
+- Schritt-Protokoll Durchschnitt V%: 93.75
+- Schritt-Protokoll Gesamt G%: 93.75
 
 - Punkt-Protokoll Durchschnitt H%: 100
 - Punkt-Protokoll Durchschnitt V%: 100
 - Punkt-Protokoll Gesamt G%: 100
 
-- Gesamtprojekt (aktueller Kontrollstand): 100
+- Gesamtprojekt (aktueller Kontrollstand): 96.88
 
 Beweispflicht-Hinweis:
 Dieser Block ist der verbindliche Ist-Nachweis und wird nach jedem Pflichtlauf aktualisiert.
@@ -146,7 +149,7 @@ Die nachfolgende Deep-Gap-Matrix beschreibt darueber hinausgehende Ausbauziele d
 | NPC-KI/Behavior | Rollen-Automatik + Korrelations-Folgeevents + trendkorrelierte Branch-Reaktionen aktiv | 93 | Gegenseitige Fraktionsreaktionen und adaptive Schwellwerte fehlen noch | Eskalations-Gegenlogik und adaptive Triggerkurven integrieren |
 | Mission/24h-Szenario | Aftermath-Nacht-Kette + Korrelationsfolgeevents + gewichtete, trend-, fenster- und mehrpunktgekoppelte Missions-Ergebnisbaeume aktiv | 100 | — | Erledigt: Mehrpunkt-Momentum/Turbulenz als Triggerbasis integriert |
 | UI/HUD-Komplettheit | Operations-Korrelation + Folgeevent-Badges + Trendlinien + gewichtete und trendkorrelierte Branches sichtbar; Spawn-Neonmarker inkl. Feintuning, Phasenkalibrierung, Dichtepriorisierung und Dringlichkeitsstufen aktiv | 100 | — | Erledigt: Spawn-Ort-Visualisierung zeitgesteuert (T-10..T-5), entzerrt, je Tagesphase kalibriert, bei Last priorisiert und countdown-sensitiv hervorgehoben |
-| Quality-Gates 700+ | VOLLSTAENDIG | 100 | — | Erledigt: 243/243 Tests gruen, comprehensive.test.ts deckt 700+ Assertions ab |
+| Quality-Gates 700+ | VOLLSTAENDIG | 100 | — | Erledigt: 253/253 Tests gruen, comprehensive.test.ts deckt 700+ Assertions ab |
 
 Realistische Gesamt-Reife (Deep, ausserhalb Pflichtumfang): 100%
 

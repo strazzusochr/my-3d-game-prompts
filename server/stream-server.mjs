@@ -23,8 +23,40 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const httpServer = createServer(app);
 
+function parseAllowedOrigins(raw) {
+  return String(raw || 'http://127.0.0.1:3001,http://localhost:3001,http://127.0.0.1:7860,http://localhost:7860')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
+const ALLOWED_ORIGINS = parseAllowedOrigins(process.env.ALLOWED_ORIGINS);
+const WS_SHARED_TOKEN = String(process.env.WS_SHARED_TOKEN || '');
+const API_ADMIN_TOKEN = String(process.env.API_ADMIN_TOKEN || '');
+const NO_REMOTE_COMPUTE = String(process.env.NO_REMOTE_COMPUTE || 'true').toLowerCase() === 'true';
+const ALLOWED_COMPUTE_HOSTS = new Set(
+  String(process.env.ALLOWED_COMPUTE_HOSTS || '127.0.0.1,localhost')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+);
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  return ALLOWED_ORIGINS.includes(origin);
+}
+
 const io = new Server(httpServer, {
-  cors: { origin: '*', methods: ['GET', 'POST'] },
+  cors: {
+    origin: (origin, callback) => {
+      if (isAllowedOrigin(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error('origin_denied'));
+    },
+    methods: ['GET', 'POST']
+  },
   maxHttpBufferSize: 5e6 // 5MB for binary frames
 });
 
@@ -62,6 +94,39 @@ const HEADLESS_MODE = String(
   process.env.HEADLESS_MODE || 'new'
 ).toLowerCase();
 const FALLBACK_BRAVE_PATH_WIN = 'C:\\Program Files\\BraveSoftware\\Brave-Browser-Nightly\\Application\\brave.exe';
+
+if (NO_REMOTE_COMPUTE) {
+  const targetHost = String(process.env.RENDER_TARGET_HOST || 'localhost').trim();
+  if (!ALLOWED_COMPUTE_HOSTS.has(targetHost)) {
+    throw new Error(`NO_REMOTE_COMPUTE verletzt: ${targetHost} ist nicht erlaubt`);
+  }
+}
+
+const endpointWindowMs = Number(process.env.API_RATE_WINDOW_MS || 10_000);
+const endpointMaxRequests = Number(process.env.API_RATE_MAX_REQUESTS || 30);
+const endpointBuckets = new Map();
+
+function allowEndpointRequest(key) {
+  const now = Date.now();
+  const bucket = endpointBuckets.get(key) || { count: 0, ts: now };
+  if (now - bucket.ts > endpointWindowMs) {
+    bucket.count = 0;
+    bucket.ts = now;
+  }
+  bucket.count += 1;
+  endpointBuckets.set(key, bucket);
+  return bucket.count <= endpointMaxRequests;
+}
+
+function requireAdminToken(req, res) {
+  if (!API_ADMIN_TOKEN) return true;
+  const token = req.headers['x-admin-token'];
+  if (token !== API_ADMIN_TOKEN) {
+    res.status(401).json({ ok: false, error: 'unauthorized' });
+    return false;
+  }
+  return true;
+}
 
 function resolveBrowserExecutablePath() {
   const fromEnv = process.env.BROWSER_EXECUTABLE_PATH || process.env.PUPPETEER_EXECUTABLE_PATH;
@@ -190,6 +255,13 @@ app.get('/health', (req, res) => {
 });
 
 app.post('/api/profile/:profile', async (req, res) => {
+  const sourceIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+  if (!allowEndpointRequest(`profile:${sourceIp}`)) {
+    res.status(429).json({ ok: false, error: 'rate_limited' });
+    return;
+  }
+  if (!requireAdminToken(req, res)) return;
+
   const requested = String(req.params.profile || '').toLowerCase();
   if (!STREAM_PROFILES[requested]) {
     res.status(400).json({ ok: false, error: 'Unknown profile', allowed: Object.keys(STREAM_PROFILES) });
@@ -215,6 +287,37 @@ app.post('/api/profile/:profile', async (req, res) => {
 
 // ─── WebSocket: frames OUT, input IN ───
 io.on('connection', (socket) => {
+  const socketOrigin = String(socket.handshake.headers.origin || '');
+  if (!isAllowedOrigin(socketOrigin)) {
+    socket.disconnect(true);
+    return;
+  }
+
+  if (WS_SHARED_TOKEN) {
+    const token = String(socket.handshake.auth?.token || '');
+    if (token !== WS_SHARED_TOKEN) {
+      socket.disconnect(true);
+      return;
+    }
+  }
+
+  const wsWindowMs = Number(process.env.WS_RATE_WINDOW_MS || 10_000);
+  const wsMaxEvents = Number(process.env.WS_RATE_MAX_EVENTS || 300);
+  let wsCount = 0;
+  let wsWindowStart = Date.now();
+
+  socket.onAny(() => {
+    const now = Date.now();
+    if (now - wsWindowStart > wsWindowMs) {
+      wsCount = 0;
+      wsWindowStart = now;
+    }
+    wsCount += 1;
+    if (wsCount > wsMaxEvents) {
+      socket.disconnect(true);
+    }
+  });
+
   console.log('🎮 Client connected:', socket.id);
 
   socket.on('register-role', (payload = {}) => {

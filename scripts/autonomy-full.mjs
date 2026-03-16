@@ -1,9 +1,16 @@
 import { spawn } from 'node:child_process';
 import { setTimeout as wait } from 'node:timers/promises';
+import { resolvePorts, applyResolvedPorts } from './security/port-check.mjs';
 
-const BASE_URL = process.env.AUTONOMY_BASE_URL || 'http://127.0.0.1:7860';
-const HEALTH_URL = `${BASE_URL}/health`;
 const rootCwd = process.cwd();
+
+function getBaseUrl() {
+  return process.env.AUTONOMY_BASE_URL || `http://127.0.0.1:${process.env.PORT || 7860}`;
+}
+
+function getHealthUrl() {
+  return `${getBaseUrl()}/health`;
+}
 
 function fail(message) {
   console.error(`AUTONOMY_FULL_FAIL: ${message}`);
@@ -34,7 +41,7 @@ async function fetchHealth(timeoutMs = 2000) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(HEALTH_URL, { signal: controller.signal });
+    const response = await fetch(getHealthUrl(), { signal: controller.signal });
     if (!response.ok) {
       return null;
     }
@@ -138,6 +145,11 @@ async function runProofWithRetries() {
 
 async function main() {
   console.log('AUTONOMY_FULL_START');
+
+  const resolved = await resolvePorts('autonomy', process.env);
+  applyResolvedPorts(process.env, resolved);
+  process.env.AUTONOMY_BASE_URL = `http://127.0.0.1:${process.env.PORT || 7860}`;
+  console.log(`AUTONOMY_FULL_PORTS stream=${process.env.PORT} internal=${process.env.INTERNAL_PORT}`);
 
   try {
     console.log('AUTONOMY_FULL_STEP lint');

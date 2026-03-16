@@ -1,4 +1,8 @@
-const BASE_URL = process.env.AUTONOMY_BASE_URL || 'http://127.0.0.1:7860';
+import { resolvePorts, applyResolvedPorts } from './security/port-check.mjs';
+
+function getBaseUrl() {
+  return process.env.AUTONOMY_BASE_URL || `http://127.0.0.1:${process.env.PORT || 7860}`;
+}
 
 const profiles = [
   { key: 'low', width: 960, height: 540, fps: 24 },
@@ -24,7 +28,7 @@ async function waitForExpectedHealth(profile, options = {}) {
   let lastHealth = null;
 
   for (let attempt = 1; attempt <= retries; attempt += 1) {
-    const health = await requestJson(`${BASE_URL}/health`, undefined, { retries: 6, delayMs: 400 });
+    const health = await requestJson(`${getBaseUrl()}/health`, undefined, { retries: 6, delayMs: 400 });
     assertHealthShape(health);
     lastHealth = health;
 
@@ -89,9 +93,15 @@ function assertHealthShape(health) {
 }
 
 async function main() {
-  console.log(`AUTONOMY_PROOF_START base=${BASE_URL}`);
+  const resolved = await resolvePorts('autonomy', process.env);
+  applyResolvedPorts(process.env, resolved);
+  process.env.AUTONOMY_BASE_URL = `http://127.0.0.1:${process.env.PORT || 7860}`;
 
-  const initialHealth = await requestJson(`${BASE_URL}/health`, undefined, { retries: 45, delayMs: 1000 });
+  const baseUrl = getBaseUrl();
+  console.log(`AUTONOMY_PROOF_START base=${baseUrl}`);
+  console.log(`AUTONOMY_PROOF_PORTS stream=${process.env.PORT} internal=${process.env.INTERNAL_PORT}`);
+
+  const initialHealth = await requestJson(`${baseUrl}/health`, undefined, { retries: 45, delayMs: 1000 });
   assertHealthShape(initialHealth);
 
   console.log(
@@ -101,7 +111,7 @@ async function main() {
   // Normalize start to low first so the proof starts from a deterministic state.
   const normalizedLow = profiles[0];
   await requestJson(
-    `${BASE_URL}/api/profile/${normalizedLow.key}`,
+    `${baseUrl}/api/profile/${normalizedLow.key}`,
     { method: 'POST' },
     { retries: 45, delayMs: 1000 }
   );
@@ -109,7 +119,7 @@ async function main() {
 
   for (const profile of profiles) {
     const switched = await requestJson(
-      `${BASE_URL}/api/profile/${profile.key}`,
+      `${baseUrl}/api/profile/${profile.key}`,
       { method: 'POST' },
       { retries: 45, delayMs: 1000 }
     );

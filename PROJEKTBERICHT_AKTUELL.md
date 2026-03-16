@@ -117,6 +117,36 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Testnachweis erweitert: `runtimePersistence.test.ts` und `gameStore.test.ts` validieren Anomalie-Felder in Store und Snapshot inklusive Sanitisierung.
 - Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 253 von 253 gruen, Build gruen.
 
+### 2.0.45 Security-Hardening + CI-Supply-Chain-Block vom 16.03.2026
+- Security-Integrationspunkte in Skripten erweitert: `prestream`, `preautonomy:proof`, `preautonomy:full` mit `port-check` und `resource-guard`; Alias-Skripte `autonomy-proof`/`autonomy-full` fuer konsistente Aufrufbarkeit.
+- Neue Security-Skripte umgesetzt: `scripts/security/port-check.mjs` (Fallback 3000-3010), `scripts/security/resource-guard.mjs` (No-Remote-Compute + Ressourcenbudget), `scripts/security/validate-memory-logs.mjs` (Hashchain-Validation fuer Memory-/Replay-/Proof-Logs).
+- Server-Hardening umgesetzt: `server/stream-server.mjs`, `server/server.js`, `server/server-prod.mjs` mit Origin-Allowlist, optionalem `WS_SHARED_TOKEN`, optionalem `API_ADMIN_TOKEN`, Endpoint-/Socket-Rate-Limits und lokalem Compute-Guard.
+- Security-CI erweitert: `.github/workflows/security-ci.yml` mit Reihenfolge `Lint -> Test -> Build -> Audit -> SBOM -> Memory-Validation -> Trivy -> Snyk` sowie `.github/dependabot.yml` mit lockfile-only Strategie.
+- Clone-/Secret-Strategie erweitert: `.env.example` um Zero-Grad-, Port-, Guard- und Secret-Defaults inkl. Home-PC-Only-Policy.
+- Port-Safety-Fix nachgezogen: `scripts/security/port-check.mjs` reserviert bereits vergebene Ports innerhalb eines Laufs und verhindert damit Doppelzuweisungen bei Fallback.
+- Vollverifikation nach Security-Block erfolgreich: `npm run autonomy:full` gruen mit `AUTONOMY_FULL_OK` und `AUTONOMY_PROOF_OK`; Profilfolge `low -> medium -> high -> aaa -> low` weiterhin PASS, Teststand 253/253.
+- Re-Run nach Port-Safety-Fix erfolgreich: `npm run autonomy:full` erneut gruen mit `AUTONOMY_FULL_OK` und `AUTONOMY_PROOF_OK`.
+- Zusatznachweis erfolgreich: `npm run security:memory-validate` meldet `MEMORY_LOG_VALIDATION_OK`.
+
+### 2.0.46 Port-Resolver als Laufzeitquelle fuer Stream/Autonomy vom 16.03.2026
+- `scripts/security/port-check.mjs` von reinem CLI-Skript zu wiederverwendbarem Modul erweitert (`resolvePorts`, `applyResolvedPorts`) und CLI-Verhalten beibehalten.
+- Neuer sicherer Stream-Starter `scripts/security/run-stream-secure.mjs` integriert Port-Aufloesung direkt vor Serverstart und uebergibt aufgeloeste Ports als Child-Env.
+- `package.json` Stream-Kommandos (`stream`, `stream:medium`, `stream:high`, `stream:aaa`) auf sicheren Wrapper umgestellt.
+- `scripts/autonomy-full.mjs` portbewusst erweitert: dynamische `AUTONOMY_BASE_URL` und Health-URL aus aufgeloestem `STREAM_PORT` statt statischer 7860-Annahme.
+- Verifikation: `npm run port:check` erfolgreich; `npm run autonomy:full` erneut vollstaendig gruen (`AUTONOMY_FULL_OK`, `AUTONOMY_PROOF_OK`, 253/253 Tests).
+
+### 2.0.47 Port-Resolver in standalone Autonomy-Proof vom 16.03.2026
+- `scripts/autonomy-proof.mjs` auf dieselbe Port-Resolver-Quelle umgestellt (`resolvePorts`, `applyResolvedPorts`) und setzt `AUTONOMY_BASE_URL` jetzt dynamisch aus dem aufgeloesten Stream-Port.
+- Health- und Profil-Endpunkte in Proof-Schleifen verwenden damit keine statische Portannahme mehr.
+- Zusätzliche Transparenz eingefuehrt: Proof meldet aktive Portwerte mit `AUTONOMY_PROOF_PORTS`.
+- Verifikation: `npm run autonomy:proof` erfolgreich; anschliessend `npm run autonomy:full` erneut erfolgreich (`AUTONOMY_FULL_OK`, `AUTONOMY_PROOF_OK`, 253/253 Tests).
+
+### 2.0.48 P-45 Deep-Recheck von vorne (Security-Hardening + Supply-Chain-CI) vom 16.03.2026
+- Deep-Kontrollpfad von vorne durchgefuehrt: erst Code/Config-Scan der P-45-Bausteine (Skripte, Server-Guards, `.env.example`, Security-Workflow, Dependabot), danach Pflichtlaeufe.
+- Reproduzierbare Pflichtlaeufe erfolgreich: `npm run security:memory-validate`, `npm run port:check`, `npm run autonomy:proof`, `npm run autonomy:full` alle gruen.
+- End-to-End bleibt stabil: `AUTONOMY_FULL_OK` und `AUTONOMY_PROOF_OK`, Lint gruen, Build gruen, Teststand unveraendert 253/253.
+- Ergebnis: P-45 ist nicht nur umgesetzt, sondern nach Neustart-Methodik erneut reproduzierbar verifiziert.
+
 ### 2.0.1 Viewer- und Lastnachweis vom 16.03.2026
 - Zwei weitere Viewer-Seiten wurden geoeffnet und der Health-Endpunkt achtmal im Abstand von rund 1,5 Sekunden abgefragt.
 - Der Stream benoetigte eine kurze Aufwaermphase: zuerst `viewerFps=0`, danach stabile Werte zwischen 22 und 24 FPS.
