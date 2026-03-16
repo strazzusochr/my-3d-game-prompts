@@ -347,3 +347,15 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - `npm run lint`: erfolgreich.
 - `npm run build`: erfolgreich, 641 Module.
 - Livecheck: lokaler Full-Stack gestartet, Browserseite geoeffnet, Socket `Y0d3YxhZ02zjI-P2AAAJ` verbunden; Prozess sauber beendet.
+
+### 8.26 Operations-Korrelations-Engine vom 16.03.2026
+- Neues Systemmodul `src/systems/operationsInsights.ts` eingefuehrt. Es berechnet aus Rollen-Trendverlauf, DayStats, Panikquote, Hook-Auslastung und Missionsfortschritt eine strukturierte Auswertung: `priority`, `recommendation`, `correlationLine`, `confidencePercent`.
+- `HUD.tsx` nutzt diese Engine im Operations-Drilldown. Die Einsatzempfehlung wird jetzt nicht mehr aus Einzel-if-Ketten, sondern aus korrelierten Lageparametern erzeugt.
+- Der Operations-Block zeigt zusaetzlich eine Korrelationszeile sowie Prioritaet und Confidence direkt in der UI.
+
+### 8.27 Korrelations-Nachweis
+- Neuer Testblock `src/tests/operationsInsights.test.ts` mit 3 Szenarien (kritische Lage, mittlere Lage, stabile Lage).
+- `npx vitest run`: erfolgreich, 222 von 222 Tests bestanden.
+- `npm run lint`: erfolgreich.
+- `npm run build`: erfolgreich, 642 Module.
+- Livecheck: lokaler Full-Stack gestartet, Browserseite geoeffnet, Socket `3Zi--HMxKGEl8XN1AAAB` verbunden; Prozess sauber beendet.
