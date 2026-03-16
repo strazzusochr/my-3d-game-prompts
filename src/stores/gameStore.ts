@@ -351,6 +351,8 @@ const applyDynamicRoleResponses = (
             'dyn-mission-fullchain-deescalation',
             'dyn-mission-fullchain-recovery',
             'dyn-mission-fragmented-command',
+            'dyn-trend-synchronization',
+            'dyn-trend-fracture-wave',
         ]
             .filter((key) => firedSet.has(key)).length,
     });
@@ -383,6 +385,61 @@ const applyDynamicRoleResponses = (
 
     if (supportReserve >= 10) {
         fallbackWaveScale = Math.max(0.75, fallbackWaveScale - 0.1);
+    }
+
+    if (
+        currentMinutes >= 20 * 60 + 30 &&
+        getMissionCompletionPercent(missionProgress) >= 80 &&
+        insight.missionPathWeightPercent >= 105 &&
+        (insight.trendSignal === 'stabilizing' || insight.trendSignal === 'flat') &&
+        !firedSet.has('dyn-trend-synchronization')
+    ) {
+        const policeWave = spawnDynamicWave(
+            nextNpcs,
+            NPCType.POLICE,
+            scaleWaveCount(2, positiveWaveScale, 1),
+            [2, 0, 32],
+            7,
+            NPCMood.TENSE,
+            NPCBehavior.SHIELD_WALL,
+        );
+        const supportWave = spawnDynamicWave(
+            policeWave,
+            NPCType.MEDIC,
+            scaleWaveCount(1, positiveWaveScale, 1),
+            [16, 0, 24],
+            6,
+            NPCMood.TENSE,
+            NPCBehavior.CLEANUP,
+        );
+        if (supportWave !== nextNpcs) {
+            nextNpcs = supportWave;
+            nextDayStats = applyDayStatsDelta(nextDayStats, { injured: -1, damage: -850 });
+            firedSet.add('dyn-trend-synchronization');
+        }
+    }
+
+    if (
+        currentMinutes >= 21 * 60 + 30 &&
+        getMissionCompletionPercent(missionProgress) < 60 &&
+        insight.missionPathWeightPercent <= 95 &&
+        insight.trendSignal !== 'stabilizing' &&
+        !firedSet.has('dyn-trend-fracture-wave')
+    ) {
+        const spawned = spawnDynamicWave(
+            nextNpcs,
+            NPCType.RIOTER,
+            scaleWaveCount(3, fallbackWaveScale, 2),
+            [10, 0, 40],
+            8,
+            NPCMood.RIOTING,
+            NPCBehavior.THROW,
+        );
+        if (spawned !== nextNpcs) {
+            nextNpcs = spawned;
+            nextDayStats = applyDayStatsDelta(nextDayStats, { injured: 1, damage: 1100 });
+            firedSet.add('dyn-trend-fracture-wave');
+        }
     }
 
     if (
