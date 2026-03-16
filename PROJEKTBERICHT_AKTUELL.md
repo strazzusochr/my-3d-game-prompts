@@ -193,3 +193,17 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 ### 8.3 Bewertung
 - Der Player-Core ist deutlich naeher an einem echten Character-Controller als zuvor, weil die Spielfigur nun nicht mehr rein frei durch den Raum gleitet.
 - Noch offen fuer eine spaetere Ausbaustufe sind vollstaendige Rapier-Kollision, robustes Sliden entlang komplexer Geometrie, echte Interaktionsflaechen und feinere Physikparameter fuer Grenzfaelle.
+
+### 8.4 Rapier-Kollisionswelt vom 16.03.2026
+- Der zuvor terrain-gesampelte Player-Core wurde auf eine echte `@react-three/rapier`-Physikwelt gehoben.
+- `GameCanvas` kapselt die 3D-Szene nun in `Physics`, waehrend `WorldColliders` feste Collider fuer Park, Strassen, Sidewalks und Gebaeude bereitstellt.
+- Der Player nutzt jetzt einen dynamischen Capsule-RigidBody mit gesperrten Rotationen, Daempfung und CCD statt reiner Positionsmutation.
+- Sprung und Schwerkraft laufen ueber die Physik-Engine; die horizontale Bewegung wird weiterhin aus Eingabe und Kamerayaw abgeleitet, nun aber mit echter Kollisionsantwort gegen die Welt.
+- Die Gebaeudehoehen wurden zwischen Renderwelt und Colliderwelt deterministisch synchronisiert, damit sichtbare Architektur und Physik dieselbe Geometrie verwenden.
+
+### 8.5 Rapier-Nachweis
+- `npm run lint`: erfolgreich.
+- `npx vitest run`: erfolgreich, 176 von 176 Tests bestanden.
+- `npm run build`: erfolgreich.
+- Livecheck: `npm run dev:all` gestartet, Browserseite geoeffnet, Socket-Server meldete eine reale Client-Verbindung.
+- Der fuer den Livecheck gestartete Hintergrundprozess wurde nach dem Nachweis wieder beendet.

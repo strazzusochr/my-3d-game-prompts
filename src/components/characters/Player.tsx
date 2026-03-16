@@ -1,21 +1,19 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useKeyboardControls } from '@react-three/drei';
+import { CapsuleCollider, RigidBody } from '@react-three/rapier';
+import type { RapierRigidBody } from '@react-three/rapier';
 import * as THREE from 'three';
 import { useGameStore } from '../../stores/gameStore';
 import {
     getGroundHeightAt,
     getGroundNormalAt,
-    resolveWalkablePosition,
 } from '../3d/environment/cityLayout';
 
 const GAMEPAD_DEADZONE = 0.15;
 const PLAYER_HEIGHT_OFFSET = 1.2;
-const PLAYER_RADIUS = 0.45;
-const MAX_STEP_HEIGHT = 0.35;
-const GRAVITY = -24;
 const JUMP_VELOCITY = 8.5;
-const TERMINAL_VELOCITY = -18;
+const GROUND_CONTACT_EPSILON = 0.08;
 
 const applyDeadzone = (value: number) => {
     if (Math.abs(value) < GAMEPAD_DEADZONE) return 0;
@@ -45,6 +43,7 @@ function vibrate(gamepad: Gamepad, strongMs = 150, strong = 0.4, weak = 0.2) {
 
 export const Player = () => {
     const meshRef = useRef<THREE.Group>(null);
+    const rigidBodyRef = useRef<RapierRigidBody>(null);
     const [, getKeys] = useKeyboardControls();
     const [position] = useState(new THREE.Vector3(0, getGroundHeightAt(0, 10) + PLAYER_HEIGHT_OFFSET, 10));
     const [rotation, setRotation] = useState({ yaw: 0, pitch: -0.5 });
@@ -75,7 +74,6 @@ export const Player = () => {
     // Previous button states for one-shot edge detection (avoid repeated fires while held)
     const prevButtonsRef = useRef<boolean[]>([]);
     const buttonCooldown = useRef<Record<number, number>>({});
-    const verticalVelocity = useRef(0);
     const groundedRef = useRef(true);
     const jumpQueued = useRef(false);
 
@@ -163,6 +161,11 @@ export const Player = () => {
     useFrame((state, delta) => {
         const { forward, backward, left, right } = getKeys();
         const gamepad = gamepadIndexRef.current !== null ? navigator.getGamepads?.()[gamepadIndexRef.current] : null;
+        const rigidBody = rigidBodyRef.current;
+
+        if (!rigidBody) {
+            return;
+        }
 
         let gpMoveX = 0;
         let gpMoveZ = 0;
@@ -280,23 +283,16 @@ export const Player = () => {
         const sideInput = THREE.MathUtils.clamp(keySideInput + gpMoveX, -1, 1);
         const gamepadSprint = gamepad ? (gamepad.buttons[5]?.pressed ?? false) : false;
         const activeSpeed = gamepadSprint ? speed * 1.7 : speed;
+        const translation = rigidBody.translation();
+        position.set(translation.x, translation.y, translation.z);
+
         const currentGroundHeight = getGroundHeightAt(position.x, position.z) + PLAYER_HEIGHT_OFFSET;
+        const currentVelocity = rigidBody.linvel();
         const distanceToGround = position.y - currentGroundHeight;
 
-        groundedRef.current = distanceToGround <= 0.05 && verticalVelocity.current <= 0;
+        groundedRef.current = distanceToGround <= GROUND_CONTACT_EPSILON && currentVelocity.y <= 0.5;
 
-        if (jumpQueued.current && groundedRef.current && !ctrlHeld.current) {
-            verticalVelocity.current = JUMP_VELOCITY;
-            groundedRef.current = false;
-        }
-        jumpQueued.current = false;
-
-        verticalVelocity.current = Math.max(
-            TERMINAL_VELOCITY,
-            verticalVelocity.current + GRAVITY * delta,
-        );
-
-        const targetPosition = position.clone();
+        const desiredVelocity = new THREE.Vector3();
 
         if (!ctrlHeld.current) {
             frontVector.set(0, 0, fwdInput);
@@ -311,26 +307,35 @@ export const Player = () => {
                     direction.projectOnPlane(getGroundNormalAt(position.x, position.z)).normalize();
                 }
 
-                direction.multiplyScalar(activeSpeed * delta);
-                targetPosition.add(direction);
+                direction.multiplyScalar(activeSpeed);
+                desiredVelocity.copy(direction);
             }
         }
 
-        const resolvedPosition = resolveWalkablePosition(position, targetPosition, PLAYER_RADIUS);
-        const resolvedGroundHeight = getGroundHeightAt(resolvedPosition.x, resolvedPosition.z) + PLAYER_HEIGHT_OFFSET;
-        const nextVerticalPosition = position.y + verticalVelocity.current * delta;
-        const stepHeight = resolvedGroundHeight - position.y;
+        rigidBody.setLinvel(
+            {
+                x: desiredVelocity.x,
+                y: currentVelocity.y,
+                z: desiredVelocity.z,
+            },
+            true,
+        );
 
-        if (nextVerticalPosition <= resolvedGroundHeight && stepHeight <= MAX_STEP_HEIGHT) {
-            resolvedPosition.y = resolvedGroundHeight;
-            verticalVelocity.current = 0;
-            groundedRef.current = true;
-        } else {
-            resolvedPosition.y = nextVerticalPosition;
+        if (jumpQueued.current && groundedRef.current && !ctrlHeld.current) {
+            rigidBody.setLinvel(
+                {
+                    x: desiredVelocity.x,
+                    y: JUMP_VELOCITY,
+                    z: desiredVelocity.z,
+                },
+                true,
+            );
             groundedRef.current = false;
         }
+        jumpQueued.current = false;
 
-        position.copy(resolvedPosition);
+        const updatedTranslation = rigidBody.translation();
+        position.set(updatedTranslation.x, updatedTranslation.y, updatedTranslation.z);
 
         if (meshRef.current) {
             meshRef.current.position.copy(position);
@@ -350,16 +355,29 @@ export const Player = () => {
 
     return (
         <>
-            <group ref={meshRef} onClick={(e) => (e.target as HTMLElement).requestPointerLock()}>
-                <mesh position={[0, 0.5, 0]} castShadow>
-                    <capsuleGeometry args={[0.3, 1, 4, 8]} />
-                    <meshStandardMaterial color="#1a237e" metalness={0.5} roughness={0.2} />
-                </mesh>
-                <mesh position={[0, 0.8, 0.1]} castShadow>
-                    <boxGeometry args={[0.5, 0.4, 0.2]} />
-                    <meshStandardMaterial color="#111" />
-                </mesh>
-            </group>
+            <RigidBody
+                ref={rigidBodyRef}
+                type="dynamic"
+                colliders={false}
+                position={[0, getGroundHeightAt(0, 10) + PLAYER_HEIGHT_OFFSET, 10]}
+                lockRotations
+                canSleep={false}
+                linearDamping={6}
+                angularDamping={10}
+                ccd
+            >
+                <CapsuleCollider args={[0.5, 0.3]} friction={0.2} />
+                <group ref={meshRef} onClick={(e) => (e.target as HTMLElement).requestPointerLock()}>
+                    <mesh position={[0, 0.5, 0]} castShadow>
+                        <capsuleGeometry args={[0.3, 1, 4, 8]} />
+                        <meshStandardMaterial color="#1a237e" metalness={0.5} roughness={0.2} />
+                    </mesh>
+                    <mesh position={[0, 0.8, 0.1]} castShadow>
+                        <boxGeometry args={[0.5, 0.4, 0.2]} />
+                        <meshStandardMaterial color="#111" />
+                    </mesh>
+                </group>
+            </RigidBody>
             {/* Invisible marker object — gamepad status shown in HUD overlay */}
             {gamepadConnected && (
                 <group userData={{ gamepadConnected: true, gamepadName }} />

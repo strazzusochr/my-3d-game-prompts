@@ -1,11 +1,13 @@
 import { Suspense, useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Html, Sky, KeyboardControls } from '@react-three/drei';
+import { Physics } from '@react-three/rapier';
 import { workerManager } from '../../managers/WorkerManager';
 import { useGameStore } from '../../stores/gameStore';
 import { InstancedHumanoid } from '../characters/InstancedHumanoid';
 import { NPCSigns } from '../characters/NPCSigns';
 import { CityEnvironment } from '../3d/environment/CityEnvironment';
+import { WorldColliders } from '../3d/environment/WorldColliders';
 import { SpawnMarkers } from '../3d/environment/SpawnMarkers';
 import { VisualEffects } from '../3d/effects/VisualEffects';
 import { Player } from '../characters/Player';
@@ -59,13 +61,16 @@ const SceneContent = () => {
                 ]}
             />
 
-            <CityEnvironment />
-            <SpawnMarkers />
+            <Physics gravity={[0, -24, 0]} timeStep="vary" colliders={false}>
+                <WorldColliders />
+                <CityEnvironment />
+                <SpawnMarkers />
 
-            <InstancedHumanoid />
-            <NPCSigns />
-            <Player />
-            <VisualEffects />
+                <InstancedHumanoid />
+                <NPCSigns />
+                <Player />
+                <VisualEffects />
+            </Physics>
         </>
     );
 };
