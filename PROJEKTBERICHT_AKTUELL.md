@@ -334,3 +334,16 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - `npm run lint`: erfolgreich.
 - `npm run build`: erfolgreich, 641 Module.
 - Livecheck: lokaler Full-Stack gestartet, Browserseite geoeffnet, Socket `gfOeXoY-9IyYb1jnAAAF` verbunden; Prozess sauber beendet.
+
+### 8.24 Rollen-Trendhistorie und Operations-Verlauf vom 16.03.2026
+- `src/stores/gameStore.ts` fuehrt jetzt `roleTrendHistory` als neuen Zustand mit verdichteten Rollen-Checkpoints (`security`, `aggressors`, `support`, `civilian`, `panicRatioPercent`).
+- Bei normalem Zeitfortschritt wird der aktuelle Checkpoint per Upsert/Trim (max 24 Punkte) fortgeschrieben.
+- Bei Rueckwaertsspruengen wird die Trendhistorie aus dem Replay bis zur Zielzeit neu aufgebaut, damit Verlauf und Weltzustand synchron bleiben.
+- `HUD.tsx` visualisiert im Operations-Drilldown eine kompakte Verlaufsgrafik (SVG-Polylinien) fuer Sicherheit/Aggression/Support der letzten 10 Checkpoints.
+
+### 8.25 Trendhistorie-Nachweis
+- `src/tests/gameStore.test.ts` um 2 weitere Tests erweitert: Fortschreibung der Rollenhistorie bei Zeitfortschritt und Leerung bei Tagesreset.
+- `npx vitest run`: erfolgreich, 219 von 219 Tests bestanden.
+- `npm run lint`: erfolgreich.
+- `npm run build`: erfolgreich, 641 Module.
+- Livecheck: lokaler Full-Stack gestartet, Browserseite geoeffnet, Socket `Y0d3YxhZ02zjI-P2AAAJ` verbunden; Prozess sauber beendet.

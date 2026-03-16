@@ -42,6 +42,7 @@ export const HUD = () => {
     const dayStats = useGameStore(state => state.dayStats);
     const showStatistics = useGameStore(state => state.gameState.showStatistics);
     const firedEventKeys = useGameStore(state => state.firedEventKeys);
+    const roleTrendHistory = useGameStore(state => state.roleTrendHistory);
     const masterVolume = useGameStore(state => state.gameState.masterVolume);
     const muted = useGameStore(state => state.gameState.muted);
     const interactionState = useGameStore(state => state.interactionState);
@@ -108,6 +109,18 @@ export const HUD = () => {
         { key: 'dyn-evening-reinforcement', label: 'Hundertschaft dynamisch aktiviert', color: '#88ddff' },
         { key: 'dyn-late-triage', label: 'Triage-Korridor dynamisch aktiv', color: '#99ffcc' },
     ].filter((response) => firedEventKeys.includes(response.key));
+    const trendView = roleTrendHistory.slice(-10);
+    const trendMax = Math.max(1, ...trendView.map((point) => Math.max(point.security, point.aggressors, point.support)));
+    const mapTrendLine = (selector: (point: (typeof trendView)[number]) => number) => {
+        if (trendView.length <= 1) return '';
+        return trendView
+            .map((point, index) => {
+                const x = (index / (trendView.length - 1)) * 100;
+                const y = 100 - (selector(point) / trendMax) * 100;
+                return `${x},${Number.isFinite(y) ? y : 100}`;
+            })
+            .join(' ');
+    };
 
     // Auto-Scroll to current event
     useEffect(() => {
@@ -762,6 +775,33 @@ export const HUD = () => {
                                     )) : (
                                         <div style={{ color: '#67808d', fontSize: '11px' }}>
                                             Keine dynamische Rollenreaktion aktiv.
+                                        </div>
+                                    )}
+                                </div>
+                                <div style={{ marginTop: '12px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '10px' }}>
+                                    <div style={{ color: '#9edfff', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: '8px' }}>
+                                        Rollen-Trend (letzte 10 Checkpoints)
+                                    </div>
+                                    {trendView.length > 1 ? (
+                                        <>
+                                            <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{ width: '100%', height: '92px', background: 'rgba(0,0,0,0.22)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                                <polyline points={mapTrendLine((point) => point.security)} fill="none" stroke="#4466ff" strokeWidth="2.4" />
+                                                <polyline points={mapTrendLine((point) => point.aggressors)} fill="none" stroke="#ff4444" strokeWidth="2.4" />
+                                                <polyline points={mapTrendLine((point) => point.support)} fill="none" stroke="#00ff88" strokeWidth="2.4" />
+                                            </svg>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', color: '#67808d', fontSize: '10px' }}>
+                                                <span>{trendView[0].time}</span>
+                                                <span>{trendView[trendView.length - 1].time}</span>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '10px', marginTop: '6px', fontSize: '10px' }}>
+                                                <span style={{ color: '#4466ff' }}>Sicherheit</span>
+                                                <span style={{ color: '#ff4444' }}>Aggression</span>
+                                                <span style={{ color: '#00ff88' }}>Support</span>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div style={{ color: '#67808d', fontSize: '11px' }}>
+                                            Noch zu wenig Daten fuer Trendlinie.
                                         </div>
                                     )}
                                 </div>

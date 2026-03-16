@@ -37,6 +37,7 @@ const resetStore = () => {
   useGameStore.setState({
     npcs: [],
     firedEventKeys: [],
+    roleTrendHistory: [],
     interactionState: {
       nearbyZoneId: null,
       lastMessage: null,
@@ -359,5 +360,26 @@ describe('gameStore core flow', () => {
     expect(state.firedEventKeys).toContain('dyn-evening-reinforcement');
     expect(state.firedEventKeys).not.toContain('dyn-late-triage');
     expect(state.npcs.filter((npc) => npc.type === NPCType.MEDIC)).toHaveLength(0);
+    expect(state.roleTrendHistory.length).toBeGreaterThan(0);
+    expect(state.roleTrendHistory.at(-1)?.time).toBe('20:00');
+  });
+
+  it('records role trend snapshots while time progresses', () => {
+    useGameStore.getState().evaluateEvents('18:00');
+    useGameStore.getState().evaluateEvents('19:00');
+    const history = useGameStore.getState().roleTrendHistory;
+
+    expect(history.length).toBeGreaterThanOrEqual(2);
+    expect(history.at(-1)?.time).toBe('19:00');
+    expect(history.some((point) => point.aggressors > 0)).toBe(true);
+  });
+
+  it('clears role trend history on day reset', () => {
+    useGameStore.getState().evaluateEvents('21:00');
+    expect(useGameStore.getState().roleTrendHistory.length).toBeGreaterThan(0);
+
+    useGameStore.getState().resetDayCycle();
+
+    expect(useGameStore.getState().roleTrendHistory).toHaveLength(0);
   });
 });
