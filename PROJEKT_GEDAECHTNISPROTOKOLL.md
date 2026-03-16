@@ -66,7 +66,10 @@
 - Rewind-/Replay-Pfad verhaertet: Rueckwaertsspruenge rekonstruieren jetzt nicht nur `SPAWN`/`DESPAWN`, sondern auch `MOVE`, `MOOD_CHANGE`, `BEHAVIOR_CHANGE`, aktuelle Phasenlabels sowie dynamische Rollenreaktionen konsistent aus dem Timeline-Stand.
 - HUD-Operations-Drilldown erweitert: aktive dynamische Rollenreaktionen werden als Live-Badges im Rollenverteilungs-Panel angezeigt.
 - Rollen-Automatik-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 217/217 gruen, `npm run build` gruen, Browser-/Socket-Livecheck bestaetigt (Socket `gfOeXoY-9IyYb1jnAAAF`).
+- Rollen-Trendhistorie-Block am 16.03.2026 integriert: Store fuehrt jetzt `roleTrendHistory` mit Checkpoints je Zeitfortschritt; bei Rewind wird die Historie aus Timeline-Stand konsistent neu aufgebaut.
+- Operations-Drilldown zeigt nun Verlaufslinien fuer Sicherheit, Aggression und Support (letzte 10 Checkpoints) inklusive Zeitrahmen.
+- Trendhistorie-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 219/219 gruen, `npm run build` gruen, Browser-/Socket-Livecheck bestaetigt (Socket `Y0d3YxhZ02zjI-P2AAAJ`).
 
 ## Naechster logischer Schritt
-- Rollen-Trendhistorie im Store halten, damit aus Live-Breakdown echte Verlaufsdiagramme und Korrelationen entstehen.
 - Entscheidungsbasierte Folge-Events: Spieleraktionen sollen zugeschnittene Kettenevents ausloesen (z.B. nach erfolgreicher Epoch-Verifikation wird ein spezifischer Journalist-Mob aktiviert).
+- Trend-Korrelationen: Verlaufslinien gegen Missionserfolge, Tagesschaden und Panikquote korrelieren und als Entscheidungshilfe ausgeben.

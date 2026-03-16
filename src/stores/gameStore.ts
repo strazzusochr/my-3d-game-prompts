@@ -32,9 +32,19 @@ interface DayStats {
     damage: number;
 }
 
+export interface RoleTrendPoint {
+    time: string;
+    security: number;
+    aggressors: number;
+    support: number;
+    civilian: number;
+    panicRatioPercent: number;
+}
+
 interface GameStore {
     npcs: NPCData[];
     firedEventKeys: string[];
+    roleTrendHistory: RoleTrendPoint[];
     interactionState: {
         nearbyZoneId: InteractionZoneId | null;
         lastMessage: string | null;
@@ -77,12 +87,63 @@ interface GameStore {
 }
 
 let nextNpcId = 1000;
+const MAX_ROLE_TREND_POINTS = 24;
+
+const SECURITY_TYPES = new Set<NPCType>([NPCType.POLICE, NPCType.RIOT_POLICE, NPCType.SEK]);
+const AGGRESSOR_TYPES = new Set<NPCType>([NPCType.RIOTER, NPCType.EXTREMIST]);
+const SUPPORT_TYPES = new Set<NPCType>([NPCType.MEDIC, NPCType.FIREFIGHTER]);
 
 interface WorldReplayState {
     npcs: NPCData[];
     dayStats: DayStats;
     firedSet: Set<string>;
 }
+
+const minutesToClock = (minutes: number) => {
+    const normalized = ((minutes % (24 * 60)) + (24 * 60)) % (24 * 60);
+    const h = Math.floor(normalized / 60);
+    const m = normalized % 60;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+};
+
+const buildRoleTrendPoint = (time: string, npcs: NPCData[]): RoleTrendPoint => {
+    const security = npcs.filter((npc) => SECURITY_TYPES.has(npc.type)).length;
+    const aggressors = npcs.filter((npc) => AGGRESSOR_TYPES.has(npc.type)).length;
+    const support = npcs.filter((npc) => SUPPORT_TYPES.has(npc.type)).length;
+    const civilian = npcs.length - security - aggressors - support;
+    const panicCount = npcs.filter((npc) => npc.mood === NPCMood.PANICKED || npc.mood === NPCMood.RIOTING).length;
+
+    return {
+        time,
+        security,
+        aggressors,
+        support,
+        civilian,
+        panicRatioPercent: npcs.length > 0 ? Math.round((panicCount / npcs.length) * 100) : 0,
+    };
+};
+
+const upsertRoleTrendPoint = (
+    history: RoleTrendPoint[],
+    point: RoleTrendPoint,
+    maxPoints: number = MAX_ROLE_TREND_POINTS,
+) => {
+    if (history.length === 0) {
+        return [point];
+    }
+
+    const last = history[history.length - 1];
+    if (last.time === point.time) {
+        return [...history.slice(0, -1), point];
+    }
+
+    const next = [...history, point];
+    if (next.length > maxPoints) {
+        return next.slice(next.length - maxPoints);
+    }
+
+    return next;
+};
 
 /** Helper: create NPCs of a given type at a position with radius */
 function createNpcs(
@@ -277,6 +338,31 @@ const replayWorldStateToMinutes = (currentMinutes: number): WorldReplayState => 
     return { npcs, dayStats, firedSet };
 };
 
+const buildRoleTrendHistoryToMinutes = (
+    currentMinutes: number,
+    missionProgress: typeof INITIAL_MISSION_PROGRESS,
+): RoleTrendPoint[] => {
+    const checkpoints = new Set<number>([currentMinutes]);
+    EVENT_TIMELINE.forEach((event) => {
+        const eventMinutes = timeToMinutes(event.time);
+        if (eventMinutes <= currentMinutes) {
+            checkpoints.add(eventMinutes);
+        }
+    });
+
+    const sorted = Array.from(checkpoints).sort((a, b) => a - b);
+    let history: RoleTrendPoint[] = [];
+
+    sorted.forEach((minutes) => {
+        const replay = replayWorldStateToMinutes(minutes);
+        const hooked = applyMissionPhaseHooks(replay.npcs, minutes, missionProgress);
+        const dynamic = applyDynamicRoleResponses(hooked, replay.dayStats, replay.firedSet, minutes);
+        history = upsertRoleTrendPoint(history, buildRoleTrendPoint(minutesToClock(minutes), dynamic.npcs));
+    });
+
+    return history;
+};
+
 const getInteractionDayStatsDelta = (zoneId: InteractionZoneId): Partial<DayStats> => {
     if (zoneId === 'epoch-terminal') {
         return { injured: -1, damage: -2500 };
@@ -409,6 +495,7 @@ const applyMissionNpcEffects = (npcs: NPCData[], zoneId: InteractionZoneId): NPC
 export const useGameStore = create<GameStore>((set, get) => ({
     npcs: [],
     firedEventKeys: [],
+    roleTrendHistory: [],
     interactionState: {
         nearbyZoneId: null,
         lastMessage: null,
@@ -439,6 +526,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         set({ 
             npcs: [],
             firedEventKeys: [],
+            roleTrendHistory: [],
             interactionState: {
                 nearbyZoneId: null,
                 lastMessage: null,
@@ -529,11 +617,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
             }
 
             const crossedMidnight = previousMinutes > currentMinutes;
+            const trendPoint = buildRoleTrendPoint(currentTime, npcs);
+            const roleTrendHistory = crossedMidnight
+                ? [trendPoint]
+                : upsertRoleTrendPoint(state.roleTrendHistory, trendPoint);
 
             return {
                 npcs,
                 dayStats,
                 firedEventKeys: Array.from(firedSet),
+                roleTrendHistory,
                 gameState: {
                     ...state.gameState,
                     inGameTime: currentTime,
@@ -568,12 +661,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const dynamicState = applyDynamicRoleResponses(npcs, rebuilt.dayStats, rebuilt.firedSet, currentMinutes);
         const tensionLevel = getTensionLevelForMinutes(currentMinutes);
         const currentPhaseLabel = getPhaseLabelForMinutes(currentMinutes, state.gameState.currentPhaseLabel);
+        const roleTrendHistory = buildRoleTrendHistoryToMinutes(currentMinutes, state.interactionState.missionProgress);
 
         workerManager.syncNpcs(dynamicState.npcs);
         set({
             npcs: dynamicState.npcs,
             dayStats: dynamicState.dayStats,
             firedEventKeys: Array.from(dynamicState.firedSet),
+            roleTrendHistory,
             gameState: { ...state.gameState, inGameTime: newTime, tensionLevel, currentPhaseLabel }
         });
     },
@@ -605,12 +700,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const dynamicState = applyDynamicRoleResponses(npcs, rebuilt.dayStats, rebuilt.firedSet, currentMinutes);
         const tensionLevel = getTensionLevelForMinutes(currentMinutes);
         const currentPhaseLabel = getPhaseLabelForMinutes(currentMinutes, state.gameState.currentPhaseLabel);
+        const roleTrendHistory = buildRoleTrendHistoryToMinutes(currentMinutes, state.interactionState.missionProgress);
 
         workerManager.syncNpcs(dynamicState.npcs);
         set({
             npcs: dynamicState.npcs,
             dayStats: dynamicState.dayStats,
             firedEventKeys: Array.from(dynamicState.firedSet),
+            roleTrendHistory,
             gameState: { ...state.gameState, inGameTime: newTime, tensionLevel, currentPhaseLabel }
         });
     },
@@ -629,6 +726,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         set({
             npcs: [],
             firedEventKeys: [],
+            roleTrendHistory: [],
             interactionState: {
                 nearbyZoneId: null,
                 lastMessage: null,
