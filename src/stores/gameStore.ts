@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { NPCType, EmotionalState, NPCMood, NPCBehavior } from '../types/enums';
 import { workerManager } from '../managers/WorkerManager';
 import { EVENT_TIMELINE, TENSION_TIMELINE, PHASE_DESCRIPTIONS, NPC_COLORS, MAX_ACTIVE_NPCS, timeToMinutes } from '../systems/eventScheduler';
+import { INITIAL_MISSION_PROGRESS, type InteractionZoneId, applyInteractionOutcome } from '../systems/interactionZones';
 import { io } from 'socket.io-client';
 
 declare global {
@@ -26,6 +27,11 @@ export interface NPCData {
 interface GameStore {
     npcs: NPCData[];
     firedEventKeys: string[];
+    interactionState: {
+        nearbyZoneId: InteractionZoneId | null;
+        lastMessage: string | null;
+        missionProgress: typeof INITIAL_MISSION_PROGRESS;
+    };
     gameState: { 
         isPlaying: boolean; 
         isTimePaused: boolean; 
@@ -61,6 +67,8 @@ interface GameStore {
     dismissStatistics: () => void;
     setMasterVolume: (vol: number) => void;
     setMuted: (muted: boolean) => void;
+    setNearbyInteraction: (zoneId: InteractionZoneId | null) => void;
+    triggerInteraction: () => void;
     initSocket: () => void;
 }
 
@@ -106,6 +114,11 @@ function removeNpcs(npcs: NPCData[], type: NPCType, count: number): NPCData[] {
 export const useGameStore = create<GameStore>((set, get) => ({
     npcs: [],
     firedEventKeys: [],
+    interactionState: {
+        nearbyZoneId: null,
+        lastMessage: null,
+        missionProgress: INITIAL_MISSION_PROGRESS,
+    },
     dayStats: { killed: 0, arrested: 0, injured: 0, damage: 0 },
     gameState: { 
         isPlaying: false, isTimePaused: false, inGameTime: '06:00', 
@@ -131,6 +144,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         set({ 
             npcs: [],
             firedEventKeys: [],
+            interactionState: {
+                nearbyZoneId: null,
+                lastMessage: null,
+                missionProgress: INITIAL_MISSION_PROGRESS,
+            },
             dayStats: { killed: 0, arrested: 0, injured: 0, damage: 0 },
             gameState: { 
                 isPlaying: true, isTimePaused: false, inGameTime: '06:00', 
@@ -365,6 +383,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         set({
             npcs: [],
             firedEventKeys: [],
+            interactionState: {
+                nearbyZoneId: null,
+                lastMessage: null,
+                missionProgress: INITIAL_MISSION_PROGRESS,
+            },
             dayStats: { killed: 0, arrested: 0, injured: 0, damage: 0 },
             gameState: { 
                 isPlaying: true, isTimePaused: false, inGameTime: '00:00', 
@@ -400,7 +423,41 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     setMuted: (muted) => set((state) => ({
         gameState: { ...state.gameState, muted }
-    }))
+    })),
+
+    setNearbyInteraction: (zoneId) => set((state) => ({
+        interactionState: {
+            ...state.interactionState,
+            nearbyZoneId: zoneId,
+        }
+    })),
+
+    triggerInteraction: () => set((state) => {
+        const zoneId = state.interactionState.nearbyZoneId;
+        if (!zoneId) {
+            return state;
+        }
+
+        const outcome = applyInteractionOutcome(state.interactionState.missionProgress, zoneId);
+        const nextReputation = Math.max(-100, Math.min(100, state.gameState.playerReputation + outcome.reputationDelta));
+        const nextMoral = Math.max(0, Math.min(100, state.gameState.moralScore + outcome.moralDelta));
+        const nextTension = Math.max(0, Math.min(100, state.gameState.tensionLevel + outcome.tensionDelta));
+
+        return {
+            interactionState: {
+                ...state.interactionState,
+                lastMessage: outcome.message,
+                missionProgress: outcome.missionProgress,
+            },
+            gameState: {
+                ...state.gameState,
+                playerReputation: nextReputation,
+                moralScore: nextMoral,
+                tensionLevel: nextTension,
+                currentPhaseLabel: outcome.phaseLabel ?? state.gameState.currentPhaseLabel,
+            },
+        };
+    })
 }));
 
 if (typeof window !== 'undefined') {

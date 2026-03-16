@@ -30,11 +30,17 @@ vi.mock('socket.io-client', () => ({
 vi.mock('../managers/WorkerManager', () => workerState);
 
 import { useGameStore } from '../stores/gameStore';
+import { INITIAL_MISSION_PROGRESS } from '../systems/interactionZones';
 
 const resetStore = () => {
   useGameStore.setState({
     npcs: [],
     firedEventKeys: [],
+    interactionState: {
+      nearbyZoneId: null,
+      lastMessage: null,
+      missionProgress: INITIAL_MISSION_PROGRESS,
+    },
     dayStats: { killed: 0, arrested: 0, injured: 0, damage: 0 },
     gameState: {
       isPlaying: false,
@@ -95,5 +101,30 @@ describe('gameStore core flow', () => {
     expect(state.npcs.length).toBe(0);
     expect(state.firedEventKeys.length).toBe(0);
     expect(state.gameState.inGameTime).toBe('00:00');
+  });
+
+  it('applies interaction outcomes to mission state and game metrics', () => {
+    useGameStore.getState().setNearbyInteraction('epoch-terminal');
+    useGameStore.getState().triggerInteraction();
+
+    const state = useGameStore.getState();
+
+    expect(state.interactionState.missionProgress.epochBriefingVerified).toBe(true);
+    expect(state.gameState.playerReputation).toBe(8);
+    expect(state.gameState.moralScore).toBe(60);
+    expect(state.gameState.tensionLevel).toBe(4);
+    expect(state.interactionState.lastMessage).toContain('Einsatzstab');
+  });
+
+  it('does not double-count the same interaction twice', () => {
+    useGameStore.getState().setNearbyInteraction('hazard-console');
+    useGameStore.getState().triggerInteraction();
+    useGameStore.getState().triggerInteraction();
+
+    const state = useGameStore.getState();
+
+    expect(state.interactionState.missionProgress.hazardMapPrepared).toBe(true);
+    expect(state.gameState.playerReputation).toBe(6);
+    expect(state.interactionState.lastMessage).toContain('bereits');
   });
 });

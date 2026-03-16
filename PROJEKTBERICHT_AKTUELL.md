@@ -207,3 +207,19 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - `npm run build`: erfolgreich.
 - Livecheck: `npm run dev:all` gestartet, Browserseite geoeffnet, Socket-Server meldete eine reale Client-Verbindung.
 - Der fuer den Livecheck gestartete Hintergrundprozess wurde nach dem Nachweis wieder beendet.
+
+### 8.6 Triggerzonen und Interaktionsflaechen vom 16.03.2026
+- Auf der Rapier-Basis wurden nun echte Interaktionspunkte in die Szene eingebaut: Lage-Terminal, Hazard-Konsole sowie drei Evakuierungsboards fuer Risikozonen.
+- Die Interaktionsdaten wurden in ein eigenes Modell ausgelagert, damit Missionseffekte, Fortschritt und HUD-Anzeige zentral und testbar bleiben.
+- Der `gameStore` fuehrt jetzt eine dedizierte Interaktionsspur mit nahem Zielpunkt, letzter Systemmeldung und Missionsfortschritt.
+- Die Spielfigur kann aktive Interaktionen per Tastatur (`E`) oder kontextuell per Gamepad-`X` ausloesen; Wiederholungen werden sauber erkannt und nicht doppelt gewertet.
+- Das HUD zeigt im unteren Zentrum nun ein echtes Interaktionsfenster mit Titel, Beschreibung, Eingabehinweis und Rueckmeldung der zuletzt ausgefuehrten Aktion.
+- Die bisher statische Missionsliste im rechten Panel wird jetzt aus realem Missionsfortschritt gespeist.
+
+### 8.7 Interaktions-Nachweis
+- Neuer Testblock `src/tests/interactionZones.test.ts` validiert Zonenmetadaten, Fortschrittslogik, Duplikatschutz und Missionschecklisten.
+- `src/tests/gameStore.test.ts` prueft nun zusaetzlich die Uebernahme von Interaktionseffekten in Reputations-, Moral- und Spannungswerte.
+- `npx vitest run`: erfolgreich, 183 von 183 Tests bestanden.
+- `npm run lint`: erfolgreich.
+- `npm run build`: erfolgreich.
+- Livecheck: `npm run dev:all` gestartet, Browserseite geoeffnet, Socket-Server meldete eine reale Client-Verbindung; der Hintergrundprozess wurde anschliessend wieder beendet.

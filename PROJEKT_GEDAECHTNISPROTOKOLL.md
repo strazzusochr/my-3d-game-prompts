@@ -43,6 +43,8 @@
 - Browser-/Livecheck fuer den Player-Core-Block bestaetigt: lokaler Full-Stack per `npm run dev:all` gestartet, Browser-Seite geoeffnet, Socket-Client-Verbindung im Terminal protokolliert.
 - Rapier-Stufe am 16.03.2026 umgesetzt: `Physics`-Welt, statische Welt-Collider und dynamischer Capsule-Player mit echter Kollisionsantwort integriert.
 - Rapier-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 176/176 gruen, `npm run build` gruen, Browser-/Livecheck mit echter Socket-Verbindung bestaetigt.
+- Interaktionsblock am 16.03.2026 umgesetzt: neue Triggerzonen und Interaktionsflaechen auf Rapier-Basis, missionstreibende Store-Logik und HUD-Prompts fuer `E` bzw. Gamepad-`X` integriert.
+- Interaktions-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 183/183 gruen, `npm run build` gruen, Browser-/Livecheck mit echter Socket-Verbindung bestaetigt; temporärer Hintergrundserver danach wieder beendet.
 
 ## Naechster logischer Schritt
-- Auf Basis der nun vorhandenen Rapier-Kollisionswelt als naechstes Interaktionsflaechen, Triggerzonen und feinere Character-Controller-Regeln aufbauen.
+- Auf Basis der nun vorhandenen Triggerzonen als naechstes Character-Controller-Kantenfaelle, Sliden und weitergehende missionsgebundene Objektinteraktionen ausbauen.

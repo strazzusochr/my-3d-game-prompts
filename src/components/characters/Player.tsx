@@ -59,6 +59,8 @@ export const Player = () => {
     const rewindHour = useGameStore(s => s.rewindHour);
     const dismissStatistics = useGameStore(s => s.dismissStatistics);
     const showStatistics = useGameStore(s => s.gameState.showStatistics);
+    const activeInteractionId = useGameStore(s => s.interactionState.nearbyZoneId);
+    const triggerInteraction = useGameStore(s => s.triggerInteraction);
 
     // STRG + Pfeiltasten: Kamera-Panning
     const ctrlHeld = useRef(false);
@@ -76,6 +78,7 @@ export const Player = () => {
     const buttonCooldown = useRef<Record<number, number>>({});
     const groundedRef = useRef(true);
     const jumpQueued = useRef(false);
+    const interactQueued = useRef(false);
 
     const wasJustPressed = useCallback((gamepad: Gamepad, index: number): boolean => {
         const now = Date.now();
@@ -103,6 +106,7 @@ export const Player = () => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Control') ctrlHeld.current = true;
             if (e.code === 'Space') jumpQueued.current = true;
+            if (e.code === 'KeyE') interactQueued.current = true;
             if (e.key === 'ArrowUp') arrowKeys.current.up = true;
             if (e.key === 'ArrowDown') arrowKeys.current.down = true;
             if (e.key === 'ArrowLeft') arrowKeys.current.left = true;
@@ -255,8 +259,12 @@ export const Player = () => {
 
             // ── X (button 2): Quick zoom reset ───────────────────
             if (wasJustPressed(gamepad, 2)) {
-                setZoom(z => z > 20 ? 8 : z);
-                vibrate(gamepad, 60, 0.1, 0.05);
+                if (activeInteractionId) {
+                    interactQueued.current = true;
+                } else {
+                    setZoom(z => z > 20 ? 8 : z);
+                    vibrate(gamepad, 60, 0.1, 0.05);
+                }
             }
 
             // Update previous button snapshot for edge detection
@@ -333,6 +341,14 @@ export const Player = () => {
             groundedRef.current = false;
         }
         jumpQueued.current = false;
+
+        if (interactQueued.current && activeInteractionId) {
+            triggerInteraction();
+            if (gamepad) {
+                vibrate(gamepad, 120, 0.22, 0.12);
+            }
+        }
+        interactQueued.current = false;
 
         const updatedTranslation = rigidBody.translation();
         position.set(updatedTranslation.x, updatedTranslation.y, updatedTranslation.z);
