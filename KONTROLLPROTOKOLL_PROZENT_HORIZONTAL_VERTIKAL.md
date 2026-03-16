@@ -23,8 +23,8 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 05:46:07 +01:00
-- Repo-Head: b13361f
+- Zeitstempel: 2026-03-16 05:50:57 +01:00
+- Repo-Head: 43bb3cc
 - Nachweislauf: npm run autonomy:full = PASS
 - Marker: AUTONOMY_PROOF_OK + AUTONOMY_FULL_OK
 - Gates: Lint PASS, Tests 7/7 PASS, Build PASS, Live-Proof PASS
