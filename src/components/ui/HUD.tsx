@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useGameStore } from '../../stores/gameStore';
 import { EVENT_TIMELINE } from '../../systems/eventScheduler';
-import { getInteractionZoneById, getMissionChecklist } from '../../systems/interactionZones';
+import { getInteractionAvailability, getInteractionZoneById, getMissionChecklist } from '../../systems/interactionZones';
 
 const StatusBar = ({ label, value, color }: { label: string, value: number, color: string }) => (
     <div style={{ marginBottom: '16px' }}>
@@ -80,6 +80,7 @@ export const HUD = () => {
     const timeColor = (h >= 8 && h < 17) ? '#ffcc00' : (h >= 6 && h < 8 || h >= 17 && h < 20) ? '#ffcc00' : '#6688ff';
     const timeShadow = (h >= 8 && h < 17) ? 'rgba(255,204,0,0.4)' : (h >= 6 && h < 8 || h >= 17 && h < 20) ? 'rgba(255,204,0,0.4)' : 'rgba(102,136,255,0.4)';
     const activeInteraction = getInteractionZoneById(interactionState.nearbyZoneId);
+    const activeInteractionAvailability = activeInteraction ? getInteractionAvailability(interactionState.missionProgress, activeInteraction.id) : null;
     const missionChecklist = getMissionChecklist(interactionState.missionProgress);
 
     // Auto-Scroll to current event
@@ -343,7 +344,9 @@ export const HUD = () => {
                                 {activeInteraction.description}
                             </div>
                             <div style={{ color: '#ffcc00', fontSize: '13px', fontWeight: 700 }}>
-                                E oder Gamepad X: {activeInteraction.prompt}
+                                {activeInteractionAvailability?.available
+                                    ? `E oder Gamepad X: ${activeInteraction.prompt}`
+                                    : `GESPERRT: ${activeInteractionAvailability?.reason}`}
                             </div>
                         </>
                     )}

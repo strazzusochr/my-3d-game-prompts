@@ -45,6 +45,8 @@
 - Rapier-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 176/176 gruen, `npm run build` gruen, Browser-/Livecheck mit echter Socket-Verbindung bestaetigt.
 - Interaktionsblock am 16.03.2026 umgesetzt: neue Triggerzonen und Interaktionsflaechen auf Rapier-Basis, missionstreibende Store-Logik und HUD-Prompts fuer `E` bzw. Gamepad-`X` integriert.
 - Interaktions-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 183/183 gruen, `npm run build` gruen, Browser-/Livecheck mit echter Socket-Verbindung bestaetigt; temporärer Hintergrundserver danach wieder beendet.
+- Feinschliff-Block am 16.03.2026 umgesetzt: missionsgebundene Zonen-Prerequisites (Lock/Unlock), HUD-Lock-Hinweise sowie weichere Player-Beschleunigung/Abbremsung mit Luftkontrolle integriert.
+- Feinschliff-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 186/186 gruen, `npm run build` gruen, Browser-/Livecheck mit echter Socket-Verbindung bestaetigt; temporärer Hintergrundserver danach wieder beendet.
 
 ## Naechster logischer Schritt
-- Auf Basis der nun vorhandenen Triggerzonen als naechstes Character-Controller-Kantenfaelle, Sliden und weitergehende missionsgebundene Objektinteraktionen ausbauen.
+- Auf Basis der nun stabilen Interaktionskette als naechstes NPC-KI/Behavior vertiefen und Missionseffekte direkt in Eskalations- und Reaktionsregeln ueberfuehren.

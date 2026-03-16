@@ -117,6 +117,8 @@ describe('gameStore core flow', () => {
   });
 
   it('does not double-count the same interaction twice', () => {
+    useGameStore.getState().setNearbyInteraction('epoch-terminal');
+    useGameStore.getState().triggerInteraction();
     useGameStore.getState().setNearbyInteraction('hazard-console');
     useGameStore.getState().triggerInteraction();
     useGameStore.getState().triggerInteraction();
@@ -124,7 +126,17 @@ describe('gameStore core flow', () => {
     const state = useGameStore.getState();
 
     expect(state.interactionState.missionProgress.hazardMapPrepared).toBe(true);
-    expect(state.gameState.playerReputation).toBe(6);
+    expect(state.gameState.playerReputation).toBe(14);
     expect(state.interactionState.lastMessage).toContain('bereits');
+  });
+
+  it('returns a locked message for mission steps out of order', () => {
+    useGameStore.getState().setNearbyInteraction('evacuation-board-north');
+    useGameStore.getState().triggerInteraction();
+
+    const state = useGameStore.getState();
+
+    expect(state.interactionState.missionProgress.prioritizedZoneIds).toHaveLength(0);
+    expect(state.interactionState.lastMessage).toContain('Hazard');
   });
 });

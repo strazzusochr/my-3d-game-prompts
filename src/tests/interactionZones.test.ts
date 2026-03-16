@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   INITIAL_MISSION_PROGRESS,
   applyInteractionOutcome,
+  getInteractionAvailability,
   getMissionChecklist,
   getInteractionZoneById,
   isZoneCompleted,
@@ -24,8 +25,16 @@ describe('interaction zone helpers', () => {
     expect(outcome.phaseLabel).toContain('Epoch-2');
   });
 
+  it('blocks hazard-console before epoch terminal is complete', () => {
+    const blocked = applyInteractionOutcome(INITIAL_MISSION_PROGRESS, 'hazard-console');
+
+    expect(blocked.wasApplied).toBe(false);
+    expect(blocked.message).toContain('Epoch-2');
+  });
+
   it('does not award duplicate progress for already completed terminal actions', () => {
-    const once = applyInteractionOutcome(INITIAL_MISSION_PROGRESS, 'hazard-console');
+    const epoch = applyInteractionOutcome(INITIAL_MISSION_PROGRESS, 'epoch-terminal');
+    const once = applyInteractionOutcome(epoch.missionProgress, 'hazard-console');
     const twice = applyInteractionOutcome(once.missionProgress, 'hazard-console');
 
     expect(twice.wasApplied).toBe(false);
@@ -34,7 +43,9 @@ describe('interaction zone helpers', () => {
   });
 
   it('tracks all three population boards independently', () => {
-    const first = applyInteractionOutcome(INITIAL_MISSION_PROGRESS, 'evacuation-board-north');
+    const epoch = applyInteractionOutcome(INITIAL_MISSION_PROGRESS, 'epoch-terminal');
+    const hazard = applyInteractionOutcome(epoch.missionProgress, 'hazard-console');
+    const first = applyInteractionOutcome(hazard.missionProgress, 'evacuation-board-north');
     const second = applyInteractionOutcome(first.missionProgress, 'evacuation-board-west');
     const third = applyInteractionOutcome(second.missionProgress, 'evacuation-board-south');
 
@@ -54,5 +65,16 @@ describe('interaction zone helpers', () => {
     expect(checklist[0]).toMatchObject({ completed: true });
     expect(checklist[1].label).toContain('0/1');
     expect(checklist[2].label).toContain('1/3');
+  });
+
+  it('reports availability status for locked and unlocked zones', () => {
+    const locked = getInteractionAvailability(INITIAL_MISSION_PROGRESS, 'evacuation-board-west');
+    const afterEpoch = applyInteractionOutcome(INITIAL_MISSION_PROGRESS, 'epoch-terminal');
+    const afterHazard = applyInteractionOutcome(afterEpoch.missionProgress, 'hazard-console');
+    const unlocked = getInteractionAvailability(afterHazard.missionProgress, 'evacuation-board-west');
+
+    expect(locked.available).toBe(false);
+    expect(locked.reason).toContain('Hazard');
+    expect(unlocked.available).toBe(true);
   });
 });

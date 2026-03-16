@@ -14,6 +14,9 @@ const GAMEPAD_DEADZONE = 0.15;
 const PLAYER_HEIGHT_OFFSET = 1.2;
 const JUMP_VELOCITY = 8.5;
 const GROUND_CONTACT_EPSILON = 0.08;
+const GROUND_ACCELERATION = 42;
+const AIR_ACCELERATION = 12;
+const GROUND_FRICTION = 16;
 
 const applyDeadzone = (value: number) => {
     if (Math.abs(value) < GAMEPAD_DEADZONE) return 0;
@@ -70,6 +73,9 @@ export const Player = () => {
     const direction = new THREE.Vector3();
     const frontVector = new THREE.Vector3();
     const sideVector = new THREE.Vector3();
+    const targetHorizontalVelocity = new THREE.Vector2();
+    const currentHorizontalVelocity = new THREE.Vector2();
+    const velocityDelta = new THREE.Vector2();
     const speed = 10;
     const gamepadIndexRef = useRef<number | null>(null);
 
@@ -320,11 +326,27 @@ export const Player = () => {
             }
         }
 
+        targetHorizontalVelocity.set(desiredVelocity.x, desiredVelocity.z);
+        currentHorizontalVelocity.set(currentVelocity.x, currentVelocity.z);
+
+        velocityDelta.copy(targetHorizontalVelocity).sub(currentHorizontalVelocity);
+        const hasInput = targetHorizontalVelocity.lengthSq() > 0.0001;
+        const accel = groundedRef.current
+            ? (hasInput ? GROUND_ACCELERATION : GROUND_FRICTION)
+            : AIR_ACCELERATION;
+        const maxDelta = accel * delta;
+
+        if (velocityDelta.length() > maxDelta) {
+            velocityDelta.setLength(maxDelta);
+        }
+
+        currentHorizontalVelocity.add(velocityDelta);
+
         rigidBody.setLinvel(
             {
-                x: desiredVelocity.x,
+                x: currentHorizontalVelocity.x,
                 y: currentVelocity.y,
-                z: desiredVelocity.z,
+                z: currentHorizontalVelocity.y,
             },
             true,
         );
@@ -332,9 +354,9 @@ export const Player = () => {
         if (jumpQueued.current && groundedRef.current && !ctrlHeld.current) {
             rigidBody.setLinvel(
                 {
-                    x: desiredVelocity.x,
+                    x: currentHorizontalVelocity.x,
                     y: JUMP_VELOCITY,
-                    z: desiredVelocity.z,
+                    z: currentHorizontalVelocity.y,
                 },
                 true,
             );
