@@ -258,3 +258,6 @@
 
 ## Naechster logischer Schritt
 - Nach dem integrierten Reset ist der naechste sinnvolle HUD-Ausbau eine feinere Drag-/Persistenzebene fuer Teilsektionen (z. B. NASA/Telemetrie/Mission/Timeline) innerhalb des rechten Hauptpanels.
+
+- Finaler YAML-Parser-Reset am 16.03.2026 durchgefuehrt: Triggerblock in `.github/workflows/security-ci.yml` auf klassisches Actions-Format (`on:` + Blocklisten fuer `branches`) zurueckgestellt, um quoted-key-Inkompatibilitaeten in einzelnen Editor-Parsern auszuschliessen.
+- Abschlusspruefung erfolgreich: `.github/workflows/security-ci.yml` meldet lokal `No errors found`; Datei startet ohne BOM und ohne versteckte Steuerzeichen.
