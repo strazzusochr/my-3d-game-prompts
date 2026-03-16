@@ -263,3 +263,6 @@
 - Abschlusspruefung erfolgreich: `.github/workflows/security-ci.yml` meldet lokal `No errors found`; Datei startet ohne BOM und ohne versteckte Steuerzeichen.
 - Frischer Vollbeweis am 16.03.2026 nach Reload-/Diagnosephase erfolgreich: `npm run lint` gruen, `npm exec vitest run` 256/256 gruen, `npm run build` gruen und `npm run autonomy:proof` mit `AUTONOMY_PROOF_OK` erfolgreich.
 - Laufzeitstatus im Proof bestaetigt: `stream=7860`, `internal=3000`, initial `profile=low`, `transport=canvas-webrtc`; Profilkette `low -> medium -> high -> aaa -> low` ohne Fehler durchlaufen.
+- HUD-Teilsektionen-Drag/Persistenz am 16.03.2026 umgesetzt: rechtes Hauptpanel unterstuetzt jetzt sortierbare Teilsektionen (`NASA`, `Telemetrie`, `Missionslage`, `Einsatz-Timeline`) per Drag-and-Drop ueber neue `Sort`-Handles.
+- Persistenz aktiviert: Reihenfolge wird unter `hud-right-sections-order-v1` in LocalStorage gespeichert, beim Laden sanitisiert (`sanitizeRightSubSectionOrder`) und bei fehlenden Keys auf Default vervollstaendigt.
+- Verifikation nach HUD-Sortierung erfolgreich: `npm run lint` gruen, `npm run build` gruen.

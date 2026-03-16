@@ -41,6 +41,7 @@ type HudPanelKey =
     | 'timeline';
 
 type DraggablePanelKey = 'left' | 'top' | 'right' | 'interaction' | 'bottom';
+type RightSubSectionKey = 'nasa' | 'telemetry' | 'mission' | 'timeline';
 
 type PanelPosition = { x: number; y: number };
 type PanelPositions = Record<DraggablePanelKey, PanelPosition>;
@@ -48,6 +49,20 @@ type PanelPositions = Record<DraggablePanelKey, PanelPosition>;
 type PanelUiState = Record<HudPanelKey, { minimized: boolean; zoom2: boolean }>;
 
 const HUD_PANEL_POSITIONS_KEY = 'hud-panel-positions-v1';
+const HUD_RIGHT_SECTION_ORDER_KEY = 'hud-right-sections-order-v1';
+const RIGHT_SUB_SECTION_DEFAULT_ORDER: RightSubSectionKey[] = ['nasa', 'telemetry', 'mission', 'timeline'];
+
+const isRightSubSectionKey = (value: unknown): value is RightSubSectionKey => (
+    value === 'nasa' || value === 'telemetry' || value === 'mission' || value === 'timeline'
+);
+
+const sanitizeRightSubSectionOrder = (input: unknown): RightSubSectionKey[] => {
+    if (!Array.isArray(input)) return RIGHT_SUB_SECTION_DEFAULT_ORDER;
+    const filtered = input.filter(isRightSubSectionKey);
+    const unique = Array.from(new Set(filtered));
+    const missing = RIGHT_SUB_SECTION_DEFAULT_ORDER.filter((key) => !unique.includes(key));
+    return [...unique, ...missing];
+};
 
 const PANEL_ESTIMATED_BOUNDS: Record<DraggablePanelKey, { width: number; height: number }> = {
     left: { width: 320, height: 360 },
@@ -211,12 +226,23 @@ export const HUD = () => {
             return makeDefaultPanelPositions(bounds.width, bounds.height);
         }
     });
+    const [rightSectionOrder, setRightSectionOrder] = useState<RightSubSectionKey[]>(() => {
+        if (typeof window === 'undefined') return RIGHT_SUB_SECTION_DEFAULT_ORDER;
+        const stored = window.localStorage.getItem(HUD_RIGHT_SECTION_ORDER_KEY);
+        if (!stored) return RIGHT_SUB_SECTION_DEFAULT_ORDER;
+        try {
+            return sanitizeRightSubSectionOrder(JSON.parse(stored));
+        } catch {
+            return RIGHT_SUB_SECTION_DEFAULT_ORDER;
+        }
+    });
     const [streamProfileState, setStreamProfileState] = useState<{ active: 'low' | 'medium' | 'high' | 'aaa' | 'unknown'; status: string }>({
         active: 'unknown',
         status: 'Profilsteuerung bereit',
     });
     const [streamProfileLoading, setStreamProfileLoading] = useState<'low' | 'medium' | 'high' | 'aaa' | null>(null);
     const dragStateRef = useRef<{ panel: DraggablePanelKey; startX: number; startY: number; origin: PanelPosition } | null>(null);
+    const rightSectionDragRef = useRef<RightSubSectionKey | null>(null);
 
     // FPS Counter
     const [fps, setFps] = useState(60);
@@ -400,6 +426,11 @@ export const HUD = () => {
     }, [panelPositions]);
 
     useEffect(() => {
+        if (typeof window === 'undefined') return;
+        window.localStorage.setItem(HUD_RIGHT_SECTION_ORDER_KEY, JSON.stringify(rightSectionOrder));
+    }, [rightSectionOrder]);
+
+    useEffect(() => {
         const handlePointerMove = (event: PointerEvent) => {
             const dragState = dragStateRef.current;
             if (!dragState) return;
@@ -455,6 +486,40 @@ export const HUD = () => {
         cursor: 'grab',
         userSelect: 'none',
         pointerEvents: 'auto',
+    };
+
+    const sectionDragHandleStyle: React.CSSProperties = {
+        ...dragHandleStyle,
+        padding: '2px 7px',
+        fontSize: '9px',
+    };
+
+    const beginRightSubSectionDrag = (section: RightSubSectionKey) => (event: React.DragEvent<HTMLDivElement>) => {
+        rightSectionDragRef.current = section;
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', section);
+    };
+
+    const onRightSubSectionDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'move';
+    };
+
+    const onRightSubSectionDrop = (target: RightSubSectionKey) => (event: React.DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        const sourceData = event.dataTransfer.getData('text/plain');
+        const source = (isRightSubSectionKey(sourceData) ? sourceData : rightSectionDragRef.current);
+        rightSectionDragRef.current = null;
+        if (!source || source === target) return;
+        setRightSectionOrder((prev) => {
+            const sourceIndex = prev.indexOf(source);
+            const targetIndex = prev.indexOf(target);
+            if (sourceIndex === -1 || targetIndex === -1 || sourceIndex === targetIndex) return prev;
+            const next = [...prev];
+            next.splice(sourceIndex, 1);
+            next.splice(targetIndex, 0, source);
+            return next;
+        });
     };
 
     const switchStreamProfile = async (profile: 'low' | 'medium' | 'high' | 'aaa') => {
@@ -599,7 +664,14 @@ export const HUD = () => {
                 {!panelUi.right.minimized && (
                 <>
 
-                <div style={{
+                {rightSectionOrder.map((sectionKey) => {
+                    if (sectionKey === 'nasa') {
+                        return (
+                <div
+                    key="right-section-nasa"
+                    onDragOver={onRightSubSectionDragOver}
+                    onDrop={onRightSubSectionDrop('nasa')}
+                    style={{
                     marginBottom: '16px',
                     padding: '12px',
                     borderRadius: '10px',
@@ -608,8 +680,11 @@ export const HUD = () => {
                     ...panelScaleStyle('nasa', 'top right')
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                        <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                            NASA PDC25 Epoch 2 Lagebild
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div draggable onDragStart={beginRightSubSectionDrag('nasa')} style={sectionDragHandleStyle}>Sort</div>
+                            <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                                NASA PDC25 Epoch 2 Lagebild
+                            </div>
                         </div>
                         <div style={{ display: 'flex', gap: '4px' }}>
                             <button onClick={() => togglePanelMinimize('nasa')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>Min</button>
@@ -644,8 +719,15 @@ export const HUD = () => {
                     </>
                     )}
                 </div>
-
-                <div style={{
+                        );
+                    }
+                    if (sectionKey === 'telemetry') {
+                        return (
+                <div
+                    key="right-section-telemetry"
+                    onDragOver={onRightSubSectionDragOver}
+                    onDrop={onRightSubSectionDrop('telemetry')}
+                    style={{
                     marginBottom: '16px',
                     padding: '12px',
                     borderRadius: '10px',
@@ -654,8 +736,11 @@ export const HUD = () => {
                     ...panelScaleStyle('telemetry', 'top right')
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                            Phase-Telemetrie
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div draggable onDragStart={beginRightSubSectionDrag('telemetry')} style={sectionDragHandleStyle}>Sort</div>
+                            <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                                Phase-Telemetrie
+                            </div>
                         </div>
                         <div style={{ display: 'flex', gap: '4px' }}>
                             <button onClick={() => togglePanelMinimize('telemetry')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>Min</button>
@@ -693,13 +778,22 @@ export const HUD = () => {
                     </>
                     )}
                 </div>
-
-                {/* Missions */}
-                <div style={{ marginBottom: '20px', ...panelScaleStyle('mission', 'top right') }}>
+                        );
+                    }
+                    if (sectionKey === 'mission') {
+                        return (
+                <div
+                    key="right-section-mission"
+                    onDragOver={onRightSubSectionDragOver}
+                    onDrop={onRightSubSectionDrop('mission')}
+                    style={{ marginBottom: '20px', ...panelScaleStyle('mission', 'top right') }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <h4 style={{ margin: 0, color: '#00ccff', fontSize: '16px', textTransform: 'uppercase', letterSpacing: '1.2px', fontWeight: '800' }}>
-                            Missionslage
-                        </h4>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div draggable onDragStart={beginRightSubSectionDrag('mission')} style={sectionDragHandleStyle}>Sort</div>
+                            <h4 style={{ margin: 0, color: '#00ccff', fontSize: '16px', textTransform: 'uppercase', letterSpacing: '1.2px', fontWeight: '800' }}>
+                                Missionslage
+                            </h4>
+                        </div>
                         <div style={{ display: 'flex', gap: '4px' }}>
                             <button onClick={() => togglePanelMinimize('mission')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>Min</button>
                             <button onClick={() => togglePanelZoom2('mission')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>x2</button>
@@ -716,22 +810,29 @@ export const HUD = () => {
                     </ul>
                     )}
                 </div>
-
-                <div style={{ height: '1px', background: 'rgba(255,255,255,0.2)', marginBottom: '16px', boxShadow: '0 1px 2px rgba(0,0,0,0.5)' }} />
-
-                {/* Timeline (Was passiert gerade) */}
-                <div style={{ ...panelScaleStyle('timeline', 'top right') }}>
+                        );
+                    }
+                    return (
+                <div
+                    key="right-section-timeline"
+                    onDragOver={onRightSubSectionDragOver}
+                    onDrop={onRightSubSectionDrop('timeline')}
+                    style={{ ...panelScaleStyle('timeline', 'top right') }}>
+                    <div style={{ height: '1px', background: 'rgba(255,255,255,0.2)', marginBottom: '16px', boxShadow: '0 1px 2px rgba(0,0,0,0.5)' }} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                        <h4 style={{ margin: 0, color: '#00ccff', fontSize: '18px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: '800' }}>
-                            Einsatz-Timeline
-                        </h4>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div draggable onDragStart={beginRightSubSectionDrag('timeline')} style={sectionDragHandleStyle}>Sort</div>
+                            <h4 style={{ margin: 0, color: '#00ccff', fontSize: '18px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: '800' }}>
+                                Einsatz-Timeline
+                            </h4>
+                        </div>
                         <div style={{ display: 'flex', gap: '4px' }}>
                             <button onClick={() => togglePanelMinimize('timeline')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>Min</button>
                             <button onClick={() => togglePanelZoom2('timeline')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>x2</button>
                         </div>
                     </div>
                     {!panelUi.timeline.minimized && (
-                    <div 
+                    <div
                         ref={timelineRef}
                         style={{
                             maxHeight: `${timelineMaxHeight}px`,
@@ -745,74 +846,72 @@ export const HUD = () => {
                         }}
                     >
                         {EVENT_TIMELINE
-                            // Filtere pure interne Events ohne Beschreibungen oder Duplikate aus
                             .filter((ev, index, self) => ev.description && index === self.findIndex((t) => t.time === ev.time && t.action === ev.action && t.npcType === ev.npcType))
                             .filter((ev) => {
-                                // Vorab filtern, um Array-Manipulation übersichtlicher zu machen
                                 const [evH, evM] = ev.time.split(':').map(Number);
                                 const evTotal = evH * 60 + evM;
                                 const curTotal = h * 60 + m;
-                                const isPast = evTotal < curTotal - 15; // 15 Min Kulanz
-                                return !isPast; // Vergangene komplett ignorieren
+                                const isPast = evTotal < curTotal - 15;
+                                return !isPast;
                             })
-                            // User Wunsch: Das aktive Ereignis soll IMMER ganz oben (als oberstes) stehen.
                             .sort((a, b) => {
                                 const [aH, aM] = a.time.split(':').map(Number);
                                 const [bH, bM] = b.time.split(':').map(Number);
                                 const aTotal = aH * 60 + aM;
                                 const bTotal = bH * 60 + bM;
                                 const curTotal = h * 60 + m;
-                                
+
                                 const aCurrent = aTotal <= curTotal && aTotal >= curTotal - 15;
                                 const bCurrent = bTotal <= curTotal && bTotal >= curTotal - 15;
 
-                                if (aCurrent && !bCurrent) return -1; // a (aktuell) nach oben
-                                if (!aCurrent && bCurrent) return 1;  // b (aktuell) nach oben
-                                if (aCurrent && bCurrent) return bTotal - aTotal; // BEIDE aktuell -> neuesten Start-Zeitpunkt ganz nach oben packen! (damit fortlaufend das Neueste oberstes ist)
-                                return aTotal - bTotal; // Sonst chronologisch
+                                if (aCurrent && !bCurrent) return -1;
+                                if (!aCurrent && bCurrent) return 1;
+                                if (aCurrent && bCurrent) return bTotal - aTotal;
+                                return aTotal - bTotal;
                             })
                             .map((ev, index) => {
-                            const [evH, evM] = ev.time.split(':').map(Number);
-                            const evTotal = evH * 60 + evM;
-                            const curTotal = h * 60 + m;
-                            
-                            const isCurrent = evTotal <= curTotal && evTotal >= curTotal - 15; 
-                            
-                            // User Wunsch: Nicht aktiv = Gelb (#ffcc00), Aktiv = Grün (#00ff88)
-                            const textColor = isCurrent ? '#00ff88' : '#ffcc00';
-                            const titleColor = isCurrent ? '#00ff88' : '#ffcc00';
-                            const descColor = isCurrent ? '#fff' : '#ffcc00';
-                            const bgHighlight = isCurrent ? 'rgba(0,255,136,0.15)' : 'rgba(0,0,0,0.3)';
-                            const borderCol = isCurrent ? '#00ff88' : '#cc9900';
-                            
-                            return (
-                                <div 
-                                    key={`timeline-${ev.time}-${index}`}
-                                    style={{
-                                        display: 'flex',
-                                        gap: '10px',
-                                        fontSize: '12px',
-                                        fontFamily: 'monospace',
-                                        padding: '8px 10px',
-                                        background: bgHighlight,
-                                        borderRadius: '6px',
-                                        borderLeft: `3px solid ${borderCol}`,
-                                        opacity: 1
-                                    }}
-                                >
-                                    <div style={{ fontWeight: 'bold', color: titleColor, minWidth: '42px' }}>{ev.time}</div>
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ color: textColor }}>{ev.action} {ev.npcType} {ev.count > 0 ? `(${ev.count}x)` : ''}</div>
-                                        <div style={{ color: descColor, marginTop: '3px', fontSize: '11px', fontStyle: 'italic', fontFamily: '"Outfit", sans-serif' }}>
-                                            {ev.description.replace(/^.{5} — /, '')}
+                                const [evH, evM] = ev.time.split(':').map(Number);
+                                const evTotal = evH * 60 + evM;
+                                const curTotal = h * 60 + m;
+
+                                const isCurrent = evTotal <= curTotal && evTotal >= curTotal - 15;
+
+                                const textColor = isCurrent ? '#00ff88' : '#ffcc00';
+                                const titleColor = isCurrent ? '#00ff88' : '#ffcc00';
+                                const descColor = isCurrent ? '#fff' : '#ffcc00';
+                                const bgHighlight = isCurrent ? 'rgba(0,255,136,0.15)' : 'rgba(0,0,0,0.3)';
+                                const borderCol = isCurrent ? '#00ff88' : '#cc9900';
+
+                                return (
+                                    <div
+                                        key={`timeline-${ev.time}-${index}`}
+                                        style={{
+                                            display: 'flex',
+                                            gap: '10px',
+                                            fontSize: '12px',
+                                            fontFamily: 'monospace',
+                                            padding: '8px 10px',
+                                            background: bgHighlight,
+                                            borderRadius: '6px',
+                                            borderLeft: `3px solid ${borderCol}`,
+                                            opacity: 1
+                                        }}
+                                    >
+                                        <div style={{ fontWeight: 'bold', color: titleColor, minWidth: '42px' }}>{ev.time}</div>
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ color: textColor }}>{ev.action} {ev.npcType} {ev.count > 0 ? `(${ev.count}x)` : ''}</div>
+                                            <div style={{ color: descColor, marginTop: '3px', fontSize: '11px', fontStyle: 'italic', fontFamily: '"Outfit", sans-serif' }}>
+                                                {ev.description.replace(/^.{5} — /, '')}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })}
                     </div>
                     )}
                 </div>
+                    );
+                })}
                 </>
                 )}
             </div>
