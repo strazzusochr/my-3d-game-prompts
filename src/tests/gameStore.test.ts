@@ -32,8 +32,10 @@ vi.mock('../managers/WorkerManager', () => workerState);
 import { useGameStore } from '../stores/gameStore';
 import { INITIAL_MISSION_PROGRESS } from '../systems/interactionZones';
 import { NPCBehavior, NPCMood, NPCType, EmotionalState } from '../types/enums';
+import { RUNTIME_SNAPSHOT_KEY } from '../stores/runtimePersistence';
 
 const resetStore = () => {
+  window.localStorage.clear();
   useGameStore.setState({
     npcs: [],
     firedEventKeys: [],
@@ -41,7 +43,11 @@ const resetStore = () => {
     interactionState: {
       nearbyZoneId: null,
       lastMessage: null,
-      missionProgress: INITIAL_MISSION_PROGRESS,
+      missionProgress: {
+        epochBriefingVerified: INITIAL_MISSION_PROGRESS.epochBriefingVerified,
+        hazardMapPrepared: INITIAL_MISSION_PROGRESS.hazardMapPrepared,
+        prioritizedZoneIds: [...INITIAL_MISSION_PROGRESS.prioritizedZoneIds],
+      },
     },
     dayStats: { killed: 0, arrested: 0, injured: 0, damage: 0 },
     gameState: {
@@ -133,6 +139,24 @@ describe('gameStore core flow', () => {
     expect(state.interactionState.missionProgress.hazardMapPrepared).toBe(true);
     expect(state.gameState.playerReputation).toBe(14);
     expect(state.interactionState.lastMessage).toContain('bereits');
+  });
+
+  it('persistiert Missionsfortschritt und Trendzustand als Runtime-Snapshot', () => {
+    useGameStore.getState().setNearbyInteraction('epoch-terminal');
+    useGameStore.getState().triggerInteraction();
+
+    const rawSnapshot = window.localStorage.getItem(RUNTIME_SNAPSHOT_KEY);
+    expect(rawSnapshot).not.toBeNull();
+
+    const snapshot = JSON.parse(rawSnapshot as string) as {
+      missionProgress: { epochBriefingVerified: boolean };
+      inGameTime: string;
+      roleTrendHistory: unknown[];
+    };
+
+    expect(snapshot.missionProgress.epochBriefingVerified).toBe(true);
+    expect(snapshot.inGameTime).toBe('06:00');
+    expect(Array.isArray(snapshot.roleTrendHistory)).toBe(true);
   });
 
   it('returns a locked message for mission steps out of order', () => {

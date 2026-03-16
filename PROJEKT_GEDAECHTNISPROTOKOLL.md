@@ -136,6 +136,10 @@
 - HUD-Micro-Pass am 16.03.2026 abgeschlossen: rechter Header/FPS-Cluster weiter komprimiert und Timeline-Scrollbar bewusst subtil gesetzt (`scrollbarWidth: thin`, reduzierte Farbintensitaet).
 - Bottom-Bar-Priorisierung bei flacher Hoehe aktiviert: zentrale Gameplay-Steuerung (`Min/x2`, Zeitlauf/Pause, Uhr/Speed, Eskalation/NPC) wird im kompakten Layout vor nachrangigen Bloecken einsortiert.
 - Vollverifikation nach Micro-Pass erfolgreich: `npm run autonomy:full` erneut komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Profilfolge `low -> medium -> high -> aaa -> low` stabil.
+- Trend-/Missionspersistenz am 16.03.2026 umgesetzt: neues Modul `src/stores/runtimePersistence.ts` speichert und laedt Missionsfortschritt, Trendhistorie, Tagesstatistik sowie zentrale Runtime-Parameter (`inGameTime`, `timeSpeed`, Reputation/Moral, Audio) robust ueber Reloads.
+- Store-Integration abgeschlossen: `src/stores/gameStore.ts` hydratisiert Initialzustand aus Snapshot und schreibt nach relevanten Zustandsaenderungen aktualisierte Snapshots zurueck.
+- Persistenz-Testabdeckung erweitert: neue Testsuite `src/tests/runtimePersistence.test.ts` plus Store-Nachweis in `src/tests/gameStore.test.ts` verifizieren Speicherung, Sanitisierung und Snapshot-Update.
+- Vollverifikation nach Persistenz-Block erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 248/248.
 
 ## Naechster logischer Schritt
-- Kein offener Blocker im aktuellen HUD-/Streaming-Zyklus; naechster Ausbau kann inhaltlich auf Spawn-HUD-Feinschliff oder Trend-/Missionspersistenz gehen.
+- Trend-/Missionspersistenz ist geschlossen; naechster Ausbaupunkt ist adaptive Triggerkurven fuer NPC-KI (situative Schwellwerte je Fraktionsdruck und Turbulenzklasse) mit regressionssicherer Testabdeckung.

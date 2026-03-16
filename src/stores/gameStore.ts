@@ -5,6 +5,7 @@ import { EVENT_TIMELINE, TENSION_TIMELINE, PHASE_DESCRIPTIONS, NPC_COLORS, MAX_A
 import { INITIAL_MISSION_PROGRESS, type InteractionZoneId, applyInteractionOutcome } from '../systems/interactionZones';
 import { applyMissionPhaseHooks } from '../systems/missionPhaseHooks';
 import { getOperationsInsight } from '../systems/operationsInsights';
+import { loadRuntimeSnapshot, saveRuntimeSnapshot, type RuntimeSnapshot } from './runtimePersistence';
 import { io } from 'socket.io-client';
 
 declare global {
@@ -89,6 +90,55 @@ interface GameStore {
 
 let nextNpcId = 1000;
 const MAX_ROLE_TREND_POINTS = 24;
+
+const cloneMissionProgress = (progress: typeof INITIAL_MISSION_PROGRESS) => ({
+    epochBriefingVerified: progress.epochBriefingVerified,
+    hazardMapPrepared: progress.hazardMapPrepared,
+    prioritizedZoneIds: [...progress.prioritizedZoneIds],
+});
+
+const RUNTIME_DEFAULTS = {
+    inGameTime: '06:00',
+    timeSpeed: 1,
+    playerReputation: 0,
+    moralScore: 50,
+    masterVolume: 0.5,
+    muted: false,
+} as const;
+
+const persistedRuntimeSnapshot = loadRuntimeSnapshot();
+
+const persistedMissionProgress = persistedRuntimeSnapshot
+    ? cloneMissionProgress(persistedRuntimeSnapshot.missionProgress)
+    : cloneMissionProgress(INITIAL_MISSION_PROGRESS);
+
+const persistedRoleTrendHistory = persistedRuntimeSnapshot
+    ? persistedRuntimeSnapshot.roleTrendHistory
+    : [];
+
+const persistedDayStats = persistedRuntimeSnapshot
+    ? persistedRuntimeSnapshot.dayStats
+    : { killed: 0, arrested: 0, injured: 0, damage: 0 };
+
+const persistedInGameTime = persistedRuntimeSnapshot?.inGameTime ?? RUNTIME_DEFAULTS.inGameTime;
+
+const buildRuntimeSnapshot = (state: GameStore): RuntimeSnapshot => ({
+    version: 1,
+    savedAtEpochMs: Date.now(),
+    inGameTime: state.gameState.inGameTime,
+    timeSpeed: state.gameState.timeSpeed,
+    playerReputation: state.gameState.playerReputation,
+    moralScore: state.gameState.moralScore,
+    masterVolume: state.gameState.masterVolume,
+    muted: state.gameState.muted,
+    missionProgress: cloneMissionProgress(state.interactionState.missionProgress),
+    dayStats: { ...state.dayStats },
+    roleTrendHistory: state.roleTrendHistory.slice(-MAX_ROLE_TREND_POINTS),
+});
+
+const persistCurrentRuntimeSnapshot = (state: GameStore) => {
+    saveRuntimeSnapshot(buildRuntimeSnapshot(state));
+};
 
 const SECURITY_TYPES = new Set<NPCType>([NPCType.POLICE, NPCType.RIOT_POLICE, NPCType.SEK]);
 const AGGRESSOR_TYPES = new Set<NPCType>([NPCType.RIOTER, NPCType.EXTREMIST]);
@@ -886,19 +936,23 @@ const applyMissionNpcEffects = (npcs: NPCData[], zoneId: InteractionZoneId): NPC
 export const useGameStore = create<GameStore>((set, get) => ({
     npcs: [],
     firedEventKeys: [],
-    roleTrendHistory: [],
+    roleTrendHistory: persistedRoleTrendHistory,
     interactionState: {
         nearbyZoneId: null,
         lastMessage: null,
-        missionProgress: INITIAL_MISSION_PROGRESS,
+        missionProgress: persistedMissionProgress,
     },
-    dayStats: { killed: 0, arrested: 0, injured: 0, damage: 0 },
+    dayStats: persistedDayStats,
     gameState: { 
-        isPlaying: false, isTimePaused: false, inGameTime: '06:00', 
-        tensionLevel: 10, timeSpeed: 1, 
+        isPlaying: false, isTimePaused: false, inGameTime: persistedInGameTime,
+        tensionLevel: getTensionLevelForMinutes(timeToMinutes(persistedInGameTime)),
+        timeSpeed: persistedRuntimeSnapshot?.timeSpeed ?? RUNTIME_DEFAULTS.timeSpeed,
         currentPhaseLabel: '🌅 Tagesbeginn — Stadt erwacht',
-        playerReputation: 0, moralScore: 50, showStatistics: false,
-        masterVolume: 0.5, muted: false
+        playerReputation: persistedRuntimeSnapshot?.playerReputation ?? RUNTIME_DEFAULTS.playerReputation,
+        moralScore: persistedRuntimeSnapshot?.moralScore ?? RUNTIME_DEFAULTS.moralScore,
+        showStatistics: false,
+        masterVolume: persistedRuntimeSnapshot?.masterVolume ?? RUNTIME_DEFAULTS.masterVolume,
+        muted: persistedRuntimeSnapshot?.muted ?? RUNTIME_DEFAULTS.muted,
     },
 
     initSocket: () => {
@@ -921,7 +975,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             interactionState: {
                 nearbyZoneId: null,
                 lastMessage: null,
-                missionProgress: INITIAL_MISSION_PROGRESS,
+                missionProgress: cloneMissionProgress(INITIAL_MISSION_PROGRESS),
             },
             dayStats: { killed: 0, arrested: 0, injured: 0, damage: 0 },
             gameState: { 
@@ -932,6 +986,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 masterVolume: 0.5, muted: false
             }
         });
+        persistCurrentRuntimeSnapshot(get());
         setTimeout(() => get().evaluateEvents('06:00'), 200);
     },
 
@@ -1034,6 +1089,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 }
             };
         });
+        persistCurrentRuntimeSnapshot(get());
     },
 
     updateTime: (time) => {
@@ -1076,6 +1132,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             roleTrendHistory,
             gameState: { ...state.gameState, inGameTime: newTime, tensionLevel, currentPhaseLabel }
         });
+        persistCurrentRuntimeSnapshot(get());
     },
 
     advanceMinute: () => {
@@ -1122,6 +1179,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             roleTrendHistory,
             gameState: { ...state.gameState, inGameTime: newTime, tensionLevel, currentPhaseLabel }
         });
+        persistCurrentRuntimeSnapshot(get());
     },
 
     toggleTimePause: () => set((state) => ({
@@ -1142,7 +1200,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             interactionState: {
                 nearbyZoneId: null,
                 lastMessage: null,
-                missionProgress: INITIAL_MISSION_PROGRESS,
+                missionProgress: cloneMissionProgress(INITIAL_MISSION_PROGRESS),
             },
             dayStats: { killed: 0, arrested: 0, injured: 0, damage: 0 },
             gameState: { 
@@ -1156,18 +1214,25 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 muted: get().gameState.muted
             }
         });
+        persistCurrentRuntimeSnapshot(get());
     },
 
-    setTimeSpeed: (speed) => set((state) => ({
-        gameState: { ...state.gameState, timeSpeed: speed }
-    })),
+    setTimeSpeed: (speed) => {
+        set((state) => ({
+            gameState: { ...state.gameState, timeSpeed: speed }
+        }));
+        persistCurrentRuntimeSnapshot(get());
+    },
 
-    adjustReputation: (delta) => set((state) => ({
-        gameState: { 
-            ...state.gameState, 
-            playerReputation: Math.max(-100, Math.min(100, state.gameState.playerReputation + delta))
-        }
-    })),
+    adjustReputation: (delta) => {
+        set((state) => ({
+            gameState: {
+                ...state.gameState,
+                playerReputation: Math.max(-100, Math.min(100, state.gameState.playerReputation + delta))
+            }
+        }));
+        persistCurrentRuntimeSnapshot(get());
+    },
 
     showStatisticsPanel: () => set((state) => ({
         gameState: { ...state.gameState, showStatistics: true }
@@ -1177,13 +1242,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
         gameState: { ...state.gameState, showStatistics: false }
     })),
 
-    setMasterVolume: (val) => set((state) => ({
-        gameState: { ...state.gameState, masterVolume: val }
-    })),
+    setMasterVolume: (val) => {
+        set((state) => ({
+            gameState: { ...state.gameState, masterVolume: val }
+        }));
+        persistCurrentRuntimeSnapshot(get());
+    },
 
-    setMuted: (muted) => set((state) => ({
-        gameState: { ...state.gameState, muted }
-    })),
+    setMuted: (muted) => {
+        set((state) => ({
+            gameState: { ...state.gameState, muted }
+        }));
+        persistCurrentRuntimeSnapshot(get());
+    },
 
     setNearbyInteraction: (zoneId) => set((state) => ({
         interactionState: {
@@ -1192,42 +1263,45 @@ export const useGameStore = create<GameStore>((set, get) => ({
         }
     })),
 
-    triggerInteraction: () => set((state) => {
-        const zoneId = state.interactionState.nearbyZoneId;
-        if (!zoneId) {
-            return state;
-        }
+    triggerInteraction: () => {
+        set((state) => {
+            const zoneId = state.interactionState.nearbyZoneId;
+            if (!zoneId) {
+                return state;
+            }
 
-        const outcome = applyInteractionOutcome(state.interactionState.missionProgress, zoneId);
-        const nextReputation = Math.max(-100, Math.min(100, state.gameState.playerReputation + outcome.reputationDelta));
-        const nextMoral = Math.max(0, Math.min(100, state.gameState.moralScore + outcome.moralDelta));
-        const nextTension = Math.max(0, Math.min(100, state.gameState.tensionLevel + outcome.tensionDelta));
-        const nextNpcs = outcome.wasApplied ? applyMissionNpcEffects(state.npcs, zoneId) : state.npcs;
-        const nextDayStats = outcome.wasApplied
-            ? applyDayStatsDelta(state.dayStats, getInteractionDayStatsDelta(zoneId))
-            : state.dayStats;
+            const outcome = applyInteractionOutcome(state.interactionState.missionProgress, zoneId);
+            const nextReputation = Math.max(-100, Math.min(100, state.gameState.playerReputation + outcome.reputationDelta));
+            const nextMoral = Math.max(0, Math.min(100, state.gameState.moralScore + outcome.moralDelta));
+            const nextTension = Math.max(0, Math.min(100, state.gameState.tensionLevel + outcome.tensionDelta));
+            const nextNpcs = outcome.wasApplied ? applyMissionNpcEffects(state.npcs, zoneId) : state.npcs;
+            const nextDayStats = outcome.wasApplied
+                ? applyDayStatsDelta(state.dayStats, getInteractionDayStatsDelta(zoneId))
+                : state.dayStats;
 
-        if (outcome.wasApplied && nextNpcs !== state.npcs) {
-            workerManager.syncNpcs(nextNpcs);
-        }
+            if (outcome.wasApplied && nextNpcs !== state.npcs) {
+                workerManager.syncNpcs(nextNpcs);
+            }
 
-        return {
-            npcs: nextNpcs,
-            dayStats: nextDayStats,
-            interactionState: {
-                ...state.interactionState,
-                lastMessage: outcome.message,
-                missionProgress: outcome.missionProgress,
-            },
-            gameState: {
-                ...state.gameState,
-                playerReputation: nextReputation,
-                moralScore: nextMoral,
-                tensionLevel: nextTension,
-                currentPhaseLabel: outcome.phaseLabel ?? state.gameState.currentPhaseLabel,
-            },
-        };
-    })
+            return {
+                npcs: nextNpcs,
+                dayStats: nextDayStats,
+                interactionState: {
+                    ...state.interactionState,
+                    lastMessage: outcome.message,
+                    missionProgress: outcome.missionProgress,
+                },
+                gameState: {
+                    ...state.gameState,
+                    playerReputation: nextReputation,
+                    moralScore: nextMoral,
+                    tensionLevel: nextTension,
+                    currentPhaseLabel: outcome.phaseLabel ?? state.gameState.currentPhaseLabel,
+                },
+            };
+        });
+        persistCurrentRuntimeSnapshot(get());
+    }
 }));
 
 if (typeof window !== 'undefined') {

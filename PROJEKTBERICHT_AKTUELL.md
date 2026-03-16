@@ -218,6 +218,20 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Die Bottom-Leiste priorisiert bei niedriger Viewport-Hoehe nun die Kernsteuerung (Zeit/Pause/Speed/Eskalation) vor den nachrangigen Bloecken (Stats/Audio/Profile).
 - Validierung: `npm run autonomy:full` erneut erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Tests weiterhin 243/243 gruen.
 
+### 2.0.30 Trend-/Missionspersistenz vom 16.03.2026
+- Ein neues Runtime-Persistenzmodul wurde eingefuehrt: `src/stores/runtimePersistence.ts`.
+- Persistiert werden nun stabil ueber Browser-Reloads: Missionsfortschritt, Role-Trendhistorie, Tagesstatistik sowie zentrale Runtime-Regler (`inGameTime`, `timeSpeed`, Reputation, Moral, Master-Volume, Mute-Status).
+- Das Persistenzformat ist versioniert und sanitisierend (Zeitformat, Wertebereiche, erlaubte Zonen-IDs, Historienlimit), sodass fehlerhafte oder manipulierte Storage-Inhalte abgefangen werden.
+- `src/stores/gameStore.ts` wurde auf Snapshot-Hydration beim Start und Snapshot-Schreiben nach relevanten Zustandsaenderungen erweitert.
+- Testausbau:
+	- neue Suite `src/tests/runtimePersistence.test.ts` fuer Save/Load/Sanitisierung/Clear,
+	- zusaetzlicher Store-Test auf Snapshot-Update nach Missionsinteraktion.
+- Validierung nach Umsetzung:
+	- `npm run lint`: gruen,
+	- `vitest`: 248/248 gruen,
+	- `npm run build`: gruen,
+	- `npm run autonomy:full`: `AUTONOMY_PROOF_OK` + `AUTONOMY_FULL_OK`.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.

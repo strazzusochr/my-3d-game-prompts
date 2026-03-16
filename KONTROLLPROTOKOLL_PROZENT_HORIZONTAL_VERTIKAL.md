@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 12:12:43 +01:00
-- Repo-Head: 01ea711 (nach Spawn-Marker-Logik-Extraktion und Testabdeckung)
-- Nachweislauf: npm run autonomy:full PASS nach HUD-Micro-Pass (inkl. lint PASS + tests 243/243 PASS + build PASS + live proof PASS)
-- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_243_243 + BUILD_PASS + HUD_WORLD_FIT_PASS + HUD_MICRO_PASS + MASTER_80000_PASS
-- Gates: Lint PASS, Tests 243/243 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, rechter Header/FPS-Cluster und Timeline-Scrollbar verdichtet sowie Bottom-Bar-Priorisierung bei flacher Hoehe validiert, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: HUD-Micro-Pass in `src/components/ui/HUD.tsx` umgesetzt und per Vollproof verifiziert
+- Zeitstempel: 2026-03-16 15:12:00 +01:00
+- Repo-Head: f82e0d1 (vor Persistenz-Commit; Arbeitsstand mit Runtime-Persistenz lokal verifiziert)
+- Nachweislauf: npm run autonomy:full PASS nach Trend-/Missionspersistenz (inkl. lint PASS + tests 248/248 PASS + build PASS + live proof PASS)
+- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_248_248 + BUILD_PASS + RUNTIME_PERSISTENCE_PASS + MASTER_80000_PASS
+- Gates: Lint PASS, Tests 248/248 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, Runtime-Snapshot-Hydration und -Sanitisierung verifiziert, Masterquelle 80.000/80.000 PASS
+- Arbeitsbaum: Runtime-Persistenz in Store/Test/Doku umgesetzt und per Vollproof verifiziert
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -46,7 +46,7 @@ Bewertungsstufen:
 | S-001 | Browser-Erreichbarkeit Stream | 100 | 100 | 100 | PASS | URL erreichbar + manueller Browseraufruf 127.0.0.1:3001 bestaetigt |
 | S-002 | Workspace-Fehlercheck | 100 | 100 | 100 | PASS | No errors found |
 | S-003 | Lint-Gate | 100 | 100 | 100 | PASS | eslint ohne Fehler |
-| S-004 | Test-Gate | 100 | 100 | 100 | PASS | 243/243 Tests bestanden (10 Dateien, comprehensive.test.ts 161 Tests) |
+| S-004 | Test-Gate | 100 | 100 | 100 | PASS | 248/248 Tests bestanden (11 Dateien, runtimePersistence.test.ts neu) |
 | S-005 | Build-Gate | 100 | 100 | 100 | PASS | vite build erfolgreich |
 | S-006 | Live-Proof Profilfolge | 100 | 100 | 100 | PASS | low->medium->high->aaa->low |
 | S-007 | Health-/Transport-Nachweis | 100 | 100 | 100 | PASS | canvas-webrtc aktiv |
@@ -85,6 +85,7 @@ Bewertungsstufen:
 | P-025 | HUD um 25 Prozent verkleinert und Gameplay-Panels steuerbar gemacht | Vertikal | 100 | PASS | HUD-Default 75%, Min/x2 fuer Haupt- und Unterpanels, sichtbare Low/Medium/High/AAA-Buttons, Live-Proof danach gruen |
 | P-026 | HUD-World-Fit zur Spielwelt kalibriert | Vertikal | 100 | PASS | Adaptive Viewport-Skalierung, schlankere Hauptpanels, responsive Bottom-Leiste und verdichtete Timeline-Cards mit Full-Proof bestaetigt |
 | P-027 | HUD-Micro-Pass fuer Priorisierung und Feindichte umgesetzt | Vertikal | 100 | PASS | Rechter Header/FPS-Cluster komprimiert, Timeline-Scrollbar subtilisiert und Bottom-Bar-Order bei geringer Hoehe priorisiert, erneut Full-Proof gruen |
+| P-028 | Trend-/Missionspersistenz fuer Runtimezustand umgesetzt | Vertikal | 100 | PASS | Snapshot-Modul mit Sanitisierung, Store-Hydration und Persistenztests; Full-Proof mit 248/248 Tests gruen |
 
 ---
 
