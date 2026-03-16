@@ -28,6 +28,31 @@ const PDC25_EPOCH2 = {
     energyMedian: '88 Mt',
 };
 
+type HudPanelKey =
+    | 'left'
+    | 'top'
+    | 'right'
+    | 'bottom'
+    | 'interaction'
+    | 'nasa'
+    | 'telemetry'
+    | 'mission'
+    | 'timeline';
+
+type PanelUiState = Record<HudPanelKey, { minimized: boolean; zoom2: boolean }>;
+
+const makeDefaultPanelState = (): PanelUiState => ({
+    left: { minimized: false, zoom2: false },
+    top: { minimized: false, zoom2: false },
+    right: { minimized: false, zoom2: false },
+    bottom: { minimized: false, zoom2: false },
+    interaction: { minimized: false, zoom2: false },
+    nasa: { minimized: false, zoom2: false },
+    telemetry: { minimized: false, zoom2: false },
+    mission: { minimized: false, zoom2: false },
+    timeline: { minimized: false, zoom2: false },
+});
+
 export const HUD = () => {
     const [statsTab, setStatsTab] = useState<'overview' | 'operations' | 'mission'>('overview');
     const inGameTime = useGameStore(state => state.gameState.inGameTime);
@@ -55,8 +80,14 @@ export const HUD = () => {
     const [hudScale, setHudScale] = useState(() => {
         if (typeof window === 'undefined') return 1;
         const stored = Number(window.localStorage.getItem('hud-scale'));
-        return Number.isFinite(stored) && stored >= 0.6 && stored <= 1.4 ? stored : 1;
+        return Number.isFinite(stored) && stored >= 0.6 && stored <= 1.4 ? stored : 0.75;
     });
+    const [panelUi, setPanelUi] = useState<PanelUiState>(() => makeDefaultPanelState());
+    const [streamProfileState, setStreamProfileState] = useState<{ active: 'low' | 'medium' | 'high' | 'aaa' | 'unknown'; status: string }>({
+        active: 'unknown',
+        status: 'Profilsteuerung bereit',
+    });
+    const [streamProfileLoading, setStreamProfileLoading] = useState<'low' | 'medium' | 'high' | 'aaa' | null>(null);
 
     // FPS Counter
     const [fps, setFps] = useState(60);
@@ -160,7 +191,45 @@ export const HUD = () => {
 
     const decreaseHudScale = () => setHudScale((value) => Math.max(0.6, Number((value - 0.1).toFixed(2))));
     const increaseHudScale = () => setHudScale((value) => Math.min(1.4, Number((value + 0.1).toFixed(2))));
-    const resetHudScale = () => setHudScale(1);
+    const resetHudScale = () => setHudScale(0.75);
+
+    const togglePanelMinimize = (panel: HudPanelKey) => {
+        setPanelUi((prev) => ({
+            ...prev,
+            [panel]: { ...prev[panel], minimized: !prev[panel].minimized },
+        }));
+    };
+
+    const togglePanelZoom2 = (panel: HudPanelKey) => {
+        setPanelUi((prev) => ({
+            ...prev,
+            [panel]: { ...prev[panel], zoom2: !prev[panel].zoom2 },
+        }));
+    };
+
+    const panelScaleStyle = (panel: HudPanelKey, origin: string): React.CSSProperties => ({
+        transform: panelUi[panel].zoom2 ? 'scale(2)' : 'scale(1)',
+        transformOrigin: origin,
+    });
+
+    const streamProfile = streamProfileState.active;
+
+    const switchStreamProfile = async (profile: 'low' | 'medium' | 'high' | 'aaa') => {
+        try {
+            setStreamProfileLoading(profile);
+            setStreamProfileState((prev) => ({ ...prev, status: `Schalte Profil: ${profile.toUpperCase()}...` }));
+            const res = await fetch(`/api/profile/${profile}`, { method: 'POST' });
+            if (!res.ok) {
+                setStreamProfileState((prev) => ({ ...prev, status: `Profilwechsel fehlgeschlagen (${res.status})` }));
+                return;
+            }
+            setStreamProfileState({ active: profile, status: `Profil aktiv: ${profile.toUpperCase()}` });
+        } catch {
+            setStreamProfileState((prev) => ({ ...prev, status: 'Profilwechsel nicht erreichbar' }));
+        } finally {
+            setStreamProfileLoading(null);
+        }
+    };
 
     return (
         <div style={{ pointerEvents: 'none', position: 'absolute', inset: 0, fontFamily: '"Outfit", sans-serif' }}>
@@ -175,19 +244,36 @@ export const HUD = () => {
                 }}
             >
             {/* Left Panel */}
-            <div style={{ pointerEvents: 'auto', position: 'absolute', top: '40px', left: '40px', width: '380px', padding: '24px', background: 'rgba(10,10,10,0.85)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
-                <StatusBar label="Physische Verfassung" value={85} color="#ff4444" />
-                <StatusBar label="Schutzweste" value={100} color="#ffcc00" />
-                <StatusBar label="Ausdauer" value={60} color="#00ccff" />
-                <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '24px 0', boxShadow: '0 1px 2px rgba(0,0,0,0.5)' }} />
-                <StatusBar label="Karma / Ansehen" value={Math.max(0, Math.min(100, 50 + playerReputation / 2))} color="#ffaa00" />
-                <StatusBar label="Lage-Spannung" value={tensionLevel} color="#888" />
-                <StatusBar label="Volks-Moral" value={moralScore} color="#ffff00" />
-                <StatusBar label="Eskalationsstufe" value={Math.floor(tensionLevel / 5)} color="#ffcc00" />
+            <div style={{ pointerEvents: 'auto', position: 'absolute', top: '40px', left: '40px', width: '380px', padding: '24px', background: 'rgba(10,10,10,0.85)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', ...panelScaleStyle('left', 'top left') }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <div style={{ color: '#9edfff', fontSize: '11px', letterSpacing: '0.8px', textTransform: 'uppercase' }}>Status-HUD</div>
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                        <button onClick={() => togglePanelMinimize('left')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }}>Min</button>
+                        <button onClick={() => togglePanelZoom2('left')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }}>x2</button>
+                    </div>
+                </div>
+                {!panelUi.left.minimized && (
+                    <>
+                        <StatusBar label="Physische Verfassung" value={85} color="#ff4444" />
+                        <StatusBar label="Schutzweste" value={100} color="#ffcc00" />
+                        <StatusBar label="Ausdauer" value={60} color="#00ccff" />
+                        <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '24px 0', boxShadow: '0 1px 2px rgba(0,0,0,0.5)' }} />
+                        <StatusBar label="Karma / Ansehen" value={Math.max(0, Math.min(100, 50 + playerReputation / 2))} color="#ffaa00" />
+                        <StatusBar label="Lage-Spannung" value={tensionLevel} color="#888" />
+                        <StatusBar label="Volks-Moral" value={moralScore} color="#ffff00" />
+                        <StatusBar label="Eskalationsstufe" value={Math.floor(tensionLevel / 5)} color="#ffcc00" />
+                    </>
+                )}
             </div>
 
             {/* Top Center Badge + Phase Label */}
-            <div style={{ position: 'absolute', top: '40px', left: '50%', transform: 'translateX(-50%)', textAlign: 'center' }}>
+            <div style={{ position: 'absolute', top: '40px', left: '50%', transform: 'translateX(-50%)', textAlign: 'center', ...panelScaleStyle('top', 'top center') }}>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '6px', pointerEvents: 'auto' }}>
+                    <button onClick={() => togglePanelMinimize('top')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }}>Min</button>
+                    <button onClick={() => togglePanelZoom2('top')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }}>x2</button>
+                </div>
+                {!panelUi.top.minimized && (
+                <>
                 <div style={{ padding: '8px 24px', background: 'rgba(10,10,10,0.9)', border: '2px solid #00ccff', borderRadius: '20px', boxShadow: '0 0 20px rgba(0,204,255,0.3)', marginBottom: '8px' }}>
                     <span style={{ color: '#ffcc00', fontSize: '14px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px' }}>
                         Phase <span style={{ color: '#00ccff' }}>14</span> OPERATIV
@@ -210,6 +296,8 @@ export const HUD = () => {
                         {currentPhaseLabel}
                     </span>
                 </div>
+                </>
+                )}
             </div>
 
             {/* Combined Right Panel (Missions + FPS + Current Event) */}
@@ -219,7 +307,8 @@ export const HUD = () => {
                 border: 'none', 
                 color: '#fff', 
                 pointerEvents: 'auto',
-                textShadow: '0 1px 4px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.6)'
+                textShadow: '0 1px 4px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.6)',
+                ...panelScaleStyle('right', 'top right')
             }}>
                 {/* Header with FPS */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
@@ -239,6 +328,8 @@ export const HUD = () => {
                             RENDER {fps} FPS
                         </div>
                         <div style={{ display: 'flex', gap: '4px', pointerEvents: 'auto' }}>
+                            <button onClick={() => togglePanelMinimize('right')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }} title="Panel minimieren">Min</button>
+                            <button onClick={() => togglePanelZoom2('right')} style={{ ...btnStyle, minWidth: '46px', padding: '4px 6px', fontSize: '11px' }} title="Panel x2">x2</button>
                             <button onClick={decreaseHudScale} style={{ ...btnStyle, minWidth: '34px', padding: '4px 8px', fontSize: '14px' }} title="HUD kleiner">-</button>
                             <button onClick={resetHudScale} style={{ ...btnStyle, minWidth: '56px', padding: '4px 8px', fontSize: '12px' }} title="HUD zurücksetzen">{Math.round(hudScale * 100)}%</button>
                             <button onClick={increaseHudScale} style={{ ...btnStyle, minWidth: '34px', padding: '4px 8px', fontSize: '14px' }} title="HUD größer">+</button>
@@ -246,16 +337,28 @@ export const HUD = () => {
                     </div>
                 </div>
 
+                {!panelUi.right.minimized && (
+                <>
+
                 <div style={{
                     marginBottom: '16px',
                     padding: '12px',
                     borderRadius: '10px',
                     background: 'rgba(0,0,0,0.42)',
-                    border: '1px solid rgba(0,204,255,0.25)'
+                    border: '1px solid rgba(0,204,255,0.25)',
+                    ...panelScaleStyle('nasa', 'top right')
                 }}>
-                    <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>
-                        NASA PDC25 Epoch 2 Lagebild
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                            NASA PDC25 Epoch 2 Lagebild
+                        </div>
+                        <div style={{ display: 'flex', gap: '4px' }}>
+                            <button onClick={() => togglePanelMinimize('nasa')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>Min</button>
+                            <button onClick={() => togglePanelZoom2('nasa')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>x2</button>
+                        </div>
                     </div>
+                    {!panelUi.nasa.minimized && (
+                    <>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 12px', fontSize: '12px' }}>
                         <span style={{ color: '#9edfff' }}>Assessment</span>
                         <span style={{ color: '#ffffff', textAlign: 'right' }}>{PDC25_EPOCH2.assessmentDate}</span>
@@ -279,6 +382,8 @@ export const HUD = () => {
                     <div style={{ marginTop: '8px', fontSize: '11px', color: '#9edfff' }}>
                         Quelle: NASA ATAP, PDC25 Hypothetical Exercise.
                     </div>
+                    </>
+                    )}
                 </div>
 
                 <div style={{
@@ -286,11 +391,20 @@ export const HUD = () => {
                     padding: '12px',
                     borderRadius: '10px',
                     background: 'rgba(0,0,0,0.42)',
-                    border: `1px solid ${phaseWindowColor}55`
+                    border: `1px solid ${phaseWindowColor}55`,
+                    ...panelScaleStyle('telemetry', 'top right')
                 }}>
-                    <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '10px' }}>
-                        Phase-Telemetrie
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                        <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                            Phase-Telemetrie
+                        </div>
+                        <div style={{ display: 'flex', gap: '4px' }}>
+                            <button onClick={() => togglePanelMinimize('telemetry')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>Min</button>
+                            <button onClick={() => togglePanelZoom2('telemetry')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>x2</button>
+                        </div>
                     </div>
+                    {!panelUi.telemetry.minimized && (
+                    <>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 12px', fontSize: '12px' }}>
                         <span style={{ color: '#9edfff' }}>Fenster</span>
                         <span style={{ color: phaseWindowColor, textAlign: 'right', fontWeight: '700' }}>{phaseWindowLabel}</span>
@@ -317,26 +431,47 @@ export const HUD = () => {
                             </div>
                         ))}
                     </div>
+                    </>
+                    )}
                 </div>
 
                 {/* Missions */}
-                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px 0', fontSize: '13px', lineHeight: '1.6' }}>
-                    {missionChecklist.map((mission) => (
-                        <li key={mission.id} style={{ marginBottom: '10px', display: 'flex', gap: '10px', alignItems: 'flex-start', opacity: mission.completed ? 1 : 0.86 }}>
-                            <span style={{ color: mission.completed ? '#00ff88' : '#ffcc00', marginTop: '1px' }}>●</span>
-                            <span style={{ color: mission.completed ? '#00ff88' : '#ffcc00' }}>{mission.label}</span>
-                        </li>
-                    ))}
-                </ul>
+                <div style={{ marginBottom: '20px', ...panelScaleStyle('mission', 'top right') }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                        <h4 style={{ margin: 0, color: '#00ccff', fontSize: '16px', textTransform: 'uppercase', letterSpacing: '1.2px', fontWeight: '800' }}>
+                            Missionslage
+                        </h4>
+                        <div style={{ display: 'flex', gap: '4px' }}>
+                            <button onClick={() => togglePanelMinimize('mission')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>Min</button>
+                            <button onClick={() => togglePanelZoom2('mission')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>x2</button>
+                        </div>
+                    </div>
+                    {!panelUi.mission.minimized && (
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '13px', lineHeight: '1.6' }}>
+                        {missionChecklist.map((mission) => (
+                            <li key={mission.id} style={{ marginBottom: '10px', display: 'flex', gap: '10px', alignItems: 'flex-start', opacity: mission.completed ? 1 : 0.86 }}>
+                                <span style={{ color: mission.completed ? '#00ff88' : '#ffcc00', marginTop: '1px' }}>●</span>
+                                <span style={{ color: mission.completed ? '#00ff88' : '#ffcc00' }}>{mission.label}</span>
+                            </li>
+                        ))}
+                    </ul>
+                    )}
+                </div>
 
                 <div style={{ height: '1px', background: 'rgba(255,255,255,0.2)', marginBottom: '16px', boxShadow: '0 1px 2px rgba(0,0,0,0.5)' }} />
 
                 {/* Timeline (Was passiert gerade) */}
-                <div>
-                    <h4 style={{ margin: '0 0 16px 0', color: '#00ccff', fontSize: '18px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: '800' }}>
-                        Einsatz-Timeline
-                    </h4>
-                    
+                <div style={{ ...panelScaleStyle('timeline', 'top right') }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                        <h4 style={{ margin: 0, color: '#00ccff', fontSize: '18px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: '800' }}>
+                            Einsatz-Timeline
+                        </h4>
+                        <div style={{ display: 'flex', gap: '4px' }}>
+                            <button onClick={() => togglePanelMinimize('timeline')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>Min</button>
+                            <button onClick={() => togglePanelZoom2('timeline')} style={{ ...btnStyle, minWidth: '42px', padding: '3px 6px', fontSize: '10px' }}>x2</button>
+                        </div>
+                    </div>
+                    {!panelUi.timeline.minimized && (
                     <div 
                         ref={timelineRef}
                         style={{
@@ -415,7 +550,10 @@ export const HUD = () => {
                             );
                         })}
                     </div>
+                    )}
                 </div>
+                </>
+                )}
             </div>
 
             {(activeInteraction || interactionState.lastMessage) && (
@@ -430,8 +568,15 @@ export const HUD = () => {
                     background: activeInteraction ? 'rgba(6,16,24,0.88)' : 'rgba(10,10,10,0.82)',
                     border: `1px solid ${activeInteraction ? 'rgba(0,204,255,0.35)' : 'rgba(255,255,255,0.12)'}`,
                     boxShadow: activeInteraction ? '0 0 24px rgba(0,204,255,0.18)' : '0 10px 30px rgba(0,0,0,0.35)',
-                    pointerEvents: 'none'
+                    pointerEvents: 'none',
+                    ...panelScaleStyle('interaction', 'bottom center')
                 }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px', marginBottom: '6px', pointerEvents: 'auto' }}>
+                        <button onClick={() => togglePanelMinimize('interaction')} style={{ ...btnStyle, minWidth: '46px', padding: '3px 6px', fontSize: '10px' }}>Min</button>
+                        <button onClick={() => togglePanelZoom2('interaction')} style={{ ...btnStyle, minWidth: '46px', padding: '3px 6px', fontSize: '10px' }}>x2</button>
+                    </div>
+                    {!panelUi.interaction.minimized && (
+                    <>
                     {activeInteraction && (
                         <>
                             <div style={{ color: '#00ccff', fontSize: '11px', fontWeight: 800, letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '6px' }}>
@@ -455,6 +600,8 @@ export const HUD = () => {
                             {interactionState.lastMessage}
                         </div>
                     )}
+                    </>
+                    )}
                 </div>
             )}
 
@@ -469,7 +616,28 @@ export const HUD = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '16px', 
+                transformOrigin: 'center bottom',
+                scale: panelUi.bottom.zoom2 ? 2 : 1,
             }}>
+                <div style={{ display: 'flex', gap: '6px', pointerEvents: 'auto', background: 'rgba(10,10,10,0.62)', border: '2px solid rgba(255,255,255,0.09)', borderRadius: '10px', padding: '5px 7px' }}>
+                    <button
+                        onClick={() => togglePanelMinimize('bottom')}
+                        style={{ ...btnStyle, minWidth: '52px', padding: '4px 8px', fontSize: '11px', color: panelUi.bottom.minimized ? '#ffcc00' : '#9edfff' }}
+                        title={panelUi.bottom.minimized ? 'Bottom-HUD einblenden' : 'Bottom-HUD minimieren'}
+                    >
+                        {panelUi.bottom.minimized ? 'OPEN' : 'MIN'}
+                    </button>
+                    <button
+                        onClick={() => togglePanelZoom2('bottom')}
+                        style={{ ...btnStyle, minWidth: '52px', padding: '4px 8px', fontSize: '11px', color: panelUi.bottom.zoom2 ? '#ffcc00' : '#9edfff' }}
+                        title={panelUi.bottom.zoom2 ? 'Bottom-HUD auf 1x setzen' : 'Bottom-HUD auf 2x zoomen'}
+                    >
+                        {panelUi.bottom.zoom2 ? '1x' : '2x'}
+                    </button>
+                </div>
+
+                {!panelUi.bottom.minimized && (
+                <>
                 {/* Reverse Speed */}
                 <div style={{ display: 'flex', gap: '2px' }}>
                     {revSpeeds.reverse().map(s => (
@@ -610,6 +778,41 @@ export const HUD = () => {
                         {muted ? ' 0%' : `${Math.round(masterVolume * 100)}%`}
                     </span>
                 </div>
+
+                <div style={{ height: '36px', width: '2px', background: 'rgba(255,255,255,0.15)' }} />
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', pointerEvents: 'auto', background: 'rgba(10,10,10,0.6)', padding: '8px 14px', borderRadius: '12px', backdropFilter: 'blur(5px)', border: '2px solid rgba(255,255,255,0.08)' }}>
+                    {([
+                        ['low', 'LOW'],
+                        ['medium', 'MEDIUM'],
+                        ['high', 'HIGH'],
+                        ['aaa', 'AAA 1080p 60 fps']
+                    ] as const).map(([key, label]) => (
+                        <button
+                            key={key}
+                            onClick={() => switchStreamProfile(key)}
+                            disabled={streamProfileLoading === key}
+                            style={{
+                                ...btnStyle,
+                                minWidth: key === 'aaa' ? '146px' : '76px',
+                                padding: '6px 8px',
+                                fontSize: key === 'aaa' ? '11px' : '12px',
+                                color: streamProfile === key ? '#ffcc00' : '#9edfff',
+                                borderColor: streamProfile === key ? 'rgba(255,204,0,0.45)' : 'rgba(255,255,255,0.08)',
+                                boxShadow: streamProfile === key ? '0 0 10px rgba(255,204,0,0.28)' : 'none',
+                                opacity: streamProfileLoading === key ? 0.7 : 1,
+                            }}
+                            title={`Streaming-Profil ${label} aktivieren`}
+                        >
+                            {streamProfileLoading === key ? '...' : label}
+                        </button>
+                    ))}
+                    <span style={{ color: '#9edfff', fontSize: '11px', letterSpacing: '0.4px', marginLeft: '4px' }}>
+                        {streamProfileState.status}
+                    </span>
+                </div>
+                </>
+                )}
             </div>
 
             {showStatistics && (

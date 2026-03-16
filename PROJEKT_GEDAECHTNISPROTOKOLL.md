@@ -125,7 +125,10 @@
 - Vollverifikation nach Logik-Extraktion erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 243/243.
 - Expliziter Live-Browsernachweis am 16.03.2026 nachgezogen: lokaler Stack manuell gestartet (`vite` auf `127.0.0.1:3001` + Socket-Server `:3000`), Browserseite geoeffnet und Socket-Verbindung im Serverlog (`Client connected`) bestaetigt.
 - Zusatznachweis dokumentiert: Browser- und Socket-Echtlauf wurde getrennt von `autonomy:full` verifiziert, anschliessend alle Hintergrundterminals kontrolliert beendet.
+- HUD-Reparatur und Ergonomieblock am 16.03.2026 abgeschlossen: globale HUD-Skalierung standardmaessig auf 75 Prozent gesetzt und Laufzeitbruch durch inkonsistente Bottom-/Profil-Referenzen in `src/components/ui/HUD.tsx` beseitigt.
+- Gameplay-Panels jetzt einzeln steuerbar: Min-/x2-Buttons fuer linkes Statuspanel, Top-Badge, rechtes Hauptpanel, Interaktionspanel, Bottom-Leiste sowie die Unterbereiche NASA, Telemetrie, Missionslage und Timeline aktiv.
+- Stream-Profilsteuerung im HUD sichtbar und live verdrahtet: `Low`, `Medium`, `High` und `AAA 1080p 60 fps` schalten ueber die bestehende Profil-API; Statusanzeige und Ladezustand werden direkt im Bottom-HUD gezeigt.
+- Vollverifikation nach HUD-Block erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Profilfolge `low -> medium -> high -> aaa -> low` im Live-Proof erfolgreich.
 
 ## Naechster logischer Schritt
-- Spawn-HUD-Liveabgleich finalisieren: Badge-Kontrast bei Tageslicht und Sammelhinweis-Platzierung am letzten Marker visuell trimmen.
-- Trend-/Missionsentscheidungen um Persistenzfenster erweitern: mehrere aufeinanderfolgende volatile Checkpoints als Haltedauer-Bedingung statt Einzelimpuls.
+- Kein offener Blocker im aktuellen HUD-/Streaming-Zyklus; naechster Ausbau kann wieder inhaltlich auf Spawn-HUD-Feinschliff oder Trend-/Missionspersistenz gehen.

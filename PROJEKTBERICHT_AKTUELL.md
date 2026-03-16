@@ -198,6 +198,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Nach Abschluss wurden die fuer den manuellen Nachweis gestarteten Hintergrundterminals beendet.
 - Ergebnis: MANUAL_BROWSER_PASS zusaetzlich zu `AUTONOMY_FULL_OK`/`AUTONOMY_PROOF_OK`.
 
+### 2.0.27 HUD-Kompaktskalierung und Panelsteuerung vom 16.03.2026
+- Die komplette Gameplay-HUD wurde standardmaessig auf 75 Prozent der bisherigen Groesse gesetzt, womit die linke Statussaeule und die uebrigen Overlay-Bloecke sichtbar kompakter werden.
+- In `src/components/ui/HUD.tsx` wurden die halbfertigen Referenzen der laufenden Refaktorierung bereinigt: Bottom-HUD verwendet wieder den gueltigen Panel-Schluessel, die Profilsteuerung ist an die bestehende `switchStreamProfile`-Logik angebunden und der Lade-/Statuszustand wird sauber gefuehrt.
+- Jeder relevante Gameplay-Bereich besitzt nun direkte Min-/x2-Steuerung: linkes Statuspanel, Top-Badge, rechtes Hauptpanel, Interaktionspanel, Bottom-Leiste sowie die Untersektionen NASA-Lagebild, Phase-Telemetrie, Missionslage und Einsatz-Timeline.
+- Die Stream-Profilbuttons sind im HUD jetzt explizit sichtbar: `Low`, `Medium`, `High` und `AAA 1080p 60 fps`; der aktive Zustand und laufende Umschaltungen werden im Bottom-HUD angezeigt.
+- Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Profilfolge `low -> medium -> high -> aaa -> low` samt `canvas-webrtc`-Transport in allen Profilen bestanden.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
@@ -211,6 +218,7 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 ### 2.3 UI, HUD und Messwerte
 - Render-FPS und Stream/View-FPS wurden fachlich getrennt und klarer benannt.
 - HUD-Funktionen wurden erweitert, inklusive Skalierung und separater Remote-Overlay-Logik.
+- Die HUD-Ergonomie wurde weiter verfeinert: 75-Prozent-Default, individuelle Panel-Minimierung und x2-Zoom fuer die operativen Unterpaneele sowie sichtbare Profilumschaltung direkt im Gameplay-HUD.
 - Damit ist besser nachvollziehbar, ob ein Engpass im Renderer oder in der Uebertragung liegt.
 
 ### 2.4 Tests und Codequalitaet

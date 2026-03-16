@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 11:03:39 +01:00
+- Zeitstempel: 2026-03-16 11:37:44 +01:00
 - Repo-Head: 01ea711 (nach Spawn-Marker-Logik-Extraktion und Testabdeckung)
-- Nachweislauf: npm run autonomy:full PASS (inkl. lint PASS + tests 243/243 PASS + build PASS + live proof PASS) + expliziter manueller Browsertest PASS
-- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_243_243 + BUILD_PASS + LIVE_SOCKET_PASS + MANUAL_BROWSER_PASS + MASTER_80000_PASS
-- Gates: Lint PASS, Tests 243/243 PASS, Build PASS, Browser-/Socket-Livecheck PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, manueller Browserlauf via http://127.0.0.1:3001/ PASS mit Socket-Log `Client connected`, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: Nachweislauf ohne Codeaenderung; zusaetzlicher Browser-/Socket-Echtlauf separat verifiziert
+- Nachweislauf: npm run autonomy:full PASS nach HUD-Reparatur (inkl. lint PASS + tests 243/243 PASS + build PASS + live proof PASS)
+- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_243_243 + BUILD_PASS + HUD_RUNTIME_PASS + STREAM_PROFILE_UI_PASS + MASTER_80000_PASS
+- Gates: Lint PASS, Tests 243/243 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, HUD-Laufzeitfehler durch inkonsistente Bottom-/Profil-Referenzen beseitigt, Masterquelle 80.000/80.000 PASS
+- Arbeitsbaum: HUD-Refaktor bereinigt; globale HUD-Skalierung 75%, Einzelpanel-Minimierung/x2 fuer Gameplay-HUD inkl. NASA/Telemetrie/Mission/Timeline aktiv
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -82,6 +82,7 @@ Bewertungsstufen:
 | P-022 | SpawnMarker-Dichtepriorisierung umgesetzt | Vertikal | 100 | PASS | Bei hoher Last nur priorisierte Top-8 Marker sichtbar, Rest als Sammelhinweis ausgeblendet |
 | P-023 | SpawnMarker-Dringlichkeitsstufen umgesetzt | Vertikal | 100 | PASS | Countdown-nahe Marker werden als WATCH/READY/IMMINENT eingestuft und visuell priorisiert |
 | P-024 | SpawnMarker-Logik regressionssicher getestet | Vertikal | 100 | PASS | Logik in separates Modul extrahiert, neue Tests fuer Zeitfenster/Grouping/Priorisierung/Dringlichkeit |
+| P-025 | HUD um 25 Prozent verkleinert und Gameplay-Panels steuerbar gemacht | Vertikal | 100 | PASS | HUD-Default 75%, Min/x2 fuer Haupt- und Unterpanels, sichtbare Low/Medium/High/AAA-Buttons, Live-Proof danach gruen |
 
 ---
 
