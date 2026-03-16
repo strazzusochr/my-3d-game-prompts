@@ -69,7 +69,10 @@
 - Rollen-Trendhistorie-Block am 16.03.2026 integriert: Store fuehrt jetzt `roleTrendHistory` mit Checkpoints je Zeitfortschritt; bei Rewind wird die Historie aus Timeline-Stand konsistent neu aufgebaut.
 - Operations-Drilldown zeigt nun Verlaufslinien fuer Sicherheit, Aggression und Support (letzte 10 Checkpoints) inklusive Zeitrahmen.
 - Trendhistorie-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 219/219 gruen, `npm run build` gruen, Browser-/Socket-Livecheck bestaetigt (Socket `Y0d3YxhZ02zjI-P2AAAJ`).
+- Korrelations-Engine-Block am 16.03.2026 eingebaut: neues Systemmodul `operationsInsights.ts` korreliert Rollenverlauf, Panikquote, DayStats, Hook-Auslastung und Missionsfortschritt zu einer priorisierten Einsatzempfehlung.
+- Operations-Tab erweitert: Empfehlungstext ist nun datengetrieben, inkl. Korrelationszeile, Prioritaetsstufe (`LOW/MEDIUM/HIGH/CRITICAL`) und Confidence-Wert.
+- Korrelations-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 222/222 gruen (inkl. neuer `operationsInsights.test.ts`), `npm run build` gruen, Browser-/Socket-Livecheck bestaetigt (Socket `3Zi--HMxKGEl8XN1AAAB`).
 
 ## Naechster logischer Schritt
 - Entscheidungsbasierte Folge-Events: Spieleraktionen sollen zugeschnittene Kettenevents ausloesen (z.B. nach erfolgreicher Epoch-Verifikation wird ein spezifischer Journalist-Mob aktiviert).
-- Trend-Korrelationen: Verlaufslinien gegen Missionserfolge, Tagesschaden und Panikquote korrelieren und als Entscheidungshilfe ausgeben.
+- Trend-Korrelationen ausweiten: Verlaufslinien mit Missionsentscheidungspfaden verknuepfen und als konkrete Trigger fuer Folge-Events nutzen.

@@ -3,6 +3,7 @@ import { useGameStore } from '../../stores/gameStore';
 import { EVENT_TIMELINE } from '../../systems/eventScheduler';
 import { getInteractionAvailability, getInteractionZoneById, getMissionChecklist } from '../../systems/interactionZones';
 import { getHudTelemetry } from '../../systems/hudTelemetry';
+import { getOperationsInsight } from '../../systems/operationsInsights';
 
 const StatusBar = ({ label, value, color }: { label: string, value: number, color: string }) => (
     <div style={{ marginBottom: '16px' }}>
@@ -109,6 +110,15 @@ export const HUD = () => {
         { key: 'dyn-evening-reinforcement', label: 'Hundertschaft dynamisch aktiviert', color: '#88ddff' },
         { key: 'dyn-late-triage', label: 'Triage-Korridor dynamisch aktiv', color: '#99ffcc' },
     ].filter((response) => firedEventKeys.includes(response.key));
+    const operationsInsight = getOperationsInsight({
+        trendHistory: roleTrendHistory,
+        dayStats,
+        missionCompletionPercent: telemetry.missionCompletionPercent,
+        panicRatioPercent: telemetry.panicRatioPercent,
+        activeHooks: telemetry.activeHooks,
+        maxHooks: telemetry.maxHooks,
+        activeDynamicResponses: activeRoleResponses.length,
+    });
     const trendView = roleTrendHistory.slice(-10);
     const trendMax = Math.max(1, ...trendView.map((point) => Math.max(point.security, point.aggressors, point.support)));
     const mapTrendLine = (selector: (point: (typeof trendView)[number]) => number) => {
@@ -727,13 +737,20 @@ export const HUD = () => {
                                         Einsatzempfehlung
                                     </div>
                                     <div style={{ color: '#9edfff', fontSize: '13px', lineHeight: 1.5 }}>
-                                        {telemetry.panicRatioPercent > 55
-                                            ? 'Prioritaet: Rueckzugsrouten sichern, Medizinachsen freihalten und Eskalationsgruppen separieren.'
-                                            : telemetry.roleBalance.aggressors > telemetry.roleBalance.security
-                                                ? `Aggressor-Uebermacht (${telemetry.roleBalance.aggressors} vs ${telemetry.roleBalance.security}): Sicherheitsverstaerkung anfordern!`
-                                                : telemetry.activeHooks >= 3
-                                                    ? 'Prioritaet: Hook-Kette stabil halten, sektoral deeskalieren und geordnete Abwanderung begleiten.'
-                                                    : 'Prioritaet: Missionskette weiter abschliessen, um phasenabhaengige Automatik voll zu aktivieren.'}
+                                        {operationsInsight.recommendation}
+                                    </div>
+                                    <div style={{ marginTop: '10px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '8px' }}>
+                                        <div style={{ color: '#9edfff', fontSize: '11px', lineHeight: 1.45 }}>
+                                            {operationsInsight.correlationLine}
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '11px' }}>
+                                            <span style={{ color: operationsInsight.priority === 'critical' ? '#ff5555' : operationsInsight.priority === 'high' ? '#ffaa44' : operationsInsight.priority === 'medium' ? '#ffdd66' : '#99ffcc', fontWeight: 700 }}>
+                                                Prioritaet: {operationsInsight.priority.toUpperCase()}
+                                            </span>
+                                            <span style={{ color: '#9edfff' }}>
+                                                Confidence {operationsInsight.confidencePercent}%
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
