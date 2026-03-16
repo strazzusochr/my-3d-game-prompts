@@ -1,8 +1,8 @@
 /**
  * 🔊 GAME AUDIO — Zeitgesteuerte Ambient-Sounds + Volume Controls
- * 
+ *
  * Problem gelöst: Browser Autoplay Policy → Audio startet erst nach User-Klick
- * 
+ *
  * Features:
  * - Vogelgezwitscher 06:00-10:00 (birds_morning.mp3)
  * - Lautstärkeregler (Slider)
@@ -10,9 +10,11 @@
  * - Fade-In/Fade-Out sanft
  * - Startet erst nach erstem Klick (Browser Policy)
  * - Konzert-Playlist (Endlosschleife 18:05 bis 02:30)
+ * - AudioManager WebAudio SFX-Integration (P-008)
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useGameStore } from '../../stores/gameStore';
+import { audioManager } from '../../managers/AudioManager';
 
 interface AmbientTrack {
     id: string;
@@ -51,6 +53,16 @@ const CONCERT_PLAYLIST = [
     '/audio/Internet.mp3'
 ];
 
+/**
+ * SFX event triggers — fire once at the given inGameMinutes threshold.
+ * key must be unique. action = function to call on audioManager.
+ */
+interface SfxTrigger {
+    key: string;
+    minThreshold: number;
+    fire: () => void;
+}
+
 // Global audio state
 let globalMasterVolume = 0.5;
 let globalMuted = false;
@@ -64,6 +76,7 @@ export const GameAudio = () => {
     const muted = useGameStore((state: any) => state.gameState.muted);
     const [unlocked, setUnlocked] = useState(false);
     const fadeTimers = useRef<Map<string, number>>(new Map());
+    const firedSfxKeys = useRef<Set<string>>(new Set());
 
     // Konzert Playlist State
     const concertAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -72,12 +85,58 @@ export const GameAudio = () => {
     const [h, m] = inGameTime.split(':').map(Number);
     const inGameMinutes = h * 60 + m;
 
+    // SFX triggers — defined once, checked on every minute tick
+    const SFX_TRIGGERS: SfxTrigger[] = [
+        {
+            key: 'sfx_chanting_1020',
+            minThreshold: 10 * 60 + 20,
+            fire: () => { audioManager.playChanting(8); audioManager.startCrowdMurmur(); }
+        },
+        {
+            key: 'sfx_police_ultimatum_1202',
+            minThreshold: 12 * 60 + 2,
+            fire: () => { audioManager.playSiren(6); audioManager.playPoliceMegaphone(5); }
+        },
+        {
+            key: 'sfx_shieldbeats_1230',
+            minThreshold: 12 * 60 + 30,
+            fire: () => audioManager.playShieldBeats(12)
+        },
+        {
+            key: 'sfx_watercannon_1300',
+            minThreshold: 13 * 60,
+            fire: () => audioManager.playWaterCannon(6)
+        },
+        {
+            key: 'sfx_siren_1400',
+            minThreshold: 14 * 60,
+            fire: () => audioManager.playSiren(4)
+        },
+        {
+            key: 'sfx_bengalo_1930',
+            minThreshold: 19 * 60 + 30,
+            fire: () => audioManager.playBengaloSizzle(5)
+        },
+        {
+            key: 'sfx_gunshot_2100',
+            minThreshold: 21 * 60,
+            fire: () => { audioManager.playGunshot(); audioManager.playExplosion(); audioManager.playSiren(8); }
+        },
+        {
+            key: 'sfx_crowd_murmur_0800',
+            minThreshold: 8 * 60,
+            fire: () => audioManager.startCrowdMurmur()
+        },
+    ];
+
     // Unlock audio on first click anywhere in the document
     const unlockAudio = useCallback(() => {
         if (audioUnlocked) return;
         audioUnlocked = true;
         setUnlocked(true);
-        // Create and play a silent audio to unlock the context
+        // Init WebAudio API on unlock
+        audioManager.init();
+        // Create and play a silent audio to unlock the HTML Audio context
         const silent = new Audio();
         silent.volume = 0;
         silent.play().catch(() => { });
@@ -94,10 +153,14 @@ export const GameAudio = () => {
         };
     }, [unlockAudio]);
 
-    // Volume change handler
+    // Volume change handler — sync to AudioManager too
     useEffect(() => {
         globalMasterVolume = masterVolume;
         globalMuted = muted;
+
+        // Sync AudioManager
+        audioManager.setVolume(masterVolume);
+        audioManager.setMuted(muted);
 
         // Standard Tracks Volume Update
         activeAudios.forEach((audio, id) => {
@@ -112,6 +175,25 @@ export const GameAudio = () => {
             concertAudioRef.current.volume = muted ? 0 : 0.8 * masterVolume;
         }
     }, [masterVolume, muted]);
+
+    // SFX event trigger check — runs every time inGameMinutes changes
+    useEffect(() => {
+        if (!isPlaying || !audioUnlocked) return;
+
+        SFX_TRIGGERS.forEach((trigger) => {
+            if (inGameMinutes >= trigger.minThreshold && !firedSfxKeys.current.has(trigger.key)) {
+                firedSfxKeys.current.add(trigger.key);
+                trigger.fire();
+                console.log(`🔈 SFX fired: ${trigger.key} at ${inGameTime}`);
+            }
+        });
+
+        // Reset SFX keys at day start (06:00 = 360 min, reset at 360 or below)
+        if (inGameMinutes <= 6 * 60) {
+            firedSfxKeys.current.clear();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [inGameMinutes, isPlaying, unlocked]);
 
     // 🎸 KONZERT PLAYLIST HANDLER (18:05 bis 02:30 Uhr)
     useEffect(() => {
@@ -190,6 +272,11 @@ export const GameAudio = () => {
                         }
                     }, 30);
                     fadeTimers.current.set(track.id, fadeIn);
+
+                    // Voice tracks get ambient ducking (speeches, ultimatum)
+                    if (track.id === 'police_ultimatum' || track.id === 'speech_weber') {
+                        audioManager.duckAmbient(0.3, 0.3, (track.endMin - track.startMin) * 60 - 0.6);
+                    }
                 }).catch((err) => {
                     console.warn(`🔇 Audio blocked: ${track.label}`, err);
                     activeAudios.delete(track.id);
@@ -226,6 +313,7 @@ export const GameAudio = () => {
                 concertAudioRef.current.currentTime = 0;
             }
             fadeTimers.current.forEach((id) => clearInterval(id));
+            audioManager.stopAll();
         };
     }, []);
 
