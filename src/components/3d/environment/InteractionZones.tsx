@@ -2,7 +2,7 @@ import { BallCollider, RigidBody } from '@react-three/rapier';
 import { Text } from '@react-three/drei';
 import { useMemo } from 'react';
 import { useGameStore } from '../../../stores/gameStore';
-import { INTERACTION_ZONES, getInteractionZoneById, isZoneCompleted } from '../../../systems/interactionZones';
+import { INTERACTION_ZONES, getInteractionAvailability, getInteractionZoneById, isZoneCompleted } from '../../../systems/interactionZones';
 import { getGroundHeightAt } from './cityLayout';
 
 export const InteractionZones = () => {
@@ -22,8 +22,10 @@ export const InteractionZones = () => {
             {zones.map((zone) => {
                 const completed = isZoneCompleted(missionProgress, zone.id);
                 const active = activeZoneId === zone.id;
-                const ringColor = completed ? '#00ff88' : active ? '#ffffff' : zone.color;
-                const fillOpacity = completed ? 0.3 : active ? 0.38 : 0.18;
+                const availability = getInteractionAvailability(missionProgress, zone.id);
+                const locked = !availability.available;
+                const ringColor = completed ? '#00ff88' : locked ? '#777777' : active ? '#ffffff' : zone.color;
+                const fillOpacity = completed ? 0.3 : locked ? 0.08 : active ? 0.38 : 0.18;
 
                 return (
                     <group key={zone.id} position={zone.position}>
@@ -57,7 +59,11 @@ export const InteractionZones = () => {
                             outlineWidth={0.03}
                             outlineColor="#000000"
                         >
-                            {completed ? 'ERLEDIGT' : getInteractionZoneById(zone.id)?.prompt}
+                            {completed
+                                ? 'ERLEDIGT'
+                                : locked
+                                    ? `GESPERRT: ${availability.reason}`
+                                    : getInteractionZoneById(zone.id)?.prompt}
                         </Text>
 
                         <RigidBody type="fixed" colliders={false}>

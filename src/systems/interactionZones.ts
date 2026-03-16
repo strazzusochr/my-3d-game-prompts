@@ -32,6 +32,11 @@ export interface InteractionOutcome {
     wasApplied: boolean;
 }
 
+export interface InteractionAvailability {
+    available: boolean;
+    reason?: string;
+}
+
 export const INITIAL_MISSION_PROGRESS: MissionProgress = {
     epochBriefingVerified: false,
     hazardMapPrepared: false,
@@ -119,6 +124,27 @@ export const isZoneCompleted = (progress: MissionProgress, zoneId: InteractionZo
     return progress.prioritizedZoneIds.includes(zoneId);
 };
 
+export const getInteractionAvailability = (
+    progress: MissionProgress,
+    zoneId: InteractionZoneId,
+): InteractionAvailability => {
+    if (zoneId === 'hazard-console' && !progress.epochBriefingVerified) {
+        return {
+            available: false,
+            reason: 'Zuerst Epoch-2 Lage-Terminal abschliessen.',
+        };
+    }
+
+    if (isPopulationZone(zoneId) && !progress.hazardMapPrepared) {
+        return {
+            available: false,
+            reason: 'Zuerst Hazard-Konsole abschliessen.',
+        };
+    }
+
+    return { available: true };
+};
+
 export const getMissionChecklist = (progress: MissionProgress) => [
     {
         id: 'epoch2',
@@ -141,6 +167,18 @@ export const applyInteractionOutcome = (
     progress: MissionProgress,
     zoneId: InteractionZoneId,
 ): InteractionOutcome => {
+    const availability = getInteractionAvailability(progress, zoneId);
+    if (!availability.available) {
+        return {
+            missionProgress: progress,
+            reputationDelta: 0,
+            moralDelta: 0,
+            tensionDelta: 0,
+            message: availability.reason ?? 'Diese Interaktion ist noch gesperrt.',
+            wasApplied: false,
+        };
+    }
+
     if (zoneId === 'epoch-terminal') {
         if (progress.epochBriefingVerified) {
             return {

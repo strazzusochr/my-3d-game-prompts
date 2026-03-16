@@ -223,3 +223,18 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - `npm run lint`: erfolgreich.
 - `npm run build`: erfolgreich.
 - Livecheck: `npm run dev:all` gestartet, Browserseite geoeffnet, Socket-Server meldete eine reale Client-Verbindung; der Hintergrundprozess wurde anschliessend wieder beendet.
+
+### 8.8 Controller- und Interaktions-Feinschliff vom 16.03.2026
+- Die Interaktionsflaechen wurden missionsgebunden verknuepft: Hazard-Konsole ist nun erst nach dem Epoch-Terminal verfuegbar, Evakuierungsboards erst nach Hazard-Abschluss.
+- Gesperrte Zonen liefern klare Rueckmeldungen im Store und in der HUD-Anzeige (`GESPERRT: ...`) statt stiller No-Op-Aktionen.
+- Die 3D-Zonenvisualisierung zeigt Lock-Zustaende durch reduzierte Farbe/Opacity und aktualisierte Prompt-Texte.
+- Der Player-Controller wurde fuer bessere Lesbarkeit und Steuerbarkeit auf beschleunigungsbasierte horizontale Bewegung mit separater Boden-/Luftkontrolle umgestellt.
+- Das sorgt fuer saubereres Start-/Stop-Verhalten und weniger abruptes Abbremsen an Kollisionskanten.
+
+### 8.9 Feinschliff-Nachweis
+- `src/tests/interactionZones.test.ts` wurde um Availability-/Prerequisite-Pruefungen erweitert.
+- `src/tests/gameStore.test.ts` prueft nun auch Lock-Meldungen und die aktualisierte Missionsketten-Reihenfolge.
+- `npx vitest run`: erfolgreich, 186 von 186 Tests bestanden.
+- `npm run lint`: erfolgreich.
+- `npm run build`: erfolgreich.
+- Livecheck: `npm run dev:all` gestartet, Browserseite geoeffnet, Socket-Server meldete reale Client-Verbindungen; der Hintergrundprozess wurde anschliessend wieder beendet.
