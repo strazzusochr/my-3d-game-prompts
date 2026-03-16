@@ -7,6 +7,8 @@
 - Antworten, Dokumentation und neu erzeugte Projektartefakte konsequent auf Deutsch halten.
 - Vorhandene Eintraege nicht loeschen, sondern nur fortlaufend ergaenzen.
 - Aenderungen nach Moeglichkeit mit Verifikation absichern.
+- Keine Abkuerzungen und keine Ausweichwege: nach jedem Implementierungsblock zwingend Tests, Browserdurchlauf und Debug-Pruefung.
+- Zielzustand ist immer null Probleme und null Fehler; autonom weiterarbeiten bis der Zielzustand erreicht ist.
 
 ## Aktueller Arbeitsstand
 - Persistente Nutzerpraeferenzen wurden um die neuen Ablaufregeln erweitert.
@@ -23,6 +25,10 @@
 - `.gitignore` wurde auf Artefakt-Trennung erweitert, damit `dist/`, `hf_space_pull/` und lokale Env-Dateien kuenftig nicht mit Quellcodeaenderungen vermischt werden.
 - Vollautonomie-Lauf am 16.03.2026 erneut ausgefuehrt: Live-Health und Profilumschaltung (`low -> medium -> high -> aaa -> low`) erfolgreich, konsistente Server-Zahlen `publicPort=7860`, `internalPort=3099`, `transportSource=canvas-webrtc`, `clients=1`.
 - Finaler Quality-Gate-Nachweis am 16.03.2026 im Einzelmodus erfolgreich: `npm run lint` gruen, `vitest` 7 von 7 gruen, Build gruen (`BUILD_OK`).
+- Verbindlicher Null-Fehler-Prozess am 16.03.2026 erneut bestaetigt: Browserdurchlauf aktiv, Debug-Pruefung ohne Fehler, Runtime-Health `ok`, danach Quality-Gates komplett gruen.
+- GO-GO-GO-Automation umgesetzt: `npm run autonomy:full` fuehrt nun in einem Lauf Lint, Tests, Build und serverseitigen Profil-/Health-Beweis aus.
+- Autonomy-Proof am 16.03.2026 bestaetigt: Profilkette `low -> medium -> high -> aaa -> low` erfolgreich, Abschlussmarker `AUTONOMY_PROOF_OK` erreicht.
+- Wiederholungslauf nach Doku-Update erfolgreich: `npm run autonomy:full` erneut komplett gruen inklusive Proof-Marker `AUTONOMY_PROOF_OK`.
 
 ## Naechster logischer Schritt
-- Projektbericht mit frischen Verifikationsdaten pflegen und kuenftige Quellcodeaenderungen gegen diesen Referenzstand abgleichen.
+- Etappe 1 des Masterplans technisch ausbauen und nach jedem Block den Command `npm run autonomy:full` als Pflichtnachweis ausfuehren.

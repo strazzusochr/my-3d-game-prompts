@@ -14,7 +14,9 @@
     "stream:aaa": "node server/stream-server.mjs --profile=aaa",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "autonomy:proof": "node scripts/autonomy-proof.mjs",
+    "autonomy:full": "npm run lint && npm exec vitest run && npm run build -- --logLevel silent && npm run autonomy:proof"
   },
   "dependencies": {
     "@dimforge/rapier3d-compat": "0.12.0",

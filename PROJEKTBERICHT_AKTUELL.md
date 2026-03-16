@@ -37,6 +37,28 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Rueckkehr zu `low`: API bestaetigte erneut `960x540` bei Ziel-`fps=24`; Health blieb konsistent mit `profile=low`.
 - Ergebnis: Profilkette `low -> medium -> high -> aaa -> low` laeuft reproduzierbar auf dem aktuellen Stand und bestaetigt die aktiven Server-Zahlen fuer den Streaming-Betrieb.
 
+### 2.0.4 Verbindlicher Null-Fehler-Beweislauf vom 16.03.2026
+- Arbeitsmodus wurde auf strikt autonomen Null-Fehler-Prozess festgelegt: immer naechster logisch bester Schritt, danach Browserdurchlauf, Debug-Pruefung, Tests und Build ohne Abkuerzungen.
+- Browserdurchlauf: `http://127.0.0.1:7860/` wurde aktiv geoeffnet.
+- Debug-Pruefung: Workspace-Fehlerstatus meldete keine Probleme.
+- Runtime-Nachweis: `GET /health` meldete `status=ok`, `profile=low`, `transportSource=canvas-webrtc`, `publicPort=7860`, `internalPort=3099`, `clients=2`.
+- Quality-Gates: `lint` gruen, `vitest` 7 von 7 gruen, `build` gruen (`BUILD_OK`).
+- Ergebnis: Der aktuelle Stand erfuellt den geforderten Null-Fehler-Nachweis im verbindlichen Vollautonomie-Modus.
+
+### 2.0.5 GO-GO-GO Vollautomation vom 16.03.2026
+- Der Nachweisprozess wurde als reproduzierbarer Ein-Kommando-Lauf standardisiert: `npm run autonomy:full`.
+- Ablauf in diesem Command: `lint` -> `vitest` -> `build` -> `autonomy:proof` (Profilkette und Health-Validierung).
+- Der Lauf wurde erfolgreich abgeschlossen und lieferte den Abschlussmarker `AUTONOMY_PROOF_OK`.
+- Gepruefte Profilfolge im Proof-Teil: `low -> medium -> high -> aaa -> low`.
+- Ergebnis: Die GO-GO-GO-Ausfuehrung ist nun technisch erzwingbar und fuer jeden Folgeblock identisch reproduzierbar.
+
+### 2.0.6 Wiederholter Pflichtnachweis vom 16.03.2026
+- Der standardisierte Command `npm run autonomy:full` wurde nach der Dokumentationsaktualisierung erneut ausgefuehrt.
+- Quality-Gates erneut gruen: `lint` ok, `vitest` 7 von 7 ok, `build` ok.
+- Proof-Abschluss erneut erreicht: `AUTONOMY_PROOF_OK`.
+- Initialer Health-Wert im Wiederholungslauf: `profile=low`, `transportSource=canvas-webrtc`, `publicPort=7860`, `internalPort=3099`, `clients=5`.
+- Ergebnis: Der Null-Fehler-Modus ist nach Aenderungen weiterhin stabil und reproduzierbar.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
