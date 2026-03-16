@@ -1,14 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import {
-  HUD_LAYOUT_EXPORT_VERSION,
-  HUD_PANEL_LAYOUT_STORAGE_KEY,
-  HUD_SCALE_STORAGE_KEY,
-  clearPersistedHudLayout,
-  loadImportedHudLayoutBundle,
-  loadPersistedPanelUi,
-  serializeHudLayoutBundle,
-  serializePanelUi,
-} from '../components/ui/hudLayoutPersistence';
+import { HUD_PANEL_LAYOUT_STORAGE_KEY, HUD_SCALE_STORAGE_KEY, clearPersistedHudLayout, loadPersistedPanelUi, serializePanelUi } from '../components/ui/hudLayoutPersistence';
 
 const fallback = {
   left: { minimized: false, zoomLevel: 0, offsetX: 0, offsetY: 0 },
@@ -42,38 +33,6 @@ describe('hud layout persistence', () => {
 
   it('serializes panel state deterministically', () => {
     expect(serializePanelUi(fallback)).toBe(JSON.stringify(fallback));
-  });
-
-  it('serializes a portable hud layout bundle including scale', () => {
-    expect(serializeHudLayoutBundle(fallback, 2)).toBe(JSON.stringify({
-      version: HUD_LAYOUT_EXPORT_VERSION,
-      hudScale: 1.2,
-      panelUi: fallback,
-    }));
-  });
-
-  it('imports a hud layout bundle with safe fallback behavior', () => {
-    const imported = loadImportedHudLayoutBundle(JSON.stringify({
-      version: HUD_LAYOUT_EXPORT_VERSION,
-      hudScale: 0.55,
-      panelUi: {
-        left: { minimized: true, zoomLevel: 2, offsetX: 12, offsetY: 18 },
-        right: { minimized: false, zoomLevel: -8, offsetX: 5, offsetY: -3 },
-      },
-    }), fallback, 0.68);
-
-    expect(imported).toEqual({
-      hudScale: 0.55,
-      panelUi: {
-        left: { minimized: true, zoomLevel: 2, offsetX: 12, offsetY: 18 },
-        right: { minimized: false, zoomLevel: -3, offsetX: 5, offsetY: -3 },
-      },
-    });
-
-    expect(loadImportedHudLayoutBundle('bad-json', fallback, 0.68)).toEqual({
-      hudScale: 0.68,
-      panelUi: fallback,
-    });
   });
 
   it('clears persisted layout and scale keys together', () => {

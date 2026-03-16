@@ -160,10 +160,6 @@
 - Persistenz-Clear zentralisiert: `clearPersistedHudLayout` entfernt sowohl `hud-panel-layout-v1` als auch `hud-scale`, damit Reset und Reload konsistent denselben Ausgangszustand verwenden.
 - Persistenz-Test erweitert: `src/tests/hudLayoutPersistence.test.ts` prueft jetzt zusaetzlich das gemeinsame Loeschen beider Storage-Keys.
 - Vollverifikation nach HUD-Layout-Reset erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 250/250.
-- HUD-Layout-Transfer am 16.03.2026 umgesetzt: globale `Export`- und `Import`-Buttons erlauben jetzt das Kopieren und Wiedereinspielen kompletter Layouts inklusive HUD-Skalierung.
-- Transferlogik modularisiert: `serializeHudLayoutBundle` und `loadImportedHudLayoutBundle` in `src/components/ui/hudLayoutPersistence.ts` kapseln Bundle-Version, Serialisierung, Clamping und JSON-Fallback.
-- Persistenz-Test erweitert: `src/tests/hudLayoutPersistence.test.ts` deckt jetzt auch Export-Bundle und Import-Fallback ab; Teststand steigt damit auf 252/252.
-- Vollverifikation nach HUD-Layout-Transfer erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`.
 
 ## Naechster logischer Schritt
-- Kein offener Blocker im aktuellen HUD-/Streaming-Zyklus; naechster Ausbau kann inhaltlich auf Spawn-HUD-Feinschliff oder auf mehrere benennbare HUD-Presets gehen.
+- Kein offener Blocker im aktuellen HUD-/Streaming-Zyklus; naechster Ausbau kann inhaltlich auf Spawn-HUD-Feinschliff oder auf Import/Export fuer HUD-Layouts gehen.
