@@ -56,6 +56,10 @@ interface RuntimeReplayQuality {
     deltaMomentumDirection: 'up' | 'down' | 'flat';
     deltaMomentumBand: 'easing' | 'steady' | 'accelerating';
     deltaMomentumHint: 'Trendbeschleunigung gering.' | 'Trendbeschleunigung moderat.' | 'Trendbeschleunigung hoch.';
+    deltaDriftScore: number;
+    deltaDriftDirection: 'up' | 'down' | 'flat';
+    deltaDriftBand: 'aligned' | 'offset' | 'diverging';
+    deltaDriftHint: 'Delta-Basis stabil.' | 'Delta-Basis leicht versetzt.' | 'Delta-Basis driftet stark.';
     stability: 'stable' | 'watch' | 'critical';
     recentStabilityTrend: Array<'stable' | 'watch' | 'critical'>;
     riskLevel: 'low' | 'medium' | 'high';
@@ -356,6 +360,40 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
                 : qualityDeltaMomentumBand === 'steady'
                     ? 'Trendbeschleunigung moderat.'
                     : 'Trendbeschleunigung gering.';
+    const qualityDeltaDriftScoreRaw =
+        typeof qualityObj.deltaDriftScore === 'number' && Number.isFinite(qualityObj.deltaDriftScore)
+            ? qualityObj.deltaDriftScore
+            : qualityDeltaHistory.length >= 2
+                ? qualityDeltaHistory[0] - Math.round(qualityDeltaHistory.slice(1).reduce((sum, value) => sum + value, 0) / Math.max(1, qualityDeltaHistory.length - 1))
+                : qualityDeltaHistory[0] ?? 0;
+    const qualityDeltaDriftScore = clamp(Math.round(qualityDeltaDriftScoreRaw), -999, 999);
+    const qualityDeltaDriftDirection =
+        qualityObj.deltaDriftDirection === 'up' || qualityObj.deltaDriftDirection === 'down' || qualityObj.deltaDriftDirection === 'flat'
+            ? qualityObj.deltaDriftDirection
+            : qualityDeltaDriftScore > 0
+                ? 'up'
+                : qualityDeltaDriftScore < 0
+                    ? 'down'
+                    : 'flat';
+    const qualityDeltaDriftAbs = Math.abs(qualityDeltaDriftScore);
+    const qualityDeltaDriftBand: 'aligned' | 'offset' | 'diverging' =
+        qualityObj.deltaDriftBand === 'aligned' || qualityObj.deltaDriftBand === 'offset' || qualityObj.deltaDriftBand === 'diverging'
+            ? qualityObj.deltaDriftBand
+            : qualityDeltaDriftAbs >= 8
+                ? 'diverging'
+                : qualityDeltaDriftAbs >= 4
+                    ? 'offset'
+                    : 'aligned';
+    const qualityDeltaDriftHint: 'Delta-Basis stabil.' | 'Delta-Basis leicht versetzt.' | 'Delta-Basis driftet stark.' =
+        qualityObj.deltaDriftHint === 'Delta-Basis stabil.' ||
+        qualityObj.deltaDriftHint === 'Delta-Basis leicht versetzt.' ||
+        qualityObj.deltaDriftHint === 'Delta-Basis driftet stark.'
+            ? qualityObj.deltaDriftHint
+            : qualityDeltaDriftBand === 'diverging'
+                ? 'Delta-Basis driftet stark.'
+                : qualityDeltaDriftBand === 'offset'
+                    ? 'Delta-Basis leicht versetzt.'
+                    : 'Delta-Basis stabil.';
 
     return {
         mode,
@@ -377,6 +415,10 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
             deltaMomentumDirection: qualityDeltaMomentumDirection,
             deltaMomentumBand: qualityDeltaMomentumBand,
             deltaMomentumHint: qualityDeltaMomentumHint,
+            deltaDriftScore: qualityDeltaDriftScore,
+            deltaDriftDirection: qualityDeltaDriftDirection,
+            deltaDriftBand: qualityDeltaDriftBand,
+            deltaDriftHint: qualityDeltaDriftHint,
             stability: qualityStability,
             recentStabilityTrend: qualityTrend,
             riskLevel: qualityRiskLevel,

@@ -214,5 +214,12 @@
 - Testabdeckung erweitert: `runtimePersistence.test.ts` verifiziert Momentum-Roundtrip und Sanitisierung, `gameStore.test.ts` prueft Momentum-Felder in Store und Snapshot.
 - Vollverifikation nach Replay-Delta-Momentumindikator erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 253/253.
 
+- Replay-Delta-Driftindikator am 16.03.2026 umgesetzt: Store fuehrt jetzt `replayQualityDeltaDriftScore`, `replayQualityDeltaDriftDirection`, `replayQualityDeltaDriftBand` und `replayQualityDeltaDriftHint` als Baseline-Abweichungsindikator der Delta-Historie.
+- Berechnung erweitert: Drift wird als Abweichung des aktuellen Delta-Werts gegen den laengeren Basisdurchschnitt (Folgewerte der Historie) berechnet, auf -999..999 begrenzt und in `aligned`/`offset`/`diverging` klassifiziert.
+- Snapshot erweitert: `runtimePersistence` persistiert und sanitisiert Drift-Felder robust (Score Clamp, Richtungs-/Band-/Hinweisableitung bei ungueltigen Eingaben).
+- HUD-Operationsansicht erweitert: neue Zeilen `Delta-Drift`, `Drift-Band` und `Drift-Hinweis` liefern eine fruehe Warnstufe fuer nachhaltige Baseline-Abweichungen.
+- Testabdeckung erweitert: `runtimePersistence.test.ts` verifiziert Drift-Roundtrip und Sanitisierung, `gameStore.test.ts` prueft Drift-Felder in Store und Snapshot.
+- Vollverifikation nach Replay-Delta-Driftindikator erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 253/253.
+
 ## Naechster logischer Schritt
-- Nach Delta-Momentumindikator folgt als naechster Ausbaupunkt ein Replay-Delta-Driftindikator (Baseline-Abweichung ueber laengeres Fenster) inklusive frueher Warnstufe im HUD.
+- Nach Delta-Driftindikator folgt als naechster Ausbaupunkt ein Replay-Delta-Anomalieindikator (Ausreissererkennung mit Sofort-Hinweis) fuer kurzfristige Lastspruenge.

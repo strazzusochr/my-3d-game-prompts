@@ -99,6 +99,15 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Testnachweis erweitert: `runtimePersistence.test.ts` und `gameStore.test.ts` validieren Momentum-Felder in Store und Snapshot inklusive Sanitisierung.
 - Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 253 von 253 gruen, Build gruen.
 
+### 2.0.43 Replay-Delta-Driftindikator vom 16.03.2026
+- Die Replay-Auswertung wurde um einen Driftindikator erweitert: `deltaDriftScore`, `deltaDriftDirection`, `deltaDriftBand` und `deltaDriftHint` messen die Abweichung vom laengeren Delta-Basistrend.
+- Berechnung basiert auf der Delta-Historie: aktueller Delta-Wert gegen Baseline-Durchschnitt der Folgewerte (laengeres Fenster), Differenz als Score auf `-999..999` begrenzt.
+- Die Warnlogik nutzt `aligned`/`offset`/`diverging`; Richtung wird als `up`/`down`/`flat` aus dem Drift-Score abgeleitet.
+- `runtimePersistence` persistiert Drift-Felder unter `replayState.quality` und sanitisiert robust (Score Clamp, Richtungs-/Band-/Hinweisableitung bei ungueltigen Inputs).
+- Das HUD-Operations-Panel zeigt neue Zeilen `Delta-Drift`, `Drift-Band` und `Drift-Hinweis` als fruehe Baseline-Warnstufe.
+- Testnachweis erweitert: `runtimePersistence.test.ts` und `gameStore.test.ts` validieren Drift-Felder in Store und Snapshot inklusive Sanitisierung.
+- Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 253 von 253 gruen, Build gruen.
+
 ### 2.0.1 Viewer- und Lastnachweis vom 16.03.2026
 - Zwei weitere Viewer-Seiten wurden geoeffnet und der Health-Endpunkt achtmal im Abstand von rund 1,5 Sekunden abgefragt.
 - Der Stream benoetigte eine kurze Aufwaermphase: zuerst `viewerFps=0`, danach stabile Werte zwischen 22 und 24 FPS.

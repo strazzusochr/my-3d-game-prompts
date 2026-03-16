@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 17:48:48 +01:00
-- Repo-Head: lokal (nach Replay-Delta-Momentumindikator, vor neuem Commit)
-- Nachweislauf: npm run autonomy:full PASS nach Replay-Delta-Momentumindikator (inkl. lint PASS + tests 253/253 PASS + build PASS + live proof PASS)
-- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_253_253 + BUILD_PASS + REPLAY_DELTA_MOMENTUM_PASS + MASTER_80000_PASS
-- Gates: Lint PASS, Tests 253/253 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, Replay-Delta-Momentumindikator inkl. Snapshot-Sanitisierung verifiziert, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: Replay-Delta-Momentumindikator (Kurz-/Mitteltrend + Richtungsstaerke) in Store/HUD/Persistence/Test erweitert und per Vollproof verifiziert
+- Zeitstempel: 2026-03-16 17:57:20 +01:00
+- Repo-Head: lokal (nach Replay-Delta-Driftindikator, vor neuem Commit)
+- Nachweislauf: npm run autonomy:full PASS nach Replay-Delta-Driftindikator (inkl. lint PASS + tests 253/253 PASS + build PASS + live proof PASS)
+- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_253_253 + BUILD_PASS + REPLAY_DELTA_DRIFT_PASS + MASTER_80000_PASS
+- Gates: Lint PASS, Tests 253/253 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, Replay-Delta-Driftindikator inkl. Snapshot-Sanitisierung verifiziert, Masterquelle 80.000/80.000 PASS
+- Arbeitsbaum: Replay-Delta-Driftindikator (Baseline-Abweichung + Warnstufe) in Store/HUD/Persistence/Test erweitert und per Vollproof verifiziert
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -100,6 +100,7 @@ Bewertungsstufen:
 | P-040 | Replay-Delta-Volatilitaetsampel umgesetzt | Vertikal | 100 | PASS | deltaVolatilityBand/deltaVolatilityHint (calm/mixed/volatile) im Store + Snapshot-Sanitisierung + HUD-Volatilitaetsanzeige + Tests; Full-Proof gruen |
 | P-041 | Replay-Delta-Trendhistorie umgesetzt | Vertikal | 100 | PASS | deltaHistory (letzte 6, newest-first) im Store + replayState.quality.deltaHistory mit Sanitisierung + HUD-Delta-Verlauf + Tests; Full-Proof gruen |
 | P-042 | Replay-Delta-Momentumindikator umgesetzt | Vertikal | 100 | PASS | deltaMomentumScore/deltaMomentumDirection/deltaMomentumBand/deltaMomentumHint im Store + replayState.quality Momentum-Sanitisierung + HUD-Momentum-Ampel + Tests; Full-Proof gruen |
+| P-043 | Replay-Delta-Driftindikator umgesetzt | Vertikal | 100 | PASS | deltaDriftScore/deltaDriftDirection/deltaDriftBand/deltaDriftHint im Store + replayState.quality Drift-Sanitisierung + HUD-Drift-Warnstufe + Tests; Full-Proof gruen |
 
 ---
 
