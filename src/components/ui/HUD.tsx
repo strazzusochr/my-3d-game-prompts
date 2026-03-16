@@ -227,14 +227,14 @@ export const HUD = () => {
         }));
     };
 
-    const shouldBlockDrag = (target: EventTarget | null) => {
+    const isDragHandleTarget = (target: EventTarget | null) => {
         if (!(target instanceof HTMLElement)) return false;
-        return Boolean(target.closest('[data-hud-control="true"],button,input,select,textarea,label,a'));
+        return Boolean(target.closest('[data-hud-drag-handle="true"]'));
     };
 
     const startPanelDrag = (panel: HudPanelKey, event: React.MouseEvent<HTMLDivElement>) => {
         if (!layoutEditMode || event.button !== 0) return;
-        if (shouldBlockDrag(event.target)) return;
+        if (!isDragHandleTarget(event.target)) return;
         event.preventDefault();
         event.stopPropagation();
         const startX = event.clientX;
@@ -284,7 +284,14 @@ export const HUD = () => {
         textShadow: '0 0 8px rgba(0,220,255,0.65)',
     });
     const renderPanelControls = (panel: HudPanelKey, compact = false) => (
-        <div data-hud-control="true" onMouseDown={(event) => event.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <div data-hud-control="true" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <button
+                data-hud-drag-handle="true"
+                style={{ ...squareControlStyle(layoutEditMode), minWidth: compact ? '28px' : '30px', padding: compact ? '2px 4px' : '2px 5px', fontSize: compact ? '10px' : '11px', cursor: layoutEditMode ? 'grab' : 'default' }}
+                title="Panel verschieben"
+            >
+                □
+            </button>
             <button onClick={() => togglePanelMinimize(panel)} style={{ ...squareControlStyle(), minWidth: compact ? '38px' : '42px', padding: compact ? '2px 5px' : '3px 6px', fontSize: compact ? '9px' : '10px' }}>
                 {panelUi[panel].minimized ? '□ Open' : '□ Min'}
             </button>
@@ -422,7 +429,7 @@ export const HUD = () => {
                         }}>
                             RENDER {fps} FPS
                         </div>
-                        <div data-hud-control="true" onMouseDown={(event) => event.stopPropagation()} style={{ display: 'flex', gap: '4px', pointerEvents: 'auto' }}>
+                        <div data-hud-control="true" style={{ display: 'flex', gap: '4px', pointerEvents: 'auto' }}>
                             {renderPanelControls('right')}
                             <button onClick={decreaseHudScale} style={{ ...btnStyle, minWidth: '34px', padding: '4px 8px', fontSize: '14px' }} title="HUD kleiner">-</button>
                             <button onClick={resetHudScale} style={{ ...btnStyle, minWidth: '56px', padding: '4px 8px', fontSize: '12px' }} title="HUD zurücksetzen">{Math.round(effectiveHudScale * 100)}%</button>
