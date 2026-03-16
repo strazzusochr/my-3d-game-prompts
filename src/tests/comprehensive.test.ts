@@ -9,7 +9,7 @@
  * - Typen und Enumerationen (50+ Prüfungen)
  */
 
-import { describe, expect, it, beforeEach, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   EVENT_TIMELINE,
   TENSION_TIMELINE,
