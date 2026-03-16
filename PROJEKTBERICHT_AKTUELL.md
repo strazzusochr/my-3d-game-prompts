@@ -27,6 +27,14 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Testnachweis wurde erweitert: Snapshot-Sanitisierung fuer Rebuild-Historie sowie Store-/Snapshot-Assertion nach Rewind.
 - Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 251 von 251 gruen, Build gruen.
 
+### 2.0.34 Replay-Qualitaetsindikator im 90-Minuten-Fenster vom 16.03.2026
+- Der Store berechnet jetzt eine kompakte Replay-Qualitaet ueber ein gleitendes 90-Minuten-Fenster auf Basis der Rebuild-Historie.
+- Metriken: Anzahl Rebuilds im Fenster, durchschnittliche Eventanzahl pro Rebuild sowie Klassifikation `stable`/`watch`/`critical`.
+- `runtimePersistence` speichert diese Quality-Werte unter `replayState.quality` und sanitisiert Grenzwerte robust beim Laden.
+- Die HUD-Operationsansicht zeigt den Quality-Status als Live-Badge sowie die beiden Kennzahlen (`Rebuilds im Fenster`, `Avg Events/Rebuild`) direkt neben den Rebuild-Infos.
+- Testnachweis erweitert: Sanitisierung fuer Quality-Felder in `runtimePersistence.test.ts` sowie Store-/Snapshot-Nachweise nach Rewind in `gameStore.test.ts`.
+- Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 251 von 251 gruen, Build gruen.
+
 ### 2.0.1 Viewer- und Lastnachweis vom 16.03.2026
 - Zwei weitere Viewer-Seiten wurden geoeffnet und der Health-Endpunkt achtmal im Abstand von rund 1,5 Sekunden abgefragt.
 - Der Stream benoetigte eine kurze Aufwaermphase: zuerst `viewerFps=0`, danach stabile Werte zwischen 22 und 24 FPS.

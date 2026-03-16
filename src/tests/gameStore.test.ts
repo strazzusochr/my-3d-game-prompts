@@ -62,6 +62,10 @@ const resetStore = () => {
       replayRebuildEventCount: 0,
       replayAnchorTime: '06:00',
       replayRebuildHistory: [],
+      replayQualityWindowMinutes: 90,
+      replayQualityRebuildCount: 0,
+      replayQualityAvgEvents: 0,
+      replayQualityStability: 'stable',
       playerReputation: 0,
       moralScore: 50,
       showStatistics: false,
@@ -588,6 +592,10 @@ describe('gameStore core flow', () => {
     expect(state.gameState.replayAnchorTime).toBe('20:00');
     expect(state.gameState.replayRebuildHistory.length).toBeGreaterThan(0);
     expect(state.gameState.replayRebuildHistory[0].anchorTime).toBe('20:00');
+    expect(state.gameState.replayQualityWindowMinutes).toBe(90);
+    expect(state.gameState.replayQualityRebuildCount).toBeGreaterThan(0);
+    expect(state.gameState.replayQualityAvgEvents).toBeGreaterThanOrEqual(0);
+    expect(['stable', 'watch', 'critical']).toContain(state.gameState.replayQualityStability);
 
     const rawSnapshot = window.localStorage.getItem(RUNTIME_SNAPSHOT_KEY);
     expect(rawSnapshot).not.toBeNull();
@@ -604,6 +612,12 @@ describe('gameStore core flow', () => {
           rebuildEventCount: number;
           savedAtEpochMs: number;
         }>;
+        quality: {
+          windowMinutes: number;
+          rebuildCount: number;
+          avgRebuildEvents: number;
+          stability: 'stable' | 'watch' | 'critical';
+        };
       };
     };
 
@@ -613,6 +627,9 @@ describe('gameStore core flow', () => {
     expect(snapshot.replayState.anchorTime).toBe('20:00');
     expect(snapshot.replayState.rebuildHistory.length).toBeGreaterThan(0);
     expect(snapshot.replayState.rebuildHistory[0].anchorTime).toBe('20:00');
+    expect(snapshot.replayState.quality.windowMinutes).toBe(90);
+    expect(snapshot.replayState.quality.rebuildCount).toBeGreaterThan(0);
+    expect(snapshot.replayState.quality.avgRebuildEvents).toBeGreaterThanOrEqual(0);
   });
 
   it('records role trend snapshots while time progresses', () => {

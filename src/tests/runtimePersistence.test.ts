@@ -51,6 +51,12 @@ const baseSnapshot: RuntimeSnapshot = {
                 savedAtEpochMs: 1000,
             },
         ],
+        quality: {
+            windowMinutes: 90,
+            rebuildCount: 1,
+            avgRebuildEvents: 14,
+            stability: 'watch',
+        },
     },
 };
 
@@ -71,6 +77,9 @@ describe('runtimePersistence', () => {
         expect(loaded?.replayState.anchorTime).toBe('18:30');
         expect(loaded?.replayState.rebuildHistory).toHaveLength(1);
         expect(loaded?.replayState.rebuildHistory[0].anchorTime).toBe('18:20');
+        expect(loaded?.replayState.quality.windowMinutes).toBe(90);
+        expect(loaded?.replayState.quality.rebuildCount).toBe(1);
+        expect(loaded?.replayState.quality.stability).toBe('watch');
     });
 
     it('liefert null bei ungueltigem JSON', () => {
@@ -103,6 +112,12 @@ describe('runtimePersistence', () => {
                         { mode: 'bad', anchorTime: '88:88', rebuildEventCount: -2, savedAtEpochMs: -10 },
                         null,
                     ],
+                    quality: {
+                        windowMinutes: 999,
+                        rebuildCount: -3,
+                        avgRebuildEvents: -7,
+                        stability: 'broken',
+                    },
                 },
             }),
         );
@@ -125,6 +140,10 @@ describe('runtimePersistence', () => {
         expect(loaded?.replayState.rebuildHistory[0].anchorTime).toBe('06:00');
         expect(loaded?.replayState.rebuildHistory[0].rebuildEventCount).toBe(0);
         expect(loaded?.replayState.rebuildHistory[0].savedAtEpochMs).toBe(0);
+        expect(loaded?.replayState.quality.windowMinutes).toBe(240);
+        expect(loaded?.replayState.quality.rebuildCount).toBe(0);
+        expect(loaded?.replayState.quality.avgRebuildEvents).toBe(0);
+        expect(loaded?.replayState.quality.stability).toBe('stable');
     });
 
     it('entfernt Snapshot mit clearRuntimeSnapshot', () => {

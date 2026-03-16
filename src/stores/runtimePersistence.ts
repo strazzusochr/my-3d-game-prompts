@@ -32,6 +32,7 @@ interface RuntimeReplayState {
     rebuildEventCount: number;
     anchorTime: string;
     rebuildHistory: RuntimeReplayHistoryPoint[];
+    quality: RuntimeReplayQuality;
 }
 
 interface RuntimeReplayHistoryPoint {
@@ -39,6 +40,13 @@ interface RuntimeReplayHistoryPoint {
     anchorTime: string;
     rebuildEventCount: number;
     savedAtEpochMs: number;
+}
+
+interface RuntimeReplayQuality {
+    windowMinutes: number;
+    rebuildCount: number;
+    avgRebuildEvents: number;
+    stability: 'stable' | 'watch' | 'critical';
 }
 
 export interface RuntimeSnapshot {
@@ -139,36 +147,63 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
         typeof asObj.rebuildEventCount === 'number' && Number.isFinite(asObj.rebuildEventCount)
             ? asObj.rebuildEventCount
             : 0;
+    const rebuildHistory = Array.isArray(asObj.rebuildHistory)
+        ? asObj.rebuildHistory
+            .map((entry) => {
+                const item = typeof entry === 'object' && entry !== null ? (entry as Record<string, unknown>) : null;
+                if (!item) return null;
+                const itemMode = item.mode === 'rewind' ? 'rewind' : 'live';
+                const itemEventCountRaw =
+                    typeof item.rebuildEventCount === 'number' && Number.isFinite(item.rebuildEventCount)
+                        ? item.rebuildEventCount
+                        : 0;
+                const itemSavedAtRaw =
+                    typeof item.savedAtEpochMs === 'number' && Number.isFinite(item.savedAtEpochMs)
+                        ? item.savedAtEpochMs
+                        : Date.now();
+                return {
+                    mode: itemMode,
+                    anchorTime: normalizeClock(item.anchorTime),
+                    rebuildEventCount: Math.max(0, Math.round(itemEventCountRaw)),
+                    savedAtEpochMs: Math.max(0, Math.round(itemSavedAtRaw)),
+                };
+            })
+            .filter((entry): entry is RuntimeReplayHistoryPoint => entry !== null)
+            .slice(0, MAX_REPLAY_HISTORY_POINTS)
+        : [];
+    const qualityObj =
+        typeof asObj.quality === 'object' && asObj.quality !== null
+            ? (asObj.quality as Record<string, unknown>)
+            : {};
+    const qualityWindowRaw =
+        typeof qualityObj.windowMinutes === 'number' && Number.isFinite(qualityObj.windowMinutes)
+            ? qualityObj.windowMinutes
+            : 90;
+    const qualityRebuildCountRaw =
+        typeof qualityObj.rebuildCount === 'number' && Number.isFinite(qualityObj.rebuildCount)
+            ? qualityObj.rebuildCount
+            : rebuildHistory.length;
+    const qualityAvgEventsRaw =
+        typeof qualityObj.avgRebuildEvents === 'number' && Number.isFinite(qualityObj.avgRebuildEvents)
+            ? qualityObj.avgRebuildEvents
+            : 0;
+    const qualityStability =
+        qualityObj.stability === 'critical' || qualityObj.stability === 'watch'
+            ? qualityObj.stability
+            : 'stable';
 
     return {
         mode,
         rebuildStatus,
         rebuildEventCount: Math.max(0, Math.round(rebuildEventCountRaw)),
         anchorTime,
-        rebuildHistory: Array.isArray(asObj.rebuildHistory)
-            ? asObj.rebuildHistory
-                .map((entry) => {
-                    const item = typeof entry === 'object' && entry !== null ? (entry as Record<string, unknown>) : null;
-                    if (!item) return null;
-                    const itemMode = item.mode === 'rewind' ? 'rewind' : 'live';
-                    const itemEventCountRaw =
-                        typeof item.rebuildEventCount === 'number' && Number.isFinite(item.rebuildEventCount)
-                            ? item.rebuildEventCount
-                            : 0;
-                    const itemSavedAtRaw =
-                        typeof item.savedAtEpochMs === 'number' && Number.isFinite(item.savedAtEpochMs)
-                            ? item.savedAtEpochMs
-                            : Date.now();
-                    return {
-                        mode: itemMode,
-                        anchorTime: normalizeClock(item.anchorTime),
-                        rebuildEventCount: Math.max(0, Math.round(itemEventCountRaw)),
-                        savedAtEpochMs: Math.max(0, Math.round(itemSavedAtRaw)),
-                    };
-                })
-                .filter((entry): entry is RuntimeReplayHistoryPoint => entry !== null)
-                .slice(0, MAX_REPLAY_HISTORY_POINTS)
-            : [],
+        rebuildHistory,
+        quality: {
+            windowMinutes: clamp(Math.round(qualityWindowRaw), 15, 240),
+            rebuildCount: Math.max(0, Math.round(qualityRebuildCountRaw)),
+            avgRebuildEvents: Math.max(0, Math.round(qualityAvgEventsRaw)),
+            stability: qualityStability,
+        },
     };
 };
 

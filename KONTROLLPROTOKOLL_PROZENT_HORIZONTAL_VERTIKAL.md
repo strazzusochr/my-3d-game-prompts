@@ -23,12 +23,12 @@ Bewertungsstufen:
 
 ## LIVE-BEWEISPFLICHT (AKTUELL)
 
-- Zeitstempel: 2026-03-16 15:51:00 +01:00
-- Repo-Head: lokal (nach Replay-Historienblock, vor neuem Commit)
-- Nachweislauf: npm run autonomy:full PASS nach Replay-Historienblock (inkl. lint PASS + tests 251/251 PASS + build PASS + live proof PASS)
-- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_251_251 + BUILD_PASS + REPLAY_HISTORY_PASS + MASTER_80000_PASS
-- Gates: Lint PASS, Tests 251/251 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, Replay-Rebuild-Historie inkl. Snapshot-Sanitisierung verifiziert, Masterquelle 80.000/80.000 PASS
-- Arbeitsbaum: Replay-Historie in Store/HUD/Persistence/Test erweitert und per Vollproof verifiziert
+- Zeitstempel: 2026-03-16 16:00:00 +01:00
+- Repo-Head: lokal (nach Replay-Qualitaetsblock, vor neuem Commit)
+- Nachweislauf: npm run autonomy:full PASS nach Replay-Qualitaetsblock (inkl. lint PASS + tests 251/251 PASS + build PASS + live proof PASS)
+- Marker: AUTONOMY_FULL_OK + AUTONOMY_PROOF_OK + LINT_PASS + TESTS_251_251 + BUILD_PASS + REPLAY_QUALITY_PASS + MASTER_80000_PASS
+- Gates: Lint PASS, Tests 251/251 PASS, Build PASS, Proof-Profilfolge low->medium->high->aaa->low PASS, canvas-webrtc Transport in allen Profilen aktiv, Replay-Qualitaet (Fenster/Frequenz/Avg) inkl. Snapshot-Sanitisierung verifiziert, Masterquelle 80.000/80.000 PASS
+- Arbeitsbaum: Replay-Qualitaetsindikator in Store/HUD/Persistence/Test erweitert und per Vollproof verifiziert
 
 80.000-Zeilen-Fortschritt (Masterquelle):
 
@@ -91,6 +91,7 @@ Bewertungsstufen:
 | P-031 | Replay-Transparenz fuer Trigger-Rekonstruktion umgesetzt | Vertikal | 100 | PASS | Zeitreise-Indikator + Rebuild-Status/Events/Ankerzeit im HUD sowie Store-Metadaten und Testnachweis; Full-Proof gruen |
 | P-032 | Replay-Metadaten als Runtime-Snapshot persistent umgesetzt | Vertikal | 100 | PASS | replayState im Snapshot + Store-Rehydrierung + Sanitisierungs-/Storetests; Full-Proof gruen |
 | P-033 | Replay-Rebuild-Historie persistent und im HUD sichtbar umgesetzt | Vertikal | 100 | PASS | replayRebuildHistory im Store + replayState.rebuildHistory im Snapshot + HUD-Panel `Letzte Rebuilds` + Tests; Full-Proof gruen |
+| P-034 | Replay-Qualitaetsindikator mit Persistenz umgesetzt | Vertikal | 100 | PASS | replayState.quality + 90m-Fensterlogik im Store + HUD-Badge/Kennzahlen + Sanitisierungs-/Storetests; Full-Proof gruen |
 
 ---
 

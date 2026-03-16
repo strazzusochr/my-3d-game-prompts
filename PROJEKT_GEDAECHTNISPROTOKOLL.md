@@ -161,6 +161,11 @@
 - HUD-Operationsansicht erweitert: Bereich `Letzte Rebuilds` zeigt die juengsten Rekonstruktionen direkt im Einsatzpanel.
 - Testabdeckung erweitert: `runtimePersistence.test.ts` verifiziert Historien-Sanitisierung, `gameStore.test.ts` prueft Historieneintrag nach Rewind inklusive Snapshot-Nachweis.
 - Vollverifikation nach Replay-Historienblock erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 251/251.
+- Replay-Qualitaetsblock am 16.03.2026 umgesetzt: Store berechnet jetzt einen Replay-Qualitaetsindikator ueber 90-Minuten-Fenster (`stable`/`watch`/`critical`) aus Rebuild-Frequenz und durchschnittlicher Eventlast.
+- Snapshot erweitert: `runtimePersistence` persistiert `replayState.quality` (Fenster, Rebuild-Count, Durchschnitts-Events, Stabilitaet) mit Sanitisierung.
+- HUD-Operationsansicht erweitert: Badge `Replay-Qualitaet` sowie Kennzahlen `Rebuilds im Fenster` und `Avg Events/Rebuild` sind live sichtbar.
+- Testabdeckung erweitert: `runtimePersistence.test.ts` prueft Quality-Sanitisierung, `gameStore.test.ts` verifiziert Quality-Felder im Store und Snapshot nach Rewind.
+- Vollverifikation nach Replay-Qualitaetsblock erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 251/251.
 
 ## Naechster logischer Schritt
-- Replay-Historie ist geschlossen; naechster Ausbaupunkt ist ein kompakter Replay-Qualitaetsindikator (z. B. Rebuild-Frequenz/Fenster) im Operations-Panel inkl. Persistenznachweis.
+- Replay-Qualitaet ist geschlossen; naechster Ausbaupunkt ist ein kurzer Replay-Stabilitaetstrend (z. B. letzte 3 Quality-Zustaende) im Operations-Panel inkl. Snapshot-Nachweis.
