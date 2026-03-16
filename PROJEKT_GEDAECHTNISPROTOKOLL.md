@@ -156,6 +156,11 @@
 - Store-Hydration erweitert: `gameStore` laedt Replay-Metadaten beim Initialzustand aus dem Snapshot und schreibt sie in jedem Runtime-Save konsistent zurueck.
 - Testabdeckung erweitert: `runtimePersistence.test.ts` prueft Replay-Sanitisierung; `gameStore.test.ts` verifiziert Replay-Snapshotwerte nach Rewind direkt in LocalStorage.
 - Vollverifikation nach Replay-Persistenzblock erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 251/251.
+- Replay-Historienblock am 16.03.2026 umgesetzt: `gameStore` fuehrt jetzt `replayRebuildHistory` (letzte Rebuilds mit Zeit/Eventcount/Mode/Timestamp) und begrenzt die Historie stabil auf die letzten sechs Eintraege.
+- Snapshot erweitert: `runtimePersistence` persistiert und sanitisiert `replayState.rebuildHistory` robust fuer Reloads.
+- HUD-Operationsansicht erweitert: Bereich `Letzte Rebuilds` zeigt die juengsten Rekonstruktionen direkt im Einsatzpanel.
+- Testabdeckung erweitert: `runtimePersistence.test.ts` verifiziert Historien-Sanitisierung, `gameStore.test.ts` prueft Historieneintrag nach Rewind inklusive Snapshot-Nachweis.
+- Vollverifikation nach Replay-Historienblock erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 251/251.
 
 ## Naechster logischer Schritt
-- Replay-Persistenz ist geschlossen; naechster Ausbaupunkt ist eine kleine Replay-Historie (letzte Rebuilds mit Zeit/Count) fuer die Operationsansicht inkl. Snapshot-Nachweis.
+- Replay-Historie ist geschlossen; naechster Ausbaupunkt ist ein kompakter Replay-Qualitaetsindikator (z. B. Rebuild-Frequenz/Fenster) im Operations-Panel inkl. Persistenznachweis.

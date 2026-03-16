@@ -19,6 +19,14 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Testnachweis wurde erweitert: Persistenz- und Sanitisierungstests fuer Replaydaten plus Store-Nachweis, dass Rewind-Metadaten auch im gespeicherten Snapshot ankommen.
 - Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Tests weiterhin 251 von 251 bestanden, Lint und Build gruen.
 
+### 2.0.33 Replay-Rebuild-Historie mit HUD-Transparenz vom 16.03.2026
+- Der Store wurde um `replayRebuildHistory` erweitert und fuehrt jetzt die letzten Rebuilds mit `anchorTime`, `rebuildEventCount`, `mode` und Zeitstempel.
+- Die Historie ist bewusst auf sechs Eintraege begrenzt, damit Runtime- und Snapshot-Daten kompakt bleiben.
+- `runtimePersistence` persistiert diese Historie in `replayState.rebuildHistory` und sanitisiert ungueltige Eintraege/Zeiten/Eventcounts beim Laden.
+- Die Operationsansicht im HUD zeigt unter `Letzte Rebuilds` die juengsten Rekonstruktionen direkt live an.
+- Testnachweis wurde erweitert: Snapshot-Sanitisierung fuer Rebuild-Historie sowie Store-/Snapshot-Assertion nach Rewind.
+- Vollverifikation: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Lint gruen, Tests 251 von 251 gruen, Build gruen.
+
 ### 2.0.1 Viewer- und Lastnachweis vom 16.03.2026
 - Zwei weitere Viewer-Seiten wurden geoeffnet und der Health-Endpunkt achtmal im Abstand von rund 1,5 Sekunden abgefragt.
 - Der Stream benoetigte eine kurze Aufwaermphase: zuerst `viewerFps=0`, danach stabile Werte zwischen 22 und 24 FPS.

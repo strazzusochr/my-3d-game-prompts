@@ -65,6 +65,7 @@ export const HUD = () => {
     const replayRebuildStatus = useGameStore(state => state.gameState.replayRebuildStatus);
     const replayRebuildEventCount = useGameStore(state => state.gameState.replayRebuildEventCount);
     const replayAnchorTime = useGameStore(state => state.gameState.replayAnchorTime);
+    const replayRebuildHistory = useGameStore(state => state.gameState.replayRebuildHistory);
     const playerReputation = useGameStore(state => state.gameState.playerReputation);
     const moralScore = useGameStore(state => state.gameState.moralScore);
     const npcCount = useGameStore(state => state.npcs.length);
@@ -1011,6 +1012,26 @@ export const HUD = () => {
                                         <span style={{ color: '#9edfff' }}>Festnahmen</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{dayStats.arrested}</span>
                                         <span style={{ color: '#9edfff' }}>Rebuild-Events</span><span style={{ color: replayRebuildStatus === 'reconstructed' ? '#66ddff' : '#9edfff', fontWeight: 700 }}>{replayRebuildEventCount}</span>
                                         <span style={{ color: '#9edfff' }}>Rebuild-Anker</span><span style={{ color: '#c6d9ff', fontWeight: 700 }}>{replayAnchorTime}</span>
+                                    </div>
+                                    <div style={{ marginTop: '10px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '8px' }}>
+                                        <div style={{ color: '#9edfff', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: '6px' }}>
+                                            Letzte Rebuilds
+                                        </div>
+                                        {replayRebuildHistory.length > 0 ? (
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '6px', fontSize: '11px' }}>
+                                                {replayRebuildHistory.slice(0, 3).map((entry, index) => (
+                                                    <React.Fragment key={`${entry.savedAtEpochMs}-${entry.anchorTime}-${index}`}>
+                                                        <span style={{ color: '#c6d9ff' }}>{entry.anchorTime}</span>
+                                                        <span style={{ color: '#66ddff', fontWeight: 700 }}>{entry.rebuildEventCount} Events</span>
+                                                        <span style={{ color: entry.mode === 'rewind' ? '#ffb366' : '#99ffcc' }}>{entry.mode === 'rewind' ? 'REWIND' : 'LIVE'}</span>
+                                                    </React.Fragment>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div style={{ color: '#67808d', fontSize: '11px' }}>
+                                                Keine Rebuild-Historie vorhanden.
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 <div style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px', background: 'rgba(255,255,255,0.02)' }}>

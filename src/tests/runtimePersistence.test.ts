@@ -43,6 +43,14 @@ const baseSnapshot: RuntimeSnapshot = {
         rebuildStatus: 'idle',
         rebuildEventCount: 0,
         anchorTime: '18:30',
+        rebuildHistory: [
+            {
+                mode: 'rewind',
+                anchorTime: '18:20',
+                rebuildEventCount: 14,
+                savedAtEpochMs: 1000,
+            },
+        ],
     },
 };
 
@@ -61,6 +69,8 @@ describe('runtimePersistence', () => {
         expect(loaded?.roleTrendHistory).toHaveLength(1);
         expect(loaded?.replayState.mode).toBe('live');
         expect(loaded?.replayState.anchorTime).toBe('18:30');
+        expect(loaded?.replayState.rebuildHistory).toHaveLength(1);
+        expect(loaded?.replayState.rebuildHistory[0].anchorTime).toBe('18:20');
     });
 
     it('liefert null bei ungueltigem JSON', () => {
@@ -89,6 +99,10 @@ describe('runtimePersistence', () => {
                     rebuildStatus: 'broken',
                     rebuildEventCount: -99,
                     anchorTime: '77:77',
+                    rebuildHistory: [
+                        { mode: 'bad', anchorTime: '88:88', rebuildEventCount: -2, savedAtEpochMs: -10 },
+                        null,
+                    ],
                 },
             }),
         );
@@ -106,6 +120,11 @@ describe('runtimePersistence', () => {
         expect(loaded?.replayState.rebuildStatus).toBe('idle');
         expect(loaded?.replayState.rebuildEventCount).toBe(0);
         expect(loaded?.replayState.anchorTime).toBe('06:00');
+        expect(loaded?.replayState.rebuildHistory).toHaveLength(1);
+        expect(loaded?.replayState.rebuildHistory[0].mode).toBe('live');
+        expect(loaded?.replayState.rebuildHistory[0].anchorTime).toBe('06:00');
+        expect(loaded?.replayState.rebuildHistory[0].rebuildEventCount).toBe(0);
+        expect(loaded?.replayState.rebuildHistory[0].savedAtEpochMs).toBe(0);
     });
 
     it('entfernt Snapshot mit clearRuntimeSnapshot', () => {

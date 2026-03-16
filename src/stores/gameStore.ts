@@ -43,6 +43,12 @@ export interface RoleTrendPoint {
     civilian: number;
     panicRatioPercent: number;
 }
+interface ReplayRebuildHistoryEntry {
+    mode: 'live' | 'rewind';
+    anchorTime: string;
+    rebuildEventCount: number;
+    savedAtEpochMs: number;
+}
 
 interface GameStore {
     npcs: NPCData[];
@@ -64,6 +70,7 @@ interface GameStore {
         replayRebuildStatus: 'idle' | 'reconstructed';
         replayRebuildEventCount: number;
         replayAnchorTime: string;
+        replayRebuildHistory: ReplayRebuildHistoryEntry[];
         // === CHUNK 11: Dynamisches System ===
         playerReputation: number;  // -100 (brutal) bis +100 (fair)
         moralScore: number;        // 0 (böse) bis 100 (gut)
@@ -95,6 +102,7 @@ interface GameStore {
 
 let nextNpcId = 1000;
 const MAX_ROLE_TREND_POINTS = 24;
+const MAX_REPLAY_HISTORY_POINTS = 6;
 
 const cloneMissionProgress = (progress: typeof INITIAL_MISSION_PROGRESS) => ({
     epochBriefingVerified: progress.epochBriefingVerified,
@@ -132,6 +140,23 @@ const persistedReplayState = persistedRuntimeSnapshot?.replayState ?? {
     rebuildStatus: 'idle' as const,
     rebuildEventCount: 0,
     anchorTime: persistedInGameTime,
+    rebuildHistory: [] as ReplayRebuildHistoryEntry[],
+};
+
+const pushReplayHistory = (
+    history: ReplayRebuildHistoryEntry[],
+    entry: ReplayRebuildHistoryEntry,
+): ReplayRebuildHistoryEntry[] => {
+    const [latest] = history;
+    if (
+        latest &&
+        latest.anchorTime === entry.anchorTime &&
+        latest.rebuildEventCount === entry.rebuildEventCount &&
+        latest.mode === entry.mode
+    ) {
+        return history;
+    }
+    return [entry, ...history].slice(0, MAX_REPLAY_HISTORY_POINTS);
 };
 
 const buildRuntimeSnapshot = (state: GameStore): RuntimeSnapshot => ({
@@ -151,6 +176,7 @@ const buildRuntimeSnapshot = (state: GameStore): RuntimeSnapshot => ({
         rebuildStatus: state.gameState.replayRebuildStatus,
         rebuildEventCount: state.gameState.replayRebuildEventCount,
         anchorTime: state.gameState.replayAnchorTime,
+        rebuildHistory: state.gameState.replayRebuildHistory.slice(0, MAX_REPLAY_HISTORY_POINTS),
     },
 });
 
@@ -984,6 +1010,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         replayRebuildStatus: persistedReplayState.rebuildStatus,
         replayRebuildEventCount: persistedReplayState.rebuildEventCount,
         replayAnchorTime: persistedReplayState.anchorTime,
+        replayRebuildHistory: persistedReplayState.rebuildHistory,
         playerReputation: persistedRuntimeSnapshot?.playerReputation ?? RUNTIME_DEFAULTS.playerReputation,
         moralScore: persistedRuntimeSnapshot?.moralScore ?? RUNTIME_DEFAULTS.moralScore,
         showStatistics: false,
@@ -1022,6 +1049,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayRebuildStatus: 'idle',
                 replayRebuildEventCount: 0,
                 replayAnchorTime: '06:00',
+                replayRebuildHistory: [],
                 playerReputation: 0, moralScore: 50, showStatistics: false,
                 masterVolume: 0.5, muted: false
             }
@@ -1129,6 +1157,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                     replayRebuildStatus: 'idle',
                     replayRebuildEventCount: 0,
                     replayAnchorTime: currentTime,
+                    replayRebuildHistory: state.gameState.replayRebuildHistory,
                     showStatistics: crossedMidnight ? true : state.gameState.showStatistics,
                 }
             };
@@ -1167,6 +1196,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const tensionLevel = getTensionLevelForMinutes(currentMinutes);
         const currentPhaseLabel = getPhaseLabelForMinutes(currentMinutes, state.gameState.currentPhaseLabel);
         const roleTrendHistory = buildRoleTrendHistoryToMinutes(currentMinutes, state.interactionState.missionProgress);
+        const replayEntry: ReplayRebuildHistoryEntry = {
+            mode: 'rewind',
+            anchorTime: newTime,
+            rebuildEventCount: dynamicState.firedSet.size,
+            savedAtEpochMs: Date.now(),
+        };
+        const replayRebuildHistory = pushReplayHistory(state.gameState.replayRebuildHistory, replayEntry);
 
         workerManager.syncNpcs(dynamicState.npcs);
         set({
@@ -1183,6 +1219,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayRebuildStatus: 'reconstructed',
                 replayRebuildEventCount: dynamicState.firedSet.size,
                 replayAnchorTime: newTime,
+                replayRebuildHistory,
             }
         });
         persistCurrentRuntimeSnapshot(get());
@@ -1223,6 +1260,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const tensionLevel = getTensionLevelForMinutes(currentMinutes);
         const currentPhaseLabel = getPhaseLabelForMinutes(currentMinutes, state.gameState.currentPhaseLabel);
         const roleTrendHistory = buildRoleTrendHistoryToMinutes(currentMinutes, state.interactionState.missionProgress);
+        const replayEntry: ReplayRebuildHistoryEntry = {
+            mode: 'rewind',
+            anchorTime: newTime,
+            rebuildEventCount: dynamicState.firedSet.size,
+            savedAtEpochMs: Date.now(),
+        };
+        const replayRebuildHistory = pushReplayHistory(state.gameState.replayRebuildHistory, replayEntry);
 
         workerManager.syncNpcs(dynamicState.npcs);
         set({
@@ -1239,6 +1283,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayRebuildStatus: 'reconstructed',
                 replayRebuildEventCount: dynamicState.firedSet.size,
                 replayAnchorTime: newTime,
+                replayRebuildHistory,
             }
         });
         persistCurrentRuntimeSnapshot(get());
@@ -1273,6 +1318,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
                 replayRebuildStatus: 'idle',
                 replayRebuildEventCount: 0,
                 replayAnchorTime: '00:00',
+                replayRebuildHistory: [],
                 playerReputation: get().gameState.playerReputation,
                 moralScore: get().gameState.moralScore,
                 showStatistics: false,

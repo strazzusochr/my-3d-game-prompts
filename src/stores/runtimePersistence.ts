@@ -2,6 +2,7 @@ import type { InteractionZoneId } from '../systems/interactionZones';
 
 export const RUNTIME_SNAPSHOT_KEY = 'ccu.runtime.snapshot.v1';
 const MAX_TREND_POINTS = 24;
+const MAX_REPLAY_HISTORY_POINTS = 6;
 
 interface RuntimeMissionProgress {
     epochBriefingVerified: boolean;
@@ -30,6 +31,14 @@ interface RuntimeReplayState {
     rebuildStatus: 'idle' | 'reconstructed';
     rebuildEventCount: number;
     anchorTime: string;
+    rebuildHistory: RuntimeReplayHistoryPoint[];
+}
+
+interface RuntimeReplayHistoryPoint {
+    mode: 'live' | 'rewind';
+    anchorTime: string;
+    rebuildEventCount: number;
+    savedAtEpochMs: number;
 }
 
 export interface RuntimeSnapshot {
@@ -136,6 +145,30 @@ const normalizeReplayState = (value: unknown, fallbackAnchorTime: string): Runti
         rebuildStatus,
         rebuildEventCount: Math.max(0, Math.round(rebuildEventCountRaw)),
         anchorTime,
+        rebuildHistory: Array.isArray(asObj.rebuildHistory)
+            ? asObj.rebuildHistory
+                .map((entry) => {
+                    const item = typeof entry === 'object' && entry !== null ? (entry as Record<string, unknown>) : null;
+                    if (!item) return null;
+                    const itemMode = item.mode === 'rewind' ? 'rewind' : 'live';
+                    const itemEventCountRaw =
+                        typeof item.rebuildEventCount === 'number' && Number.isFinite(item.rebuildEventCount)
+                            ? item.rebuildEventCount
+                            : 0;
+                    const itemSavedAtRaw =
+                        typeof item.savedAtEpochMs === 'number' && Number.isFinite(item.savedAtEpochMs)
+                            ? item.savedAtEpochMs
+                            : Date.now();
+                    return {
+                        mode: itemMode,
+                        anchorTime: normalizeClock(item.anchorTime),
+                        rebuildEventCount: Math.max(0, Math.round(itemEventCountRaw)),
+                        savedAtEpochMs: Math.max(0, Math.round(itemSavedAtRaw)),
+                    };
+                })
+                .filter((entry): entry is RuntimeReplayHistoryPoint => entry !== null)
+                .slice(0, MAX_REPLAY_HISTORY_POINTS)
+            : [],
     };
 };
 
