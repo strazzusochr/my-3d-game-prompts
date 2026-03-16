@@ -7,6 +7,7 @@ import { useGameStore } from '../../stores/gameStore';
 import { InstancedHumanoid } from '../characters/InstancedHumanoid';
 import { NPCSigns } from '../characters/NPCSigns';
 import { CityEnvironment } from '../3d/environment/CityEnvironment';
+import { InteractionZones } from '../3d/environment/InteractionZones';
 import { WorldColliders } from '../3d/environment/WorldColliders';
 import { SpawnMarkers } from '../3d/environment/SpawnMarkers';
 import { VisualEffects } from '../3d/effects/VisualEffects';
@@ -65,6 +66,7 @@ const SceneContent = () => {
                 <WorldColliders />
                 <CityEnvironment />
                 <SpawnMarkers />
+                <InteractionZones />
 
                 <InstancedHumanoid />
                 <NPCSigns />

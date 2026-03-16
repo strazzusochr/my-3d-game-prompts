@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useGameStore } from '../../stores/gameStore';
 import { EVENT_TIMELINE } from '../../systems/eventScheduler';
+import { getInteractionZoneById, getMissionChecklist } from '../../systems/interactionZones';
 
 const StatusBar = ({ label, value, color }: { label: string, value: number, color: string }) => (
     <div style={{ marginBottom: '16px' }}>
@@ -31,9 +32,12 @@ export const HUD = () => {
     const tensionLevel = useGameStore(state => state.gameState.tensionLevel);
     const timeSpeed = useGameStore(state => state.gameState.timeSpeed);
     const currentPhaseLabel = useGameStore(state => state.gameState.currentPhaseLabel);
+    const playerReputation = useGameStore(state => state.gameState.playerReputation);
+    const moralScore = useGameStore(state => state.gameState.moralScore);
     const npcCount = useGameStore(state => state.npcs.length);
     const masterVolume = useGameStore(state => state.gameState.masterVolume);
     const muted = useGameStore(state => state.gameState.muted);
+    const interactionState = useGameStore(state => state.interactionState);
     const { advanceHour, rewindHour, advanceMinute, rewindMinute, toggleTimePause, setTimeSpeed, setMasterVolume, setMuted } = useGameStore();
 
     // Timeline Scroll Ref
@@ -75,6 +79,8 @@ export const HUD = () => {
     const [h, m] = inGameTime.split(':').map(Number);
     const timeColor = (h >= 8 && h < 17) ? '#ffcc00' : (h >= 6 && h < 8 || h >= 17 && h < 20) ? '#ffcc00' : '#6688ff';
     const timeShadow = (h >= 8 && h < 17) ? 'rgba(255,204,0,0.4)' : (h >= 6 && h < 8 || h >= 17 && h < 20) ? 'rgba(255,204,0,0.4)' : 'rgba(102,136,255,0.4)';
+    const activeInteraction = getInteractionZoneById(interactionState.nearbyZoneId);
+    const missionChecklist = getMissionChecklist(interactionState.missionProgress);
 
     // Auto-Scroll to current event
     useEffect(() => {
@@ -111,9 +117,9 @@ export const HUD = () => {
                 <StatusBar label="Schutzweste" value={100} color="#ffcc00" />
                 <StatusBar label="Ausdauer" value={60} color="#00ccff" />
                 <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '24px 0', boxShadow: '0 1px 2px rgba(0,0,0,0.5)' }} />
-                <StatusBar label="Karma / Ansehen" value={45} color="#ffaa00" />
+                <StatusBar label="Karma / Ansehen" value={Math.max(0, Math.min(100, 50 + playerReputation / 2))} color="#ffaa00" />
                 <StatusBar label="Lage-Spannung" value={tensionLevel} color="#888" />
-                <StatusBar label="Volks-Moral" value={40} color="#ffff00" />
+                <StatusBar label="Volks-Moral" value={moralScore} color="#ffff00" />
                 <StatusBar label="Eskalationsstufe" value={Math.floor(tensionLevel / 5)} color="#ffcc00" />
             </div>
 
@@ -214,18 +220,12 @@ export const HUD = () => {
 
                 {/* Missions */}
                 <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px 0', fontSize: '13px', lineHeight: '1.6' }}>
-                    <li style={{ marginBottom: '10px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                        <span style={{ color: '#00ff88', marginTop: '1px' }}>●</span>
-                        <span style={{ color: '#00ff88' }}>Epoch-2 Datenlage verifizieren und freigeben (1/1)</span>
-                    </li>
-                    <li style={{ marginBottom: '10px', display: 'flex', gap: '10px', alignItems: 'flex-start', opacity: 0.8 }}>
-                        <span style={{ color: '#ffcc00', marginTop: '1px' }}>●</span>
-                        <span style={{ color: '#ffcc00' }}>Schaedensbild fuer Locations und Hazards vorbereiten (0/1)</span>
-                    </li>
-                    <li style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', opacity: 0.8 }}>
-                        <span style={{ color: '#ffcc00', marginTop: '1px' }}>●</span>
-                        <span style={{ color: '#ffcc00' }}>Betroffene Bevoelkerung nach Risikozonen priorisieren (0/3)</span>
-                    </li>
+                    {missionChecklist.map((mission) => (
+                        <li key={mission.id} style={{ marginBottom: '10px', display: 'flex', gap: '10px', alignItems: 'flex-start', opacity: mission.completed ? 1 : 0.86 }}>
+                            <span style={{ color: mission.completed ? '#00ff88' : '#ffcc00', marginTop: '1px' }}>●</span>
+                            <span style={{ color: mission.completed ? '#00ff88' : '#ffcc00' }}>{mission.label}</span>
+                        </li>
+                    ))}
                 </ul>
 
                 <div style={{ height: '1px', background: 'rgba(255,255,255,0.2)', marginBottom: '16px', boxShadow: '0 1px 2px rgba(0,0,0,0.5)' }} />
@@ -316,6 +316,44 @@ export const HUD = () => {
                     </div>
                 </div>
             </div>
+
+            {(activeInteraction || interactionState.lastMessage) && (
+                <div style={{
+                    position: 'absolute',
+                    left: '50%',
+                    bottom: '38px',
+                    transform: 'translateX(-50%)',
+                    width: 'min(720px, calc(100% - 48px))',
+                    padding: '14px 18px',
+                    borderRadius: '16px',
+                    background: activeInteraction ? 'rgba(6,16,24,0.88)' : 'rgba(10,10,10,0.82)',
+                    border: `1px solid ${activeInteraction ? 'rgba(0,204,255,0.35)' : 'rgba(255,255,255,0.12)'}`,
+                    boxShadow: activeInteraction ? '0 0 24px rgba(0,204,255,0.18)' : '0 10px 30px rgba(0,0,0,0.35)',
+                    pointerEvents: 'none'
+                }}>
+                    {activeInteraction && (
+                        <>
+                            <div style={{ color: '#00ccff', fontSize: '11px', fontWeight: 800, letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '6px' }}>
+                                Interaktionsfenster aktiv
+                            </div>
+                            <div style={{ color: '#ffffff', fontSize: '17px', fontWeight: 700, marginBottom: '4px' }}>
+                                {activeInteraction.title}
+                            </div>
+                            <div style={{ color: '#9edfff', fontSize: '13px', marginBottom: '8px' }}>
+                                {activeInteraction.description}
+                            </div>
+                            <div style={{ color: '#ffcc00', fontSize: '13px', fontWeight: 700 }}>
+                                E oder Gamepad X: {activeInteraction.prompt}
+                            </div>
+                        </>
+                    )}
+                    {interactionState.lastMessage && (
+                        <div style={{ color: activeInteraction ? '#d7f6ff' : '#ffffff', fontSize: '12px', marginTop: activeInteraction ? '8px' : 0 }}>
+                            {interactionState.lastMessage}
+                        </div>
+                    )}
+                </div>
+            )}
 
             <div style={{ 
                 pointerEvents: 'none', // click through leiste
