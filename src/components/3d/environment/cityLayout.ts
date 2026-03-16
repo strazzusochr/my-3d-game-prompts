@@ -21,6 +21,11 @@ export interface BuildingLot {
     depth: number;
 }
 
+const pseudoRandomFromId = (id: number) => {
+    const seed = Math.sin(id * 12.9898 + 78.233) * 43758.5453;
+    return seed - Math.floor(seed);
+};
+
 export interface StreetSegment {
     id: string;
     x: number;
@@ -47,6 +52,10 @@ export const BUILDING_LOTS: BuildingLot[] = [...Array(144)]
         } satisfies BuildingLot;
     })
     .filter((lot): lot is BuildingLot => lot !== null);
+
+export const getBuildingHeight = (lot: BuildingLot) => {
+    return 15 + (Math.abs(lot.x) + Math.abs(lot.z)) * 0.05 + pseudoRandomFromId(lot.id) * 15;
+};
 
 export const STREET_SEGMENTS: StreetSegment[] = (() => {
     const segments: StreetSegment[] = [];

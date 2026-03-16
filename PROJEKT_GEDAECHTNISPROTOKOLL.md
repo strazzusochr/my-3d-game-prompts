@@ -41,6 +41,8 @@
 - Player-Core-Block am 16.03.2026 ausgebaut: gemeinsames Stadt-/Terrain-Layout extrahiert, Ground-Check, Jump-Arc, Slope-Projektion und einfache Building-Blocker fuer den Player implementiert.
 - Verifikation des Player-Core-Blocks erfolgreich: `npm run lint` gruen, `vitest` 176/176 gruen, `npm run build` gruen.
 - Browser-/Livecheck fuer den Player-Core-Block bestaetigt: lokaler Full-Stack per `npm run dev:all` gestartet, Browser-Seite geoeffnet, Socket-Client-Verbindung im Terminal protokolliert.
+- Rapier-Stufe am 16.03.2026 umgesetzt: `Physics`-Welt, statische Welt-Collider und dynamischer Capsule-Player mit echter Kollisionsantwort integriert.
+- Rapier-Verifikation erfolgreich: `npm run lint` gruen, `vitest` 176/176 gruen, `npm run build` gruen, Browser-/Livecheck mit echter Socket-Verbindung bestaetigt.
 
 ## Naechster logischer Schritt
-- Player-Core weiter in Richtung vollwertiger Character-Controller ausbauen, insbesondere mit sauberer Begrenzung, Interaktionslogik und spaeter optional echter Rapier-Kollisionswelt.
+- Auf Basis der nun vorhandenen Rapier-Kollisionswelt als naechstes Interaktionsflaechen, Triggerzonen und feinere Character-Controller-Regeln aufbauen.

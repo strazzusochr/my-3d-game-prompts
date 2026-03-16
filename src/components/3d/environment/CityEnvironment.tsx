@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useGameStore } from '../../../stores/gameStore';
-import { BUILDING_LOTS, STREET_SEGMENTS } from './cityLayout';
+import { BUILDING_LOTS, STREET_SEGMENTS, getBuildingHeight } from './cityLayout';
 
 const Tree = ({ position }: { position: [number, number, number] }) => (
     <group position={position}>
@@ -56,7 +56,7 @@ export const CityEnvironment = () => {
     const buildings = useMemo(() => {
         return BUILDING_LOTS.map((lot) => ({
             ...lot,
-            height: 15 + (Math.abs(lot.x) + Math.abs(lot.z)) * 0.05 + Math.random() * 15,
+            height: getBuildingHeight(lot),
         }));
     }, []);
 

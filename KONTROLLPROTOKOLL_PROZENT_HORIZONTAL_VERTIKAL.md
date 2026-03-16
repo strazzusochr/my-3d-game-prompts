@@ -107,7 +107,7 @@ Die nachfolgende Deep-Gap-Matrix beschreibt darueber hinausgehende Ausbauziele d
 
 | Bereich | Ist-Status | Reifegrad % | Kritische Luecke | Naechster Umsetzungsschritt |
 |---|---|---:|---|---|
-| Player-Core | Deutlich ausgebaut | 72 | Noch keine vollwertige Rapier-Kollisionswelt oder Interaktionslogik | Rapier-Controller/Collider und Interaktionsflaechen als naechste Stufe integrieren |
+| Player-Core | Rapier-Kollisionswelt aktiv | 84 | Interaktionslogik und feinere Character-Controller-Regeln fehlen noch | Triggerzonen, Interaktionsflaechen und Character-Controller-Feinschliff integrieren |
 | Gamepad-System | VOLLSTAENDIG | 100 | — | Erledigt: 16-Button-Mapping + Vibration + Store-Integration |
 | Audio-Engine (Teil 33) | VOLLSTAENDIG | 100 | — | Erledigt: Kategorien + Ducking + 3 neue Sounds + SFX-Trigger |
 | NPC-KI/Behavior | Teilweise vorhanden | 40 | Keine tiefe BT/State-Machine-Abdeckung fuer alle Szenarien | Behavior-Tree Nodes + Eskalationsregeln ausbauen |
@@ -115,7 +115,7 @@ Die nachfolgende Deep-Gap-Matrix beschreibt darueber hinausgehende Ausbauziele d
 | UI/HUD-Komplettheit | Teilweise vorhanden | 50 | Viele Ultra-Checks offen (Interaktion, Statistik, Menues) | HUD-Checklisten in Blöcken abarbeiten |
 | Quality-Gates 700+ | VOLLSTAENDIG | 100 | — | Erledigt: 168/168 Tests gruen, comprehensive.test.ts deckt 700+ Assertions ab |
 
-Realistische Gesamt-Reife (Deep, ausserhalb Pflichtumfang): 52%
+Realistische Gesamt-Reife (Deep, ausserhalb Pflichtumfang): 56%
 
 Interpretation:
 Der technische Kern ist fuer den verifizierten Pflichtumfang vollstaendig abgeschlossen.
