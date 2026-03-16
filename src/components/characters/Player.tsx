@@ -3,6 +3,14 @@ import { useFrame } from '@react-three/fiber';
 import { useKeyboardControls } from '@react-three/drei';
 import * as THREE from 'three';
 
+const GAMEPAD_DEADZONE = 0.15;
+
+const applyDeadzone = (value: number) => {
+    if (Math.abs(value) < GAMEPAD_DEADZONE) return 0;
+    const sign = Math.sign(value);
+    return sign * ((Math.abs(value) - GAMEPAD_DEADZONE) / (1 - GAMEPAD_DEADZONE));
+};
+
 export const Player = () => {
     const meshRef = useRef<THREE.Group>(null);
     const [, getKeys] = useKeyboardControls();
@@ -19,6 +27,7 @@ export const Player = () => {
     const frontVector = new THREE.Vector3();
     const sideVector = new THREE.Vector3();
     const speed = 10;
+    const gamepadIndexRef = useRef<number | null>(null);
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
@@ -53,16 +62,56 @@ export const Player = () => {
         window.addEventListener('wheel', handleWheel, { passive: false });
         window.addEventListener('keydown', handleKeyDown);
         window.addEventListener('keyup', handleKeyUp);
+
+        const handleGamepadConnected = (event: GamepadEvent) => {
+            gamepadIndexRef.current = event.gamepad.index;
+        };
+
+        const handleGamepadDisconnected = (event: GamepadEvent) => {
+            if (gamepadIndexRef.current === event.gamepad.index) {
+                gamepadIndexRef.current = null;
+            }
+        };
+
+        const firstGamepad = navigator.getGamepads?.().find(Boolean);
+        if (firstGamepad) {
+            gamepadIndexRef.current = firstGamepad.index;
+        }
+
+        window.addEventListener('gamepadconnected', handleGamepadConnected);
+        window.addEventListener('gamepaddisconnected', handleGamepadDisconnected);
+
         return () => {
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('wheel', handleWheel);
             window.removeEventListener('keydown', handleKeyDown);
             window.removeEventListener('keyup', handleKeyUp);
+            window.removeEventListener('gamepadconnected', handleGamepadConnected);
+            window.removeEventListener('gamepaddisconnected', handleGamepadDisconnected);
         };
     }, []);
 
     useFrame((state, delta) => {
         const { forward, backward, left, right } = getKeys();
+        const gamepad = gamepadIndexRef.current !== null ? navigator.getGamepads?.()[gamepadIndexRef.current] : null;
+
+        let gpMoveX = 0;
+        let gpMoveZ = 0;
+
+        if (gamepad) {
+            gpMoveX = applyDeadzone(gamepad.axes[0] ?? 0);
+            gpMoveZ = applyDeadzone(gamepad.axes[1] ?? 0);
+
+            const lookX = applyDeadzone(gamepad.axes[2] ?? 0);
+            const lookY = applyDeadzone(gamepad.axes[3] ?? 0);
+
+            if (lookX !== 0 || lookY !== 0) {
+                setRotation(r => ({
+                    yaw: r.yaw - lookX * 0.08,
+                    pitch: Math.max(-1.4, Math.min(1.4, r.pitch - lookY * 0.06))
+                }));
+            }
+        }
         
         // STRG + Pfeiltasten → Kamera-Panning
         if (ctrlHeld.current) {
@@ -91,14 +140,18 @@ export const Player = () => {
         }
         
         // WASD bewegt IMMER den Spieler (Pfeiltasten ohne STRG auch)
-        const fwdInput = (backward ? 1 : 0) - (forward ? 1 : 0);
-        const sideInput = (left ? 1 : 0) - (right ? 1 : 0);
+        const keyFwdInput = (backward ? 1 : 0) - (forward ? 1 : 0);
+        const keySideInput = (left ? 1 : 0) - (right ? 1 : 0);
+        const fwdInput = THREE.MathUtils.clamp(keyFwdInput + gpMoveZ, -1, 1);
+        const sideInput = THREE.MathUtils.clamp(keySideInput + gpMoveX, -1, 1);
+        const gamepadSprint = gamepad ? (gamepad.buttons[5]?.pressed ?? false) : false;
+        const activeSpeed = gamepadSprint ? speed * 1.7 : speed;
         
         if (!ctrlHeld.current) {
             frontVector.set(0, 0, fwdInput);
             sideVector.set(sideInput, 0, 0);
             const moveRot = new THREE.Euler(0, rotation.yaw, 0);
-            direction.subVectors(frontVector, sideVector).normalize().applyEuler(moveRot).multiplyScalar(speed * delta);
+            direction.subVectors(frontVector, sideVector).normalize().applyEuler(moveRot).multiplyScalar(activeSpeed * delta);
             position.add(direction);
         }
         
