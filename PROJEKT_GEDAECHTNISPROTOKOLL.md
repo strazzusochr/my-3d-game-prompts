@@ -104,7 +104,11 @@
 - Volatilitaetsklassifikation nachgeschaerft: `trendSignal=volatile` wird bei hoher Turbulenz und gleichzeitig niedrigem Netto-Momentum gesetzt.
 - Testabgleich umgesetzt: Volatilitaets-Testfall wurde auf das neue Verhalten (volatile trotz niedrigem Netto-Momentum) umgestellt.
 - Vollverifikation nach Momentum/Turbulenz erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand jetzt 239/239.
+- Spawn-Marker-Block am 16.03.2026 umgesetzt: `SpawnMarkers.tsx` von statischer Daueranzeige auf zeitgesteuerte Pre-Spawn-Sichtbarkeit umgestellt.
+- Sichtfenster aktiv: Marker erscheinen nur von T-10 bis T-5 Minuten vor dem jeweiligen Spawn und werden ausserhalb dieses Fensters automatisch ausgeblendet.
+- Fotostil umgesetzt: Marker als aufgeraeumte Neon-Karten (Billboard + Ring) direkt am Spawn-Ort mit Uhrzeit, Einheitenzeilen und Countdown.
+- Vollverifikation nach Spawn-Marker-Block erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand unveraendert 239/239.
 
 ## Naechster logischer Schritt
+- Spawn-HUD-Feintuning nach Livevergleich: Kartenabstaende, Glow-Intensitaet und Informationsdichte je Profil (`low/medium/high/aaa`) kalibrieren.
 - Trend-/Missionsentscheidungen um Persistenzfenster erweitern: mehrere aufeinanderfolgende volatile Checkpoints als Haltedauer-Bedingung statt Einzelimpuls.
-- Pfadgewicht mit Rollenverhaeltnis koppeln: dynamische Sicherheits-/Aggressor-Quoten als eigenstaendigen Triggerfaktor weiter ausbauen.

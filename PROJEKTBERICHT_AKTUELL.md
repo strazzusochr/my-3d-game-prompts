@@ -149,6 +149,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Der zugehoerige Testfall wurde auf das neue Zielbild angepasst: volatile Lage trotz kleinem Netto-Momentum.
 - Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 239 von 239 bestanden, Lint und Build gruen.
 
+### 2.0.20 Spawn-Marker-Neudesign mit Zeitfenster vom 16.03.2026
+- Die Spawn-Visualisierung wurde von dauerhaften Textmarkern auf fotoaehnliche Neon-Karten am Spawn-Ort umgestellt (Billboard-Karte plus Bodenring).
+- Die Sichtbarkeit ist jetzt strikt zeitgesteuert: Marker erscheinen nur im Pre-Spawn-Fenster von T-10 bis T-5 Minuten und verschwinden danach automatisch.
+- Karteninhalt zeigt Uhrzeit, aggregierte Einheiteninformationen pro Spawn-Ort/Zeit und einen Countdown, wodurch die Szene deutlich aufgeraeumter und taktischer lesbar ist.
+- Dummy-/Null-Spawn-Ereignisse werden nicht mehr als Marker visualisiert.
+- Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 239 von 239 bestanden, Lint und Build gruen.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
