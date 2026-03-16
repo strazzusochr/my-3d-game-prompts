@@ -266,3 +266,4 @@
 - HUD-Teilsektionen-Drag/Persistenz am 16.03.2026 umgesetzt: rechtes Hauptpanel unterstuetzt jetzt sortierbare Teilsektionen (`NASA`, `Telemetrie`, `Missionslage`, `Einsatz-Timeline`) per Drag-and-Drop ueber neue `Sort`-Handles.
 - Persistenz aktiviert: Reihenfolge wird unter `hud-right-sections-order-v1` in LocalStorage gespeichert, beim Laden sanitisiert (`sanitizeRightSubSectionOrder`) und bei fehlenden Keys auf Default vervollstaendigt.
 - Verifikation nach HUD-Sortierung erfolgreich: `npm run lint` gruen, `npm run build` gruen.
+- Live-Browserdurchlauf am 16.03.2026 nachgezogen: Vite-Devserver auf Port `5174` gestartet, Browserseite geoeffnet und Endpoint mit `HTTP 200` bestaetigt.
