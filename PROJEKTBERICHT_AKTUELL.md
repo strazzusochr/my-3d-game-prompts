@@ -279,3 +279,16 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - `npm run lint`: erfolgreich.
 - `npm run build`: erfolgreich.
 - Livecheck: `npm run dev:all` gestartet, Browserseite geoeffnet, Socket-Server meldete reale Client-Verbindung; der Hintergrundprozess wurde anschliessend wieder beendet.
+
+### 8.16 HUD-Telemetrie- und Statistik-Ausbau vom 16.03.2026
+- Das HUD wurde um ein eigenes Phase-Telemetrie-Modul erweitert (`src/systems/hudTelemetry.ts`), das aus Echtzeitdaten Missionsfortschritt, Hook-Readiness, aktive Hooks, Panikquote und Kernverhaltenszaehler ableitet.
+- Im rechten HUD-Panel werden diese Kennzahlen nun dauerhaft visualisiert und damit die vorher rein technischen 24h-Hooks operativ sichtbar.
+- Zusaetzlich wurde ein neues Statistik-Overlay eingebaut, das per `STAT`-Bedienelement geoeffnet werden kann und DayStats plus verhaltensbasierte Live-Balken zusammenfuehrt.
+- Der Store erhielt dafuer eine explizite Aktion zum Oeffnen der Statistikansicht sowie eine automatische Einblendung beim Tageswechsel ueber Mitternacht.
+
+### 8.17 HUD-Telemetrie-Nachweis
+- Neuer Testblock `src/tests/hudTelemetry.test.ts` validiert Zeitfenster-Mapping, robuste Zeitparser-Logik und Telemetrie-Berechnung.
+- `src/tests/gameStore.test.ts` wurde um Statistik-Overlay-Steuerung (manuell + Mitternachtswechsel) erweitert.
+- `npx vitest run`: erfolgreich, 207 von 207 Tests bestanden.
+- `npm run lint`: erfolgreich.
+- `npm run build`: erfolgreich.

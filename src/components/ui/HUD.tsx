@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useGameStore } from '../../stores/gameStore';
 import { EVENT_TIMELINE } from '../../systems/eventScheduler';
 import { getInteractionAvailability, getInteractionZoneById, getMissionChecklist } from '../../systems/interactionZones';
+import { getHudTelemetry } from '../../systems/hudTelemetry';
 
 const StatusBar = ({ label, value, color }: { label: string, value: number, color: string }) => (
     <div style={{ marginBottom: '16px' }}>
@@ -35,10 +36,14 @@ export const HUD = () => {
     const playerReputation = useGameStore(state => state.gameState.playerReputation);
     const moralScore = useGameStore(state => state.gameState.moralScore);
     const npcCount = useGameStore(state => state.npcs.length);
+    const npcs = useGameStore(state => state.npcs);
+    const missionProgress = useGameStore(state => state.interactionState.missionProgress);
+    const dayStats = useGameStore(state => state.dayStats);
+    const showStatistics = useGameStore(state => state.gameState.showStatistics);
     const masterVolume = useGameStore(state => state.gameState.masterVolume);
     const muted = useGameStore(state => state.gameState.muted);
     const interactionState = useGameStore(state => state.interactionState);
-    const { advanceHour, rewindHour, advanceMinute, rewindMinute, toggleTimePause, setTimeSpeed, setMasterVolume, setMuted } = useGameStore();
+    const { advanceHour, rewindHour, advanceMinute, rewindMinute, toggleTimePause, setTimeSpeed, setMasterVolume, setMuted, showStatisticsPanel, dismissStatistics } = useGameStore();
 
     // Timeline Scroll Ref
     const timelineRef = useRef<HTMLDivElement>(null);
@@ -82,6 +87,21 @@ export const HUD = () => {
     const activeInteraction = getInteractionZoneById(interactionState.nearbyZoneId);
     const activeInteractionAvailability = activeInteraction ? getInteractionAvailability(interactionState.missionProgress, activeInteraction.id) : null;
     const missionChecklist = getMissionChecklist(interactionState.missionProgress);
+    const telemetry = getHudTelemetry(inGameTime, missionProgress, npcs);
+    const phaseWindowLabel = {
+        NIGHT: 'Nacht',
+        MORNING: 'Morgen',
+        MIDDAY: 'Mittag',
+        EVENING: 'Abend',
+        LATE: 'Spaetphase',
+    }[telemetry.phaseWindow];
+    const phaseWindowColor = {
+        NIGHT: '#6688ff',
+        MORNING: '#00ccff',
+        MIDDAY: '#ffcc00',
+        EVENING: '#ffaa44',
+        LATE: '#ff6666',
+    }[telemetry.phaseWindow];
 
     // Auto-Scroll to current event
     useEffect(() => {
@@ -216,6 +236,44 @@ export const HUD = () => {
                     </div>
                     <div style={{ marginTop: '8px', fontSize: '11px', color: '#9edfff' }}>
                         Quelle: NASA ATAP, PDC25 Hypothetical Exercise.
+                    </div>
+                </div>
+
+                <div style={{
+                    marginBottom: '16px',
+                    padding: '12px',
+                    borderRadius: '10px',
+                    background: 'rgba(0,0,0,0.42)',
+                    border: `1px solid ${phaseWindowColor}55`
+                }}>
+                    <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '10px' }}>
+                        Phase-Telemetrie
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 12px', fontSize: '12px' }}>
+                        <span style={{ color: '#9edfff' }}>Fenster</span>
+                        <span style={{ color: phaseWindowColor, textAlign: 'right', fontWeight: '700' }}>{phaseWindowLabel}</span>
+                        <span style={{ color: '#9edfff' }}>Mission-Fortschritt</span>
+                        <span style={{ color: '#ffffff', textAlign: 'right', fontWeight: '700' }}>{telemetry.missionCompletionPercent}%</span>
+                        <span style={{ color: '#9edfff' }}>Hook-Readiness</span>
+                        <span style={{ color: '#ffffff', textAlign: 'right', fontWeight: '700' }}>{telemetry.hookReadinessPercent}%</span>
+                        <span style={{ color: '#9edfff' }}>Aktive Hooks</span>
+                        <span style={{ color: '#ffffff', textAlign: 'right', fontWeight: '700' }}>{telemetry.activeHooks}/{telemetry.maxHooks}</span>
+                        <span style={{ color: '#9edfff' }}>Panik-/Riot-Anteil</span>
+                        <span style={{ color: telemetry.panicRatioPercent > 45 ? '#ff6666' : '#ffcc00', textAlign: 'right', fontWeight: '700' }}>{telemetry.panicRatioPercent}%</span>
+                    </div>
+                    <div style={{ marginTop: '10px', display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: '6px' }}>
+                        {[
+                            { label: 'Gather', value: telemetry.behaviorCounts.gather, color: '#66ccff' },
+                            { label: 'Cleanup', value: telemetry.behaviorCounts.cleanup, color: '#88ffcc' },
+                            { label: 'Shield', value: telemetry.behaviorCounts.shieldWall, color: '#aaddff' },
+                            { label: 'Flee', value: telemetry.behaviorCounts.flee, color: '#ffcc66' },
+                            { label: 'Retreat', value: telemetry.behaviorCounts.retreat, color: '#ff8888' },
+                        ].map((entry) => (
+                            <div key={entry.label} style={{ border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '6px', textAlign: 'center', background: 'rgba(255,255,255,0.03)' }}>
+                                <div style={{ color: '#9edfff', fontSize: '10px', letterSpacing: '0.6px', textTransform: 'uppercase' }}>{entry.label}</div>
+                                <div style={{ color: entry.color, fontSize: '14px', fontWeight: '800', marginTop: '2px' }}>{entry.value}</div>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
@@ -467,6 +525,21 @@ export const HUD = () => {
 
                 <div style={{ height: '36px', width: '2px', background: 'rgba(255,255,255,0.15)' }} />
 
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', pointerEvents: 'auto', background: 'rgba(10,10,10,0.6)', padding: '8px 14px', borderRadius: '12px', backdropFilter: 'blur(5px)', border: '2px solid rgba(255,255,255,0.08)' }}>
+                    <button
+                        onClick={showStatisticsPanel}
+                        style={{ ...btnStyle, minWidth: '70px', padding: '6px 10px', fontSize: '13px', color: '#9edfff' }}
+                        title="Statistikfenster anzeigen"
+                    >
+                        STAT
+                    </button>
+                    <span style={{ color: '#9edfff', fontSize: '12px', letterSpacing: '0.6px' }}>
+                        {telemetry.phaseWindow}
+                    </span>
+                </div>
+
+                <div style={{ height: '36px', width: '2px', background: 'rgba(255,255,255,0.15)' }} />
+
                 {/* Volume / Audio Controls */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', pointerEvents: 'auto', background: 'rgba(10,10,10,0.6)', padding: '10px 16px', borderRadius: '12px', backdropFilter: 'blur(5px)', border: '2px solid rgba(255,255,255,0.08)' }}>
                     <button 
@@ -496,6 +569,97 @@ export const HUD = () => {
                     </span>
                 </div>
             </div>
+
+            {showStatistics && (
+                <div style={{
+                    pointerEvents: 'auto',
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'rgba(4,8,12,0.72)'
+                }}>
+                    <div style={{
+                        width: 'min(920px, calc(100% - 36px))',
+                        maxHeight: 'min(86vh, 860px)',
+                        overflowY: 'auto',
+                        borderRadius: '18px',
+                        border: '1px solid rgba(0,204,255,0.32)',
+                        background: 'rgba(8,14,20,0.94)',
+                        boxShadow: '0 30px 70px rgba(0,0,0,0.55)',
+                        padding: '22px'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                            <div>
+                                <div style={{ color: '#00ccff', fontSize: '13px', fontWeight: 800, letterSpacing: '1.2px', textTransform: 'uppercase' }}>
+                                    Einsatz-Statistikfenster
+                                </div>
+                                <div style={{ color: '#ffffff', fontSize: '20px', fontWeight: 800, marginTop: '2px' }}>
+                                    24h-Lageauswertung
+                                </div>
+                            </div>
+                            <button
+                                onClick={dismissStatistics}
+                                style={{ ...btnStyle, minWidth: '90px', color: '#ffcc00' }}
+                            >
+                                Schliessen
+                            </button>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', marginBottom: '14px' }}>
+                            {[
+                                { label: 'Mission', value: `${telemetry.missionCompletionPercent}%`, color: '#88ddff' },
+                                { label: 'Readiness', value: `${telemetry.hookReadinessPercent}%`, color: '#99ffcc' },
+                                { label: 'Aktive Hooks', value: `${telemetry.activeHooks}/${telemetry.maxHooks}`, color: '#ffcc66' },
+                                { label: 'Panikquote', value: `${telemetry.panicRatioPercent}%`, color: telemetry.panicRatioPercent > 45 ? '#ff7777' : '#ffcc66' },
+                            ].map((metric) => (
+                                <div key={metric.label} style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '10px 12px', background: 'rgba(255,255,255,0.03)' }}>
+                                    <div style={{ color: '#9edfff', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.8px' }}>{metric.label}</div>
+                                    <div style={{ color: metric.color, fontSize: '24px', marginTop: '4px', fontWeight: 800 }}>{metric.value}</div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '12px' }}>
+                            <div style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px', background: 'rgba(255,255,255,0.02)' }}>
+                                <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', marginBottom: '10px' }}>
+                                    Verhaltensverteilung (live)
+                                </div>
+                                {[
+                                    { label: 'Gather', value: telemetry.behaviorCounts.gather, color: '#66ccff' },
+                                    { label: 'Cleanup', value: telemetry.behaviorCounts.cleanup, color: '#88ffcc' },
+                                    { label: 'Shield-Wall', value: telemetry.behaviorCounts.shieldWall, color: '#aaddff' },
+                                    { label: 'Flee', value: telemetry.behaviorCounts.flee, color: '#ffcc66' },
+                                    { label: 'Retreat', value: telemetry.behaviorCounts.retreat, color: '#ff8888' },
+                                ].map((entry) => (
+                                    <div key={entry.label} style={{ display: 'grid', gridTemplateColumns: '120px 1fr auto', alignItems: 'center', gap: '8px', marginBottom: '7px' }}>
+                                        <span style={{ color: '#9edfff', fontSize: '12px' }}>{entry.label}</span>
+                                        <div style={{ height: '7px', borderRadius: '999px', background: 'rgba(255,255,255,0.1)', overflow: 'hidden' }}>
+                                            <div style={{ height: '100%', width: `${npcCount > 0 ? Math.min(100, Math.round((entry.value / npcCount) * 100)) : 0}%`, background: entry.color }} />
+                                        </div>
+                                        <span style={{ color: entry.color, fontWeight: 700, fontSize: '12px' }}>{entry.value}</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div style={{ border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px', background: 'rgba(255,255,255,0.02)' }}>
+                                <div style={{ color: '#00ccff', fontSize: '12px', fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', marginBottom: '10px' }}>
+                                    Tageswerte (Store)
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '8px', fontSize: '13px' }}>
+                                    <span style={{ color: '#9edfff' }}>Getoetet</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{dayStats.killed}</span>
+                                    <span style={{ color: '#9edfff' }}>Festnahmen</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{dayStats.arrested}</span>
+                                    <span style={{ color: '#9edfff' }}>Verletzt</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{dayStats.injured}</span>
+                                    <span style={{ color: '#9edfff' }}>Sachschaden</span><span style={{ color: '#ffffff', fontWeight: 700 }}>{dayStats.damage.toLocaleString('de-DE')} EUR</span>
+                                    <span style={{ color: '#9edfff' }}>Phase</span><span style={{ color: phaseWindowColor, fontWeight: 700 }}>{phaseWindowLabel}</span>
+                                    <span style={{ color: '#9edfff' }}>Ingame-Zeit</span><span style={{ color: '#ffcc00', fontWeight: 700 }}>{inGameTime}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             </div>
         </div>
     );
