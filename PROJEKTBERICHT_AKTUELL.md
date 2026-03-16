@@ -28,6 +28,15 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Rueckkehr zu `low`: API bestaetigte `960x540` bei Ziel-`fps=24`; Health-Snapshots zeigten `viewerFps` von 0, 0 und 24 bei `rendererFps` 86, 88 und 86.
 - Ergebnis: Die Profilumschaltung funktioniert reproduzierbar unter aktiver Viewer-Last. Der experimentelle Tab-Capture-Pfad wurde praktisch nicht aktiv; in dieser Umgebung laeuft der Stream konsistent ueber den verifizierten `canvas-webrtc`-Fallback.
 
+### 2.0.3 Vollautonomie-Livecheck vom 16.03.2026
+- Ein weiterer kompletter Profil- und Health-Lauf wurde auf dem aktuellen Stand durchgefuehrt.
+- Start-Health (`low`) meldete: `status=ok`, `profile=low`, `width=960`, `height=540`, `transportSource=canvas-webrtc`, `publicPort=7860`, `internalPort=3099`, `clients=1`.
+- `medium`: API bestaetigte `1280x720` bei Ziel-`fps=30`; Health blieb konsistent mit `profile=medium`.
+- `high`: API bestaetigte `1600x900` bei Ziel-`fps=45`; Health blieb konsistent mit `profile=high`.
+- `aaa`: API bestaetigte `1920x1080` bei Ziel-`fps=60`; Health blieb konsistent mit `profile=aaa`.
+- Rueckkehr zu `low`: API bestaetigte erneut `960x540` bei Ziel-`fps=24`; Health blieb konsistent mit `profile=low`.
+- Ergebnis: Profilkette `low -> medium -> high -> aaa -> low` laeuft reproduzierbar auf dem aktuellen Stand und bestaetigt die aktiven Server-Zahlen fuer den Streaming-Betrieb.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.
