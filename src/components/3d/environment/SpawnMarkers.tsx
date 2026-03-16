@@ -18,6 +18,24 @@ interface SpawnPoint {
     emphasis: number;
 }
 
+type PhaseBand = 'NIGHT' | 'MORNING' | 'MIDDAY' | 'EVENING' | 'LATE';
+
+const getPhaseBandForMinutes = (minutes: number): PhaseBand => {
+    if (minutes < 6 * 60) return 'NIGHT';
+    if (minutes < 12 * 60) return 'MORNING';
+    if (minutes < 17 * 60) return 'MIDDAY';
+    if (minutes < 21 * 60) return 'EVENING';
+    return 'LATE';
+};
+
+const PHASE_THEME: Record<PhaseBand, { timeColor: string; glassOpacity: number; cardBackdrop: string }> = {
+    NIGHT: { timeColor: '#7bd6ff', glassOpacity: 0.18, cardBackdrop: '#030916' },
+    MORNING: { timeColor: '#ffe46b', glassOpacity: 0.19, cardBackdrop: '#060a14' },
+    MIDDAY: { timeColor: '#ffd38b', glassOpacity: 0.16, cardBackdrop: '#070b12' },
+    EVENING: { timeColor: '#ffb36b', glassOpacity: 0.21, cardBackdrop: '#0a0612' },
+    LATE: { timeColor: '#bba8ff', glassOpacity: 0.23, cardBackdrop: '#080513' },
+};
+
 const SHORT_NAMES: Record<string, string> = {
     'CIVILIAN': 'ZIV',
     'POLICE': 'POL',
@@ -95,6 +113,24 @@ export const SpawnMarkers = () => {
         return Array.from(grouped.values()).sort((a, b) => a.minutesUntilSpawn - b.minutesUntilSpawn);
     }, [inGameTime]);
 
+    const currentMinutes = timeToMinutes(inGameTime);
+    const phaseBand = getPhaseBandForMinutes(currentMinutes);
+    const phaseTheme = PHASE_THEME[phaseBand];
+    const denseMode = markers.length >= 6;
+    const mediumDenseMode = markers.length >= 4;
+    const cardScale = denseMode ? 0.82 : mediumDenseMode ? 0.9 : 1;
+    const cardWidth = 6.5 * cardScale;
+    const cardHeight = 8.5 * cardScale;
+    const innerWidth = 6.2 * cardScale;
+    const innerHeight = 8.2 * cardScale;
+    const detailMaxLines = denseMode ? 2 : 3;
+    const phaseBadgeY = 3.52 * cardScale;
+    const timeY = 2.72 * cardScale;
+    const titleY = 1.56 * cardScale;
+    const detailsY = 0.2 * cardScale;
+    const countdownY = -2.25 * cardScale;
+    const baseFont = denseMode ? 0.9 : 1;
+
     return (
         <group>
             {markers.map((m, idx) => (
@@ -144,18 +180,30 @@ export const SpawnMarkers = () => {
                     <Billboard position={[m.cardOffsetX, 4.4 + m.cardLiftY, m.cardOffsetZ]} follow={true} lockX={false} lockY={false} lockZ={false}>
                         <group>
                             <mesh position={[0, 0, -0.03]}>
-                                <planeGeometry args={[6.2, 8.2]} />
-                                <meshBasicMaterial color="#05070e" transparent opacity={0.88} />
+                                <planeGeometry args={[innerWidth, innerHeight]} />
+                                <meshBasicMaterial color={phaseTheme.cardBackdrop} transparent opacity={0.88} />
                             </mesh>
                             <mesh>
-                                <planeGeometry args={[6.5, 8.5]} />
-                                <meshBasicMaterial color={m.color} transparent opacity={0.15 + m.emphasis * 0.22} />
+                                <planeGeometry args={[cardWidth, cardHeight]} />
+                                <meshBasicMaterial color={m.color} transparent opacity={phaseTheme.glassOpacity + m.emphasis * 0.18} />
                             </mesh>
 
                             <Text
-                                position={[0, 2.95, 0.03]}
-                                fontSize={0.95}
-                                color="#ffe46b"
+                                position={[0, phaseBadgeY, 0.03]}
+                                fontSize={0.33 * baseFont}
+                                color="#c8e8ff"
+                                anchorX="center"
+                                anchorY="middle"
+                                outlineWidth={0.02}
+                                outlineColor="#000"
+                            >
+                                {`PHASE ${phaseBand}`}
+                            </Text>
+
+                            <Text
+                                position={[0, timeY, 0.03]}
+                                fontSize={0.92 * baseFont}
+                                color={phaseTheme.timeColor}
                                 anchorX="center"
                                 anchorY="middle"
                                 outlineWidth={0.06}
@@ -165,8 +213,8 @@ export const SpawnMarkers = () => {
                             </Text>
 
                             <Text
-                                position={[0, 1.7, 0.03]}
-                                fontSize={0.78}
+                                position={[0, titleY, 0.03]}
+                                fontSize={0.74 * baseFont}
                                 color={m.color}
                                 anchorX="center"
                                 anchorY="middle"
@@ -179,8 +227,8 @@ export const SpawnMarkers = () => {
                             </Text>
 
                             <Text
-                                position={[0, 0.3, 0.03]}
-                                fontSize={0.44}
+                                position={[0, detailsY, 0.03]}
+                                fontSize={0.42 * baseFont}
                                 color="#d9f6ff"
                                 anchorX="center"
                                 anchorY="middle"
@@ -189,12 +237,12 @@ export const SpawnMarkers = () => {
                                 maxWidth={5.7}
                                 textAlign="center"
                             >
-                                {m.details.slice(0, 3).join('\n')}
+                                {m.details.slice(0, detailMaxLines).join('\n')}
                             </Text>
 
                             <Text
-                                position={[0, -2.35, 0.03]}
-                                fontSize={0.62}
+                                position={[0, countdownY, 0.03]}
+                                fontSize={0.6 * baseFont}
                                 color="#ffffff"
                                 anchorX="center"
                                 anchorY="middle"

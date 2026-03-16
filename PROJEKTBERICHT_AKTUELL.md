@@ -163,6 +163,13 @@ Das Projekt ist eine webbasierte 3D-Anwendung auf Basis von React, Vite, TypeScr
 - Informationsdichte auf den Karten wurde komprimiert (maximal drei Detailzeilen), um Textmatsch in dichten Spawn-Phasen zu vermeiden.
 - Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 239 von 239 bestanden, Lint und Build gruen.
 
+### 2.0.22 Spawn-Marker-Phasenkalibrierung und Dichteprofil vom 16.03.2026
+- Die Spawn-Karten wurden visuell an die Tagesphasen angebunden: Zeitfarbe, Glaswirkung und Kartenhintergrund reagieren jetzt auf `NIGHT`, `MORNING`, `MIDDAY`, `EVENING` und `LATE`.
+- Dadurch bleibt der Neon-Look konsistent, wirkt aber je Zeitfenster differenzierter und besser an die Szenenlichtlage angepasst.
+- Fuer dichte Spawn-Lagen wurde ein automatisches Dichteprofil eingefuehrt: Kartenskalierung und Detailzeilen werden dynamisch reduziert, sobald viele Marker gleichzeitig sichtbar sind.
+- Die Taktiklesbarkeit bleibt dadurch auch in Stoßzeiten stabil, ohne die T-10 bis T-5 Sichtfensterregel zu verletzen.
+- Validierung: `npm run autonomy:full` erfolgreich mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand 239 von 239 bestanden, Lint und Build gruen.
+
 ### 2.1 Laufzeit und Server
 - Die Serverbasis wurde auf eine konsistente ESM-Nutzung ausgerichtet.
 - Ports wurden fuer geklonte Umgebungen env-basiert konfigurierbar gemacht.

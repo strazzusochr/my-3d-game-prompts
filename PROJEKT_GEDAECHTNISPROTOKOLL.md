@@ -111,7 +111,10 @@
 - Spawn-Marker-Feintuning am 16.03.2026 umgesetzt: Karten erhalten jetzt positionsgebundene Offset-Lanes zur Reduktion von Ueberlappung bei benachbarten Spawn-Orten.
 - Lesbarkeit erweitert: Standsaeule + Standfuss ergaenzt, Ring-Emphasis nach Restzeit abgestuft und Detailzeilen auf maximal drei komprimiert.
 - Vollverifikation nach Spawn-Feintuning erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 239/239.
+- Spawn-Marker-Phasenkalibrierung am 16.03.2026 umgesetzt: Karten nutzen nun ein Tagesphasen-Theme (`NIGHT`, `MORNING`, `MIDDAY`, `EVENING`, `LATE`) mit abgestufter Zeitfarbe und Glas-Opacity.
+- Dichteanpassung aktiv: Bei hoher Markerzahl werden Kartengroesse und Detailtiefe automatisch reduziert, um Textkollisionen in Hotspots zu vermeiden.
+- Vollverifikation nach Phasenkalibrierung erfolgreich: `npm run autonomy:full` komplett gruen mit `AUTONOMY_PROOF_OK` und `AUTONOMY_FULL_OK`; Teststand weiterhin 239/239.
 
 ## Naechster logischer Schritt
-- Spawn-HUD-Liveabgleich finalisieren: Farbpalette/Glow gegen Referenzbild per Screenshot-Vergleich pro Tagesphase kalibrieren.
+- Spawn-HUD-Liveabgleich finalisieren: Standfuss-/Ring-Skalierung gegen Referenzbild fuer nahe Kameraabstaende weiter feinjustieren.
 - Trend-/Missionsentscheidungen um Persistenzfenster erweitern: mehrere aufeinanderfolgende volatile Checkpoints als Haltedauer-Bedingung statt Einzelimpuls.
