@@ -1,5 +1,5 @@
 # ---- Builder: Chainguard Node (0 CVEs) ----
-FROM cgr.dev/chainguard/node:latest AS builder
+FROM node:18-slim AS builder
 
 WORKDIR /app
 
@@ -15,8 +15,8 @@ ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN npm run build
 
 # ─────────────────────────────────────────────
-# Runtime: Distroless (Minimale Angriffsfläche, 0 CVEs)
-FROM gcr.io/distroless/nodejs22-debian12 AS runner
+# Runtime: Node.js (Standard für Hugging Face)
+FROM node:18-slim AS runner
 
 WORKDIR /app
 
@@ -31,9 +31,8 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/server ./server
 
-# Distroless nutzt standardmäßig UID 65532 (nonroot)
 # Hugging Face Spaces unterstützen nonroot Users
-USER nonroot
+USER node
 
-# Normaler Static-File Server (kein Stream-Server)
-CMD ["server/server-prod.mjs"]
+# Start Server
+CMD ["node", "server/server-prod.mjs"]
