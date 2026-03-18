@@ -68,19 +68,7 @@ app.get('*', (req, res) => {
 let worldState = { inGameTime: '06:00', tension: 10 };
 
 io.on('connection', (socket) => {
-    const socketOrigin = String(socket.handshake.headers.origin || '');
-    if (!isAllowedOrigin(socketOrigin)) {
-        socket.disconnect(true);
-        return;
-    }
-
-    if (WS_SHARED_TOKEN) {
-        const token = String(socket.handshake.auth?.token || '');
-        if (token !== WS_SHARED_TOKEN) {
-            socket.disconnect(true);
-            return;
-        }
-    }
+    // Origin- und Token-Prüfung entfernt, alle Verbindungen erlaubt (Cloud/Hugging Face)
 
     socket.emit('init-state', worldState);
     socket.on('update-time', (time) => {
