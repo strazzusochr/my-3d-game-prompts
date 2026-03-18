@@ -9,6 +9,9 @@ RUN npm ci --prefer-offline || npm install
 
 COPY . .
 
+# Berechtigungsproblem fixen: dist und dist/assets löschen (direkt nach COPY)
+RUN rm -rf dist dist/assets
+
 ENV NODE_ENV=production
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
