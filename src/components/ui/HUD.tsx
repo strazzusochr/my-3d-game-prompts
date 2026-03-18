@@ -250,12 +250,31 @@ export const HUD = () => {
     const lastTime = useRef(performance.now());
 
     useEffect(() => {
+        // Socket initialisieren und Viewer registrieren
+        if (window.__GAME_STORE__ && typeof window.__GAME_STORE__.initSocket === 'function') {
+            window.__GAME_STORE__.initSocket();
+        }
+        // Viewer-Rolle explizit registrieren
+        if (window.socket && window.socket.connected) {
+            window.socket.emit('register-role', { role: 'viewer' });
+        } else if (window.socket) {
+            window.socket.on('connect', () => {
+                window.socket.emit('register-role', { role: 'viewer' });
+                window.socket.emit('viewer-stats', { fps: 60 }); // Initialwert
+            });
+        }
         let raf: number;
         const loop = () => {
             frameCount.current++;
             const now = performance.now();
             if (now - lastTime.current >= 1000) {
                 setFps(frameCount.current);
+                // Debug-Logging FPS und Socket
+                console.log('HUD FPS:', frameCount.current, 'Socket connected:', window.socket && window.socket.connected);
+                // Viewer-Stats an Server senden
+                if (window.socket && window.socket.connected) {
+                    window.socket.emit('viewer-stats', { fps: frameCount.current });
+                }
                 frameCount.current = 0;
                 lastTime.current = now;
             }

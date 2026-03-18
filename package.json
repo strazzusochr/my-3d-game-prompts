@@ -44,11 +44,13 @@
     "puppeteer": "^24.6.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-error-boundary": "^6.1.1",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "stats.js": "^0.17.0",
     "three": "^0.182.0",
     "three-stdlib": "^2.36.1",
+    "three-subdivide": "^1.1.5",
     "winston": "^3.19.0",
     "zustand": "^5.0.11"
   },

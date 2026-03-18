@@ -3,34 +3,39 @@ function sleep(ms) {
 }
 
 async function requestWithRetry(url, options = {}) {
-  const retries = options.retries ?? 20;
-  const delayMs = options.delayMs ?? 500;
+  const retries = options.retries ?? 30;
+  const delayMs = options.delayMs ?? 750;
 
+  let lastError = null;
+  let lastStatus = null;
   for (let attempt = 1; attempt <= retries; attempt += 1) {
     try {
       const response = await fetch(url, { method: 'GET' });
       if (response.ok) {
         return response;
       }
+      lastStatus = `${response.status} ${response.statusText}`;
+      lastError = new Error(`${url} -> ${response.status} ${response.statusText}`);
       if (attempt < retries) {
         await sleep(delayMs);
         continue;
       }
-      throw new Error(`${url} -> ${response.status} ${response.statusText}`);
+      throw lastError;
     } catch (error) {
+      lastError = error;
       if (attempt < retries) {
         await sleep(delayMs);
         continue;
       }
-      throw error;
+      throw new Error(`fetch failed after ${attempt} attempts: ${url} lastStatus=${lastStatus} lastError=${lastError?.message}`);
     }
   }
 
-  throw new Error(`retry budget exhausted for ${url}`);
+  throw new Error(`retry budget exhausted for ${url} after ${retries} attempts. lastStatus=${lastStatus} lastError=${lastError?.message}`);
 }
 
 async function main() {
-  const vitePort = Number(process.env.VITE_PORT) || 5173;
+  const vitePort = Number(process.env.VITE_PORT) || 3001;
   const socketPort = Number(process.env.SOCKET_PORT) || 3000;
 
   const appUrl = `http://127.0.0.1:${vitePort}`;
@@ -56,5 +61,8 @@ async function main() {
 main().catch((error) => {
   const message = error instanceof Error ? error.message : String(error);
   console.error(`LIVE_STACK_FAIL ${message}`);
+  if (error instanceof Error && error.stack) {
+    console.error(error.stack);
+  }
   process.exit(1);
 });

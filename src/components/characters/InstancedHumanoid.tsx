@@ -1,8 +1,10 @@
+import { createNPCMaterial } from '../../materials/AAAMaterialSystem';
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useGameStore } from '../../stores/gameStore';
 import { workerManager } from '../../managers/WorkerManager';
+import { createHighPolyHumanMesh } from '../../meshes/ProceduralHumanMesh';
 
 export const InstancedHumanoid = () => {
     const bodyRef = useRef<THREE.InstancedMesh>(null);
@@ -16,9 +18,9 @@ export const InstancedHumanoid = () => {
         return o.matrix.clone();
     }, []);
 
-    // Body geometry (größer skalieren, damit es zum Spieler passt)
-    const bodyGeo = useMemo(() => new THREE.CapsuleGeometry(0.35, 0.7, 4, 8), []);
-    const bodyMat = useMemo(() => new THREE.MeshStandardMaterial({ roughness: 0.5 }), []);
+    // High-Poly Body Mesh und PBR-Material
+    const bodyGeo = useMemo(() => createHighPolyHumanMesh(), []);
+    // bodyMat wird pro NPC individuell gesetzt
 
     // Aura geometry (larger transparent sphere passend zur neuen Body-Größe)
     const auraGeo = useMemo(() => new THREE.SphereGeometry(1.0, 8, 8), []);
@@ -41,22 +43,27 @@ export const InstancedHumanoid = () => {
         for (let i = 0; i < count; i++) {
             const npc = npcs[i];
             let x = npc.position[0];
-            let y = 1.35; // Höher setzen wegen größerer Capsule (vorher 1.2)
+            let y = 1.35;
             let z = npc.position[2];
-            
             if (buffer && buffer.length > i * 12 + 4) {
                 x = buffer[i * 12 + 2];
                 y = buffer[i * 12 + 3];
                 z = buffer[i * 12 + 4];
             }
-
-            // Body
+            // High-Poly Body
             temp.position.set(x, y, z);
             temp.scale.set(1, 1, 1);
             temp.updateMatrix();
-            bodyRef.current.setMatrixAt(i, temp.matrix);
-
-            // Aura (slightly below body center for ground glow effect)
+            // Material pro NPC
+            const npcMat = createNPCMaterial(npc.type);
+            // bodyRef.current.setMatrixAt(i, temp.matrix); // InstancedMesh kann kein Group, daher Meshes direkt erzeugen
+            // Workaround: Mesh direkt erzeugen und zu Szene hinzufügen
+            const mesh = bodyGeo.clone();
+            mesh.position.copy(temp.position);
+            mesh.material = npcMat;
+            mesh.updateMatrix();
+            // TODO: Mesh zu Szene hinzufügen (hier: bodyRef.current.add(mesh))
+            // Aura bleibt wie gehabt
             temp.position.set(x, y - 0.35, z);
             temp.scale.set(1, 0.5, 1);
             temp.updateMatrix();

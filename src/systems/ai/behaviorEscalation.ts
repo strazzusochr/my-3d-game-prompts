@@ -8,6 +8,16 @@ export interface EscalationInput {
     panicNearby: number;
 }
 
+export interface FactionReactionInput {
+    faction: string;
+    tension: number;
+    hostileNearby: number;
+    policeNearby: number;
+    supportNearby: number;
+    panicNearby: number;
+    trendSignal: 'stabilizing' | 'deteriorating' | 'volatile' | 'flat';
+}
+
 const POLICE_TYPES = new Set(['POLICE', 'RIOT_POLICE', 'SEK']);
 const AGITATOR_TYPES = new Set(['EXTREMIST', 'RIOTER']);
 const CIVILIAN_TYPES = new Set(['CIVILIAN', 'TOURIST', 'JOURNALIST', 'MUSICIAN']);
@@ -70,4 +80,47 @@ export const computeAdaptiveBehavior = (input: EscalationInput) => {
     }
 
     return input.behavior;
+};
+
+export const computeFactionReaction = (input: FactionReactionInput) => {
+    // Fraktionsreaktion: Polizei, Demo, Aggressor, Support
+    if (input.faction === 'POLICE') {
+        if (input.tension >= 70 && input.hostileNearby >= 2) {
+            return 'SHIELD_WALL';
+        }
+        if (input.trendSignal === 'deteriorating' && input.panicNearby >= 2) {
+            return 'RETREAT';
+        }
+        if (input.supportNearby >= 3 && input.tension < 40) {
+            return 'ADVANCE';
+        }
+    }
+    if (input.faction === 'DEMONSTRATOR') {
+        if (input.tension >= 75 && input.hostileNearby >= 2) {
+            return 'FLEE';
+        }
+        if (input.trendSignal === 'volatile' && input.panicNearby >= 1) {
+            return 'PANIC';
+        }
+        if (input.supportNearby >= 2 && input.tension < 50) {
+            return 'GATHER';
+        }
+    }
+    if (input.faction === 'AGGRESSOR') {
+        if (input.tension >= 72 && input.policeNearby >= 1) {
+            return 'ATTACK';
+        }
+        if (input.trendSignal === 'deteriorating' && input.panicNearby >= 2) {
+            return 'ESCALATE';
+        }
+    }
+    if (input.faction === 'SUPPORT') {
+        if (input.supportNearby >= 4 && input.tension < 40) {
+            return 'SUPPORT';
+        }
+        if (input.trendSignal === 'stabilizing' && input.tension < 30) {
+            return 'CALM';
+        }
+    }
+    return 'IDLE';
 };

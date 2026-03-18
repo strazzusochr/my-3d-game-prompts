@@ -12,6 +12,7 @@ import { WorldColliders } from '../3d/environment/WorldColliders';
 import { SpawnMarkers } from '../3d/environment/SpawnMarkers';
 import { VisualEffects } from '../3d/effects/VisualEffects';
 import { Player } from '../characters/Player';
+import { ErrorBoundary } from 'react-error-boundary';
 
 const SceneContent = () => {
     const isPlaying = useGameStore(state => state.gameState.isPlaying);
@@ -86,6 +87,7 @@ export const GameCanvas = () => {
         startGame();
     }, []);
     return (
+        <ErrorBoundary FallbackComponent={({error}) => <div style={{color:'red',fontWeight:'bold'}}>Renderer Error: {error.message}</div>}>
         <KeyboardControls map={[
             { name: 'forward', keys: ['ArrowUp', 'KeyW'] },
             { name: 'backward', keys: ['ArrowDown', 'KeyS'] },
@@ -110,5 +112,6 @@ export const GameCanvas = () => {
                 <Suspense fallback={<Html center>Loading Engine...</Html>}><SceneContent /></Suspense>
             </Canvas>
         </KeyboardControls >
+        </ErrorBoundary>
     );
 };

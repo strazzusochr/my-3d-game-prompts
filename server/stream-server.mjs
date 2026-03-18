@@ -244,7 +244,7 @@ app.get('/health', (req, res) => {
     fps: transportMetrics.viewerFps || transportMetrics.rendererFps || currentFps,
     rendererFps: transportMetrics.rendererFps,
     viewerFps: transportMetrics.viewerFps,
-    clients: io.engine?.clientsCount || 0,
+    clients: viewerSocketIds.size,
     profile: settings.profileKey,
     width: settings.width,
     height: settings.height,
@@ -323,6 +323,7 @@ io.on('connection', (socket) => {
   socket.on('register-role', (payload = {}) => {
     const role = payload.role === 'renderer' ? 'renderer' : 'viewer';
     socket.data.role = role;
+    console.log(`[SOCKET] register-role received:`, role, 'socket.id:', socket.id);
 
     if (role === 'renderer') {
       rendererSocketId = socket.id;
@@ -340,6 +341,7 @@ io.on('connection', (socket) => {
     }
 
     viewerSocketIds.add(socket.id);
+    console.log(`[SOCKET] viewerSocketIds after add:`, Array.from(viewerSocketIds));
     if (rendererSocketId) {
       socket.emit('renderer-ready', {
         rendererId: rendererSocketId,
@@ -379,7 +381,11 @@ io.on('connection', (socket) => {
   });
 
   socket.on('viewer-stats', (stats = {}) => {
-    if (!viewerSocketIds.has(socket.id)) return;
+    console.log(`[SOCKET] viewer-stats received:`, stats, 'socket.id:', socket.id, 'viewerSocketIds:', Array.from(viewerSocketIds));
+    if (!viewerSocketIds.has(socket.id)) {
+      console.log(`[SOCKET] viewer-stats ignored, socket.id not in viewerSocketIds`);
+      return;
+    }
     if (typeof stats.fps === 'number' && Number.isFinite(stats.fps)) {
       transportMetrics.viewerFps = Math.max(0, Math.round(stats.fps));
       currentFps = transportMetrics.viewerFps || transportMetrics.rendererFps;
@@ -442,6 +448,7 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     viewerSocketIds.delete(socket.id);
+    console.log(`[SOCKET] viewerSocketIds after delete:`, Array.from(viewerSocketIds));
     if (socket.id === rendererSocketId) {
       rendererSocketId = null;
       rendererTransportSource = 'none';

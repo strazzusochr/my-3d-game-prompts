@@ -47,3 +47,36 @@ export const getAdaptiveTriggerCurve = (input: AdaptiveCurveInput): AdaptiveCurv
         fallbackScaleFactor: clamp(Number((fallbackScaleRaw - supportRelief).toFixed(3)), 0.8, 1.45),
     };
 };
+
+export interface AdaptiveFactionThresholdInput {
+    faction: string;
+    tension: number;
+    supportNearby: number;
+    trendSignal: 'stabilizing' | 'deteriorating' | 'volatile' | 'flat';
+    trendMomentumScore: number;
+}
+
+export const getAdaptiveFactionThreshold = (input: AdaptiveFactionThresholdInput): number => {
+    // Adaptive Schwelle für Fraktionsreaktion
+    let base = 50;
+    if (input.faction === 'POLICE') {
+        base += input.supportNearby * 2;
+        if (input.trendSignal === 'stabilizing') base -= 5;
+        if (input.trendSignal === 'deteriorating') base += 8;
+    }
+    if (input.faction === 'DEMONSTRATOR') {
+        base -= input.supportNearby * 3;
+        if (input.trendSignal === 'volatile') base += 10;
+        if (input.trendSignal === 'stabilizing') base -= 7;
+    }
+    if (input.faction === 'AGGRESSOR') {
+        base += input.trendMomentumScore * 1.5;
+        if (input.trendSignal === 'deteriorating') base += 12;
+    }
+    if (input.faction === 'SUPPORT') {
+        base -= input.supportNearby * 4;
+        if (input.trendSignal === 'stabilizing') base -= 10;
+    }
+    // Clamp
+    return Math.max(10, Math.min(90, Math.round(base)));
+};

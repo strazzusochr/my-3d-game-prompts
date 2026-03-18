@@ -16,6 +16,7 @@ declare global {
 }
 
 const socket = io(window.location.origin, { autoConnect: false });
+window.socket = socket;
 
 export interface NPCData {
     id: number;
@@ -1408,6 +1409,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     initSocket: () => {
         if (socket.connected) return;
         socket.connect();
+            // Viewer-Registrierung beim Server
+            socket.emit('register-role', { role: 'viewer' });
         socket.on('init-state', (state: any) => {
             get().evaluateEvents(state.inGameTime);
         });
