@@ -1,5 +1,5 @@
 # ---- Builder: Chainguard Node (0 CVEs) ----
-FROM node:18-slim AS builder
+FROM node:25-slim AS builder
 
 WORKDIR /app
 
@@ -19,7 +19,7 @@ RUN npm run build
 
 # ─────────────────────────────────────────────
 # Runtime: Node.js (Standard für Hugging Face)
-FROM node:18-slim AS runner
+FROM node:25-slim AS runner
 
 WORKDIR /app
 
